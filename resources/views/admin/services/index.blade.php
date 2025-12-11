@@ -3,13 +3,6 @@
 @section('title', 'Servicios - Admin')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4 text-dark">
-    <h2 class="fw-bold m-0" style="color: #1e293b;">Servicios</h2>
-    <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#createServiceModal">
-        <i class="bi bi-plus-lg"></i> Nuevo Servicio
-    </button>
-</div>
-
 <div class="card bg-white border-0 shadow-sm rounded-4">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
