@@ -18,15 +18,12 @@
                         
                         <form action="{{ route('login') }}" method="POST" autocomplete="off">
                             @csrf
-                            <!-- Fake fields to trick password managers -->
-                            <input type="text" name="fake_email_remember_me" style="display:none" autocomplete="off">
-                            <input type="password" name="fake_password_remember_me" style="display:none" autocomplete="off">
         
                             <div class="mb-3 text-start">
                                 <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 1px;">Correo Electrónico</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-envelope"></i></span>
-                                    <input type="email" name="email" class="form-control bg-transparent border-secondary text-white" required autocomplete="off" placeholder="usuario@ejemplo.com" readonly onfocus="this.removeAttribute('readonly');">
+                                    <input type="email" name="email" class="form-control bg-transparent border-secondary text-white" required autocomplete="off" placeholder="usuario@ejemplo.com">
                                 </div>
                             </div>
                             
@@ -34,7 +31,7 @@
                                 <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 1px;">Contraseña</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-lock"></i></span>
-                                    <input type="password" name="password" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password" placeholder="••••••••" readonly onfocus="this.removeAttribute('readonly');">
+                                    <input type="password" name="password" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password" placeholder="••••••••">
                                 </div>
                             </div>
         

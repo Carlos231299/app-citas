@@ -14,8 +14,6 @@
                         
                         <form action="{{ route('password.update') }}" method="POST" autocomplete="off">
                             @csrf
-                            <input type="text" name="fake_email_reset" style="display:none" autocomplete="off">
-                            <input type="password" name="fake_pass_reset" style="display:none" autocomplete="off">
                             
                             <!-- Hidden Fields (Passed from Verify Step) -->
                             <input type="hidden" name="email" value="{{ $email }}">
@@ -25,7 +23,7 @@
                                 <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Nueva Contraseña</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-lock"></i></span>
-                                    <input type="password" name="password" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password" autofocus placeholder="" readonly onfocus="this.removeAttribute('readonly');">
+                                    <input type="password" name="password" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password" autofocus placeholder="">
                                 </div>
                                 <div class="text-white-50 small mt-2">
                                     <i class="bi bi-info-circle me-1"></i> La contraseña debe cumplir:
@@ -42,7 +40,7 @@
                                 <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Confirmar Contraseña</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-check-circle"></i></span>
-                                    <input type="password" name="password_confirmation" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password" placeholder="Repite la contraseña" readonly onfocus="this.removeAttribute('readonly');">
+                                    <input type="password" name="password_confirmation" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password" placeholder="Repite la contraseña">
                                 </div>
                             </div>
         
