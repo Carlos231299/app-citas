@@ -11,31 +11,32 @@
                     <div class="card-body p-5 text-center">
                         <h3 class="mb-4 text-white">Crear Cuenta</h3>
                         
-                        <form action="{{ route('register') }}" method="POST">
+                        <form action="{{ route('register') }}" method="POST" autocomplete="off">
                             @csrf
         
                             <div class="mb-3 text-start">
-                                <label class="form-label text-secondary small text-uppercase">Nombre</label>
+                                <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Nombre</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-person"></i></span>
-                                    <input type="text" name="name" class="form-control bg-transparent border-secondary text-white" required>
+                                    <input type="text" name="name" class="form-control bg-transparent border-secondary text-white" required autocomplete="off">
                                 </div>
                             </div>
 
                             <div class="mb-3 text-start">
-                                <label class="form-label text-secondary small text-uppercase">Email</label>
+                                <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Email</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-envelope"></i></span>
-                                    <input type="email" name="email" class="form-control bg-transparent border-secondary text-white" required>
+                                    <input type="email" name="email" class="form-control bg-transparent border-secondary text-white" required autocomplete="off">
                                 </div>
                             </div>
                             
                             <div class="mb-3 text-start">
-                                <label class="form-label text-secondary small text-uppercase">Contraseña</label>
+                                <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Contraseña</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-key"></i></span>
-                                    <input type="password" name="password" class="form-control bg-transparent border-secondary text-white" required>
+                                    <input type="password" name="password" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password">
                                 </div>
+                                <div class="form-text text-white-50 small">Mínimo 8 caracteres, mayúscula, número y símbolo.</div>
                             </div>
 
                             <div class="mb-4 text-start">

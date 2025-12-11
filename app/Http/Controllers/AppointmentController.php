@@ -23,6 +23,10 @@ class AppointmentController extends Controller
     {
         try {
             $date = Carbon::parse($request->date);
+            // Prevent past dates logic
+            if ($date->lt(Carbon::today())) {
+                 return response()->json([]);
+            }
         } catch (\Exception $e) {
             return response()->json(['error' => 'Invalid date'], 400);
         }

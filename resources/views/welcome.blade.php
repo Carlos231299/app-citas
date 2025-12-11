@@ -105,8 +105,7 @@
                             <!-- Date -->
                             <div class="col-md-6">
                                 <label class="form-label text-dark fw-bold small">FECHA</label>
-                                @php
-                                    $minDate = date('H') >= 18 ? date('Y-m-d', strtotime('+1 day')) : date('Y-m-d');
+                                    $minDate = now()->format('H') >= 18 ? now()->addDay()->format('Y-m-d') : now()->format('Y-m-d');
                                 @endphp
                                 <div onclick="checkBarberSelected()">
                                     <input type="date" name="date" id="date" class="form-control form-control-lg border shadow-sm bg-white text-dark" required min="{{ $minDate }}" onchange="checkAvailability()" disabled title="Selecciona un barbero primero" style="pointer-events: none;"> 

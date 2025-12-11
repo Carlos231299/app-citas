@@ -50,7 +50,14 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|confirmed|min:8',
+            'password' => [
+                'required', 
+                'confirmed', 
+                \Illuminate\Validation\Rules\Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+            ],
         ]);
 
         $user = \App\Models\User::create([
@@ -59,9 +66,15 @@ class AuthController extends Controller
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
         ]);
 
-        Auth::login($user);
+        // Send Welcome Email
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\WelcomeEmail($user->name));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Welcome Email Error: ' . $e->getMessage());
+        }
 
-        return redirect('/dashboard')->with('success', '¡Registro exitoso! Bienvenido.');
+        // Redirect to Login (No Auto-Login)
+        return redirect()->route('login')->with('success', '¡Registro exitoso! Por favor inicia sesión.');
     }
 
     // --- PASSWORD RECOVERY ---
@@ -104,7 +117,14 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email|exists:users,email',
             'code' => 'required|string',
-            'password' => 'required|string|confirmed|min:8',
+            'password' => [
+                'required', 
+                'confirmed', 
+                \Illuminate\Validation\Rules\Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+            ],
         ]);
 
         $user = \App\Models\User::where('email', $request->email)->first();
