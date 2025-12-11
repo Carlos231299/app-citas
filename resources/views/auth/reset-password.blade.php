@@ -23,7 +23,16 @@
                                 <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Nueva Contraseña</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-lock"></i></span>
-                                    <input type="password" name="password" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password" autofocus placeholder="Mínimo 8 caracteres">
+                                    <input type="password" name="password" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password" autofocus placeholder="">
+                                </div>
+                                <div class="text-white-50 small mt-2">
+                                    <i class="bi bi-info-circle me-1"></i> La contraseña debe cumplir:
+                                    <ul class="mb-0 ps-3 mt-1" style="font-size: 0.85rem;">
+                                        <li>Mínimo 8 caracteres</li>
+                                        <li>Al menos 1 mayúscula</li>
+                                        <li>Al menos 1 número</li>
+                                        <li>Al menos 1 símbolo (@$!%*?&)</li>
+                                    </ul>
                                 </div>
                             </div>
 

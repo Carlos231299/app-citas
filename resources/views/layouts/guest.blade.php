@@ -23,32 +23,13 @@
 </head>
 <body>
     
-    @if(session('success'))
-        <div class="position-fixed top-0 start-50 translate-middle-x mt-4 z-3" style="min-width: 300px;">
-            <div class="alert alert-success alert-dismissible fade show bg-success text-white border-0 shadow" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
-            </div>
-        </div>
-    @endif
 
-    @if($errors->any())
-        <div class="position-fixed top-0 start-50 translate-middle-x mt-4 z-3" style="min-width: 300px;">
-            <div class="alert alert-danger alert-dismissible fade show bg-danger text-white border-0 shadow" role="alert">
-                <ul class="mb-0 ps-3">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
-            </div>
-        </div>
-    @endif
 
     @yield('content')
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Kill Autocomplete
         document.addEventListener('DOMContentLoaded', function() {
@@ -56,6 +37,38 @@
             inputs.forEach(input => {
                 input.setAttribute('autocomplete', 'off_random_' + Math.random().toString(36).substring(7));
             });
+
+            // SweetAlert for Success
+            @if(session('success'))
+                Swal.fire({
+                    title: '¡Excelente!',
+                    text: "{{ session('success') }}",
+                    icon: 'success',
+                    timer: 1500, // 1.5 seconds to be readable
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                    background: '#1a1d20',
+                    color: '#c5a964',
+                    customClass: { popup: 'border-gold shadow-lg' }
+                });
+            @endif
+
+            // SweetAlert for Errors
+            @if($errors->any())
+                let errorMsg = '';
+                @foreach ($errors->all() as $error)
+                    errorMsg += '{{ $error }}<br>';
+                @endforeach
+                
+                Swal.fire({
+                    title: 'Atención',
+                    html: errorMsg,
+                    icon: 'error',
+                    confirmButtonColor: '#c5a964',
+                    background: '#1a1d20',
+                    color: '#fff'
+                });
+            @endif
         });
     </script>
 </body>

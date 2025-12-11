@@ -2,25 +2,30 @@
 <html>
 <head>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .code { font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #2d3748; text-align: center; margin: 20px 0; padding: 15px; background: #edf2f7; border-radius: 4px; }
-        .footer { font-size: 12px; color: #718096; text-align: center; margin-top: 20px; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #1a1a1a; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 40px auto; background: #000000; padding: 40px; border-radius: 8px; border: 1px solid #c5a964; text-align: center; color: #ffffff; }
+        .header img { max-height: 80px; margin-bottom: 20px; }
+        h1 { color: #c5a964; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; font-size: 24px; }
+        .code { font-size: 36px; letter-spacing: 8px; color: #c5a964; font-weight: bold; margin: 30px 0; display: block; }
+        p { color: #cccccc; line-height: 1.6; font-size: 16px; margin-bottom: 20px; }
+        .footer { margin-top: 40px; font-size: 12px; color: #666666; border-top: 1px solid #333; padding-top: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2 style="color: #4a5568; text-align: center;">Recuperación de Contraseña</h2>
-        <p>Hola,</p>
-        <p>Has solicitado restablecer tu contraseña en <strong>Barbería JR</strong>. Usa el siguiente código para continuar:</p>
+        <div class="header">
+            <img src="{{ asset('images/logo.png') }}" alt="Barbería JR">
+        </div>
+        <h1>Código de Verificación</h1>
+        <p>Estás intentando restablecer tu contraseña. Usa el siguiente código para continuar:</p>
         
-        <div class="code">{{ $code }}</div>
+        <span class="code">{{ $code }}</span>
         
-        <p>Este código expirará en 15 minutos.</p>
-        <p>Si no solicitaste este cambio, puedes ignorar este correo.</p>
+        <p style="color: #999; font-size: 14px;">Este código expirará en 15 minutos.</p>
+        <p>Si no solicitaste este cambio, por favor ignora este correo.</p>
         
         <div class="footer">
-            &copy; {{ date('Y') }} Barbería JR. Todos los derechos reservados.
+            &copy; {{ date('Y') }} Barbería JR. Seguridad y Estilo.
         </div>
     </div>
 </body>

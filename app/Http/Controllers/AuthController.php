@@ -134,7 +134,9 @@ class AuthController extends Controller
         }
 
         // Success: Show Step 3 (Reset Password Form) passing validated data
-        // We pass the code again to be submitted in the final form for double-check
+        // Flash the success message for SweetAlert to pick up
+        session()->flash('success', 'Código verificado exitosamente. Ingrese su nueva contraseña.');
+
         return view('auth.reset-password', [
             'email' => $request->email,
             'code' => $request->code

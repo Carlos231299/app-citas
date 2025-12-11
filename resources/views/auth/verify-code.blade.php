@@ -21,7 +21,7 @@
                                 <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Código de Verificación</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-123"></i></span>
-                                    <input type="text" name="code" class="form-control bg-transparent border-secondary text-white text-center fw-bold letter-spacing-2" placeholder="######" required autocomplete="off" autofocus maxlength="6" style="letter-spacing: 5px;">
+                                    <input type="text" name="code" class="form-control bg-transparent border-secondary text-white text-center fw-bold letter-spacing-2" placeholder="######" required autocomplete="off" autofocus maxlength="6" style="letter-spacing: 5px;" inputmode="numeric" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                                 </div>
                             </div>
         
