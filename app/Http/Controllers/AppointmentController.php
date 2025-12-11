@@ -149,14 +149,24 @@ class AppointmentController extends Controller
     // Admin Dashboard
     public function index()
     {
-        // Get today's appointments ordered by time
-        $appointments = Appointment::with(['service', 'barber'])
-            ->whereDate('scheduled_at', Carbon::today())
-            ->where('status', '!=', 'request') // Hide requests from daily dashboard for now if they aren't 'scheduled'
-            ->orderBy('scheduled_at')
+        // Stats for Today
+        $today = Carbon::today();
+        
+        $todaysAppointments = Appointment::whereDate('scheduled_at', $today)
+            ->where('status', '!=', 'request')
             ->get();
-            
-        return view('admin.dashboard', compact('appointments'));
+
+        $stats = [
+            'total_today' => $todaysAppointments->count(),
+            'revenue_today' => $todaysAppointments->where('status', 'completed')->sum('price'),
+            'pending_today' => $todaysAppointments->where('status', 'scheduled')->count(),
+            'active_barbers' => $todaysAppointments->unique('barber_id')->count()
+        ];
+
+        // Get appointments for Calendar (handled by API usually, but if initial render needs them?)
+        // Actually, calendar fetches via API. We just need the view.
+        
+        return view('admin.dashboard', compact('stats'));
     }
 
     // Admin: Mark Complete with Price

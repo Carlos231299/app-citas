@@ -50,10 +50,11 @@ body {
 
 /* Sidebar */
 .sidebar {
-    background: #FFFFFF;
+    background: #1a1d20;
+    /* Dark Background */
     width: 250px;
     height: 100%;
-    border-right: 1px solid var(--border);
+    border-right: 1px solid #333;
     padding-top: 1rem;
     display: flex;
     flex-direction: column;
@@ -87,23 +88,29 @@ body {
     display: flex;
     align-items: center;
     padding: 12px 24px;
-    color: var(--secondary);
+    color: #a0a0a0;
+    /* Secondary text */
     text-decoration: none;
     font-weight: 500;
     transition: all 0.2s;
+    border-left: 3px solid transparent;
 }
 
 .sidebar-link:hover,
 .sidebar-link.active {
-    background: #EFF6FF;
-    color: var(--primary);
-    border-right: 3px solid var(--primary);
+    background: #25282c;
+    /* Slightly lighter dark */
+    color: var(--gold-primary);
+    border-left: 3px solid var(--gold-primary);
+    border-right: none;
 }
 
 .sidebar-link i {
     width: 24px;
     font-size: 1.1rem;
     margin-right: 10px;
+    color: var(--gold-primary);
+    /* Gold icons */
 }
 
 /* Main Content Wrapper */
