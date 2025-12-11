@@ -25,14 +25,11 @@
     
     <!-- Sidebar (Default Collapsed) -->
     <div class="sidebar collapsed" id="sidebar">
-        <div class="px-3 py-3 mb-4 border-bottom d-flex align-items-center justify-content-between">
+        <div class="px-3 py-3 mb-4 border-bottom">
             <div class="overflow-hidden sidebar-header-text">
                 <h4 class="fw-bold text-primary mb-0 text-nowrap">Barbería JR</h4>
                 <small class="text-secondary text-nowrap">Panel de Gestión</small>
             </div>
-            <button class="btn btn-sm btn-light border text-primary" id="sidebarToggle" style="z-index: 1001;">
-                <i class="bi bi-list"></i>
-            </button>
         </div>
 
         <nav class="nav flex-column">
@@ -68,7 +65,12 @@
     <div class="main-content">
         <!-- Topbar -->
         <header class="mb-4 d-flex justify-content-between align-items-center">
-            <h2 class="h4 mb-0 fw-bold text-dark">@yield('header')</h2>
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn bg-white border shadow-sm text-primary rounded-circle" id="sidebarToggle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+                <h2 class="h4 mb-0 fw-bold text-dark">@yield('header')</h2>
+            </div>
             <div class="text-secondary">
                 Hola, <span class="fw-bold text-primary">{{ auth()->user()->name }}</span>
             </div>
@@ -134,17 +136,17 @@
             document.querySelectorAll('form').forEach(form => {
                 form.setAttribute('autocomplete', 'off');
             });
-            // ... SPA Logic ...
+        });
 
-
+        // Global Function for Logout
         function confirmLogout() {
             Swal.fire({
                 title: '¿Cerrar Sesión?',
                 text: "¿Estás seguro que deseas salir del sistema?",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
+                confirmButtonColor: '#2563EB',
+                cancelButtonColor: '#94a3b8',
                 confirmButtonText: 'Sí, salir',
                 cancelButtonText: 'Cancelar'
             }).then((result) => {
