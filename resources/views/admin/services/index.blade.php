@@ -182,13 +182,6 @@
     let iconModal;
     let currentInputId = null;
 
-@push('scripts')
-<script>
-    let editModal;
-    let iconModal;
-    let currentInputId = null;
-
-    // Curated list of relevant icons (Bootstrap Icons)
     const icons = [
         'scissors', 'person', 'person-fill', 'person-lines-fill', 'emoji-smile',
         'stars', 'star-fill', 'heart-fill', 'lightning-fill', 'gem',
@@ -196,7 +189,7 @@
         'clock', 'calendar-check', 'cash', 'credit-card', 'tiktok',
         'instagram', 'whatsapp', 'facebook', 'geo-alt', 'house',
         'shop', 'bag', 'cart', 'box-seam', 'gear', 
-        'person-circle', 'person-video', 'person-square', 'incognito', 'eyeglasses' 
+        'person-circle', 'person-video', 'person-square', 'incognito', 'eyeglasses'
     ];
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -204,8 +197,7 @@
         iconModal = new bootstrap.Modal(document.getElementById('iconSelectorModal'));
         
         loadIcons();
-        
-        // Filter Logic
+
         document.getElementById('iconSearch').addEventListener('keyup', (e) => {
             loadIcons(e.target.value.toLowerCase());
         });
@@ -246,6 +238,7 @@
         } else {
             input.value = icon;
         }
+
         input.dispatchEvent(new Event('input'));
         iconModal.hide();
     }
@@ -256,28 +249,20 @@
         document.getElementById('edit_price').value = service.price;
         document.getElementById('edit_description').value = service.description || '';
         document.getElementById('edit_icon').value = service.icon || 'scissors';
-        
+
         const display = document.getElementById('current_icon_display');
         const icons = (service.icon || 'scissors').split(',');
-        
-        let htmlHtml = '';
+
+        let html = '';
         icons.forEach(icon => {
             if(icon.trim()) {
-                htmlHtml += `<i class="bi bi-${icon.trim()} me-2 text-primary"></i>`;
+                html += `<i class="bi bi-${icon.trim()} me-2 text-primary"></i>`;
             }
         });
-        display.innerHTML = htmlHtml;
-        
+        display.innerHTML = html;
+
         editModal.show();
     }
 </script>
-
-<style>
-    .cursor-pointer { cursor: pointer; }
-    .icon-option { transition: all 0.2s; }
-    .icon-option:hover { background-color: #EFF6FF !important; border-color: var(--primary) !important; }
-    .icon-option:hover i { color: var(--primary) !important; }
-    .description-cell { max-width: 250px; }
-</style>
 @endpush
 @endsection
