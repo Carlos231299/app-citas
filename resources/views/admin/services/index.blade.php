@@ -25,19 +25,23 @@
                 @foreach($services as $service)
                 <tr>
                     <td class="ps-4">
-                        <div class="d-flex gap-2 flex-wrap" style="max-width: 150px;">
-                            @foreach(explode(',', $service->icon) as $icon)
-                                @if(trim($icon) !== '')
-                                <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary" style="width: 32px; height: 32px;">
-                                    <i class="bi bi-{{ trim($icon) }}"></i>
-                                </div>
-                                @endif
-                            @endforeach
+                        @php
+                            $icons = array_filter(explode(',', $service->icon));
+                            $firstIcon = trim($icons[0] ?? 'scissors');
+                            $count = count($icons);
+                        @endphp
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary" style="width: 40px; height: 40px;">
+                                <i class="bi bi-{{ $firstIcon }} fs-5"></i>
+                            </div>
+                            @if($count > 1)
+                                <span class="badge rounded-pill bg-light text-secondary border ms-2">+{{ $count - 1 }}</span>
+                            @endif
                         </div>
                     </td>
                     <td>
                         <div class="fw-bold text-dark mb-1">{{ $service->name }}</div>
-                        <div class="text-muted small text-truncate" style="max-width: 250px;">
+                        <div class="text-muted small text-truncate description-cell">
                             {{ $service->description }}
                         </div>
                     </td>
@@ -273,6 +277,7 @@
     .icon-option { transition: all 0.2s; }
     .icon-option:hover { background-color: #EFF6FF !important; border-color: var(--primary) !important; }
     .icon-option:hover i { color: var(--primary) !important; }
+    .description-cell { max-width: 250px; }
 </style>
 @endpush
 @endsection

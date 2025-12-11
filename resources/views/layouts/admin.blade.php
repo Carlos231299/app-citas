@@ -38,7 +38,7 @@
         <nav class="nav flex-column">
             <!-- Dashboard is now Agenda -->
             <a class="nav-link sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}" title="Agenda">
-                <i class="bi bi-calendar-checkui-fill"></i> <span class="sidebar-text">Agenda</span>
+                <i class="bi bi-calendar-week-fill"></i> <span class="sidebar-text">Agenda</span>
             </a>
             
             <a class="nav-link sidebar-link {{ request()->routeIs('services.*') ? 'active' : '' }}" href="{{ route('services.index') }}" title="Servicios">
@@ -53,10 +53,10 @@
                 <i class="bi bi-file-earmark-bar-graph-fill"></i> <span class="sidebar-text">Reportes</span>
             </a>
             
-            <div class="mt-5 px-3">
+            <div class="mt-auto px-3 mb-4">
                 <form action="{{ route('logout') }}" method="POST" id="logout-form">
                     @csrf
-                    <button type="button" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2 overflow-hidden" title="Salir" onclick="confirmLogout()">
+                    <button type="button" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2 overflow-hidden" title="Salir" onclick="confirmLogout()" style="z-index: 1002; position: relative;">
                         <i class="bi bi-box-arrow-right"></i> <span class="sidebar-text">Salir</span>
                     </button>
                 </form>
@@ -83,9 +83,7 @@
                         icon: 'success',
                         timer: 2000,
                         showConfirmButton: false,
-                        background: '#1a1d20',
-                        color: '#D4AF37',
-                        customClass: { popup: 'rounded-4 shadow-lg border border-warning' }
+                        confirmButtonColor: '#2563EB'
                     });
                 });
             </script>
@@ -99,7 +97,9 @@
                         text: 'Nos alegra verte de nuevo.',
                         icon: 'success',
                         confirmButtonText: 'Continuar',
-                        confirmButtonColor: '#D4AF37', // Gold
+                        confirmButtonColor: '#2563EB', // Blue
+                        background: '#fff', 
+                        color: '#333'
                     });
                 });
             </script>
@@ -125,6 +125,7 @@
             if(toggle && sidebar) {
                 toggle.addEventListener('click', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     sidebar.classList.toggle('collapsed');
                 });
             }
