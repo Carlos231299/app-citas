@@ -1,10 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap');
 
 :root {
-    /* Modern SaaS Architecture Palette */
-    --primary: #4F46E5;
-    /* Indigo 600 - Softer and more modern than Royal Blue */
-    --primary-hover: #4338CA;
+    /* Modern SaaS Architecture Palette - White/Blue */
+    --primary: #2563EB;
+    /* Royal Blue */
+    --primary-hover: #1D4ED8;
     --secondary: #64748B;
     /* Slate 500 */
     --success: #10B981;
@@ -19,7 +19,8 @@
     /* Slate 50 */
     --border: #E2E8F0;
     /* Slate 200 */
-    --gold-primary: #D4AF37;
+    --gold-primary: #2563EB;
+    /* Using Blue as primary legacy variable if needed, or replace usage */
 }
 
 .btn-gold {
@@ -50,17 +51,17 @@ body {
 
 /* Sidebar */
 .sidebar {
-    background: #1a1d20;
-    /* Dark Background */
+    background: #FFFFFF;
     width: 250px;
     height: 100%;
-    border-right: 1px solid #333;
+    border-right: 1px solid var(--border);
     padding-top: 1rem;
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
     overflow-y: auto;
-    z-index: 100;
+    z-index: 1000;
+    /* Higher Z-index to ensure it sits above content if needed */
     transition: width 0.3s ease;
 }
 
@@ -88,29 +89,34 @@ body {
     display: flex;
     align-items: center;
     padding: 12px 24px;
-    color: #a0a0a0;
-    /* Secondary text */
+    color: var(--secondary);
     text-decoration: none;
     font-weight: 500;
     transition: all 0.2s;
     border-left: 3px solid transparent;
+    /* Keep border logic */
+    border-right: none;
 }
 
 .sidebar-link:hover,
 .sidebar-link.active {
-    background: #25282c;
-    /* Slightly lighter dark */
-    color: var(--gold-primary);
-    border-left: 3px solid var(--gold-primary);
-    border-right: none;
+    background: #EFF6FF;
+    /* Light Blue bg */
+    color: var(--primary);
+    border-left: 3px solid var(--primary);
 }
 
 .sidebar-link i {
     width: 24px;
     font-size: 1.1rem;
     margin-right: 10px;
-    color: var(--gold-primary);
-    /* Gold icons */
+    color: var(--secondary);
+    /* Default icon color */
+}
+
+.sidebar-link:hover i,
+.sidebar-link.active i {
+    color: var(--primary);
 }
 
 /* Main Content Wrapper */

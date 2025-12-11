@@ -23,6 +23,8 @@ class ReportController extends Controller
             $query->where('status', 'scheduled')->where('scheduled_at', '>=', now());
         } elseif ($status === 'completed') {
             $query->where('status', 'completed');
+        } elseif ($status === 'cancelled') {
+            $query->where('status', 'cancelled');
         }
 
         // Barber Filter

@@ -34,6 +34,11 @@ class AppointmentController extends Controller
         // Check Barber Special Mode
         $barberId = $request->barber_id;
         $barber = Barber::find($barberId);
+
+        if (!$barber || !$barber->is_active) {
+            return response()->json([]);
+        }
+
         $isSpecial = $barber->special_mode ?? false;
 
         $start = 4; // Earliest possible (Special)

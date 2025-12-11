@@ -48,6 +48,7 @@
                     <option value="all" {{ $status == 'all' ? 'selected' : '' }}>Todas</option>
                     <option value="scheduled" {{ $status == 'scheduled' ? 'selected' : '' }}>Programadas</option>
                     <option value="completed" {{ $status == 'completed' ? 'selected' : '' }}>Completadas</option>
+                    <option value="cancelled" {{ $status == 'cancelled' ? 'selected' : '' }}>Canceladas</option>
                 </select>
             </div>
             

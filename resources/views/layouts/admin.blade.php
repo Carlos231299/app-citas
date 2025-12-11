@@ -27,18 +27,18 @@
     <div class="sidebar collapsed" id="sidebar">
         <div class="px-3 py-3 mb-4 border-bottom d-flex align-items-center justify-content-between">
             <div class="overflow-hidden sidebar-header-text">
-                <h4 class="fw-bold text-white mb-0 text-nowrap">Barbería JR</h4>
-                <small class="text-white-50 text-nowrap">Panel de Gestión</small>
+                <h4 class="fw-bold text-primary mb-0 text-nowrap">Barbería JR</h4>
+                <small class="text-secondary text-nowrap">Panel de Gestión</small>
             </div>
-            <button class="btn btn-sm btn-outline-warning border-0" id="sidebarToggle">
-                <i class="bi bi-list text-gold"></i>
+            <button class="btn btn-sm btn-light border text-primary" id="sidebarToggle" style="z-index: 1001;">
+                <i class="bi bi-list"></i>
             </button>
         </div>
 
         <nav class="nav flex-column">
             <!-- Dashboard is now Agenda -->
             <a class="nav-link sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}" title="Agenda">
-                <i class="bi bi-calendar-check-fill"></i> <span class="sidebar-text">Agenda</span>
+                <i class="bi bi-calendar-checkui-fill"></i> <span class="sidebar-text">Agenda</span>
             </a>
             
             <a class="nav-link sidebar-link {{ request()->routeIs('services.*') ? 'active' : '' }}" href="{{ route('services.index') }}" title="Servicios">

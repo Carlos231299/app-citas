@@ -4,50 +4,52 @@
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 text-dark">
-    <h2 class="fw-bold m-0" style="color: #333;">Servicios</h2>
-    <button class="btn btn-gold" data-bs-toggle="modal" data-bs-target="#createServiceModal">
-        <i data-lucide="plus"></i> Nuevo Servicio
+    <h2 class="fw-bold m-0" style="color: #1e293b;">Servicios</h2>
+    <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#createServiceModal">
+        <i class="bi bi-plus-lg"></i> Nuevo Servicio
     </button>
 </div>
 
-<div class="card bg-white border-0 shadow-sm">
+<div class="card bg-white border-0 shadow-sm rounded-4">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
             <thead class="bg-light text-secondary">
-                <tr>
-                    <th class="ps-4 py-3 border-0">Icono</th>
+                <tr class="text-uppercase small fw-bold">
+                    <th class="ps-4 py-3 border-0 rounded-start">Icono</th>
                     <th class="py-3 border-0">Nombre</th>
                     <th class="py-3 border-0">Precio</th>
-                    <th class="text-end pe-4 py-3 border-0">Acciones</th>
+                    <th class="text-end pe-4 py-3 border-0 rounded-end">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($services as $service)
                 <tr>
                     <td class="ps-4">
-                        <div class="d-flex gap-1">
+                        <div class="d-flex gap-2 flex-wrap" style="max-width: 150px;">
                             @foreach(explode(',', $service->icon) as $icon)
                                 @if(trim($icon) !== '')
-                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-primary shadow-sm" style="width: 40px; height: 40px;">
-                                    <i class="bi bi-{{ trim($icon) }} fs-5"></i>
+                                <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary" style="width: 32px; height: 32px;">
+                                    <i class="bi bi-{{ trim($icon) }}"></i>
                                 </div>
                                 @endif
                             @endforeach
                         </div>
                     </td>
                     <td>
-                        <div class="fw-bold text-dark">{{ $service->name }}</div>
-                        <small class="text-secondary">{{ Str::limit($service->description, 40) }}</small>
+                        <div class="fw-bold text-dark mb-1">{{ $service->name }}</div>
+                        <div class="text-muted small text-truncate" style="max-width: 250px;">
+                            {{ $service->description }}
+                        </div>
                     </td>
                     <td class="text-dark fw-bold">${{ number_format($service->price, 0, ',', '.') }}</td>
                     <td class="text-end pe-4">
-                        <button class="btn btn-sm btn-outline-secondary me-1" onclick='editService(@json($service))'>
-                            <i class="bi bi-pencil"></i>
+                        <button class="btn btn-sm btn-light text-primary border me-1 mb-1" onclick='editService(@json($service))' title="Editar">
+                            <i class="bi bi-pencil-fill"></i>
                         </button>
                         <form action="{{ route('services.destroy', $service) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar servicio?')">
                             @csrf
                             @method('DELETE')
-                            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-sm btn-light text-danger border mb-1" title="Eliminar"><i class="bi bi-trash-fill"></i></button>
                         </form>
                     </td>
                 </tr>
@@ -98,7 +100,7 @@
                     </div>
                 </div>
                 <div class="modal-footer border-top-0">
-                    <button type="submit" class="btn btn-gold px-4 fw-bold">Guardar</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">Guardar</button>
                 </div>
             </form>
         </div>
@@ -145,7 +147,7 @@
                     </div>
                 </div>
                 <div class="modal-footer border-top-0">
-                    <button type="submit" class="btn btn-gold px-4 fw-bold">Actualizar</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">Actualizar</button>
                 </div>
             </form>
         </div>
@@ -213,8 +215,8 @@
             const col = document.createElement('div');
             col.className = 'col-3 col-md-2 text-center';
             col.innerHTML = `
-                <div class="p-3 border border-secondary rounded cursor-pointer hover-gold icon-option" onclick="selectIcon('${icon}')">
-                    <i class="bi bi-${icon} fs-3 text-white"></i>
+                <div class="p-3 border border-secondary rounded cursor-pointer hover-primary icon-option" onclick="selectIcon('${icon}')">
+                    <i class="bi bi-${icon} fs-3 text-secondary"></i>
                     <div class="small text-secondary mt-1 text-truncate">${icon}</div>
                 </div>
             `;
@@ -257,7 +259,7 @@
         let htmlHtml = '';
         icons.forEach(icon => {
             if(icon.trim()) {
-                htmlHtml += `<i class="bi bi-${icon.trim()} me-2 text-gold"></i>`;
+                htmlHtml += `<i class="bi bi-${icon.trim()} me-2 text-primary"></i>`;
             }
         });
         display.innerHTML = htmlHtml;
@@ -268,8 +270,9 @@
 
 <style>
     .cursor-pointer { cursor: pointer; }
-    .icon-option:hover { background-color: rgba(212, 175, 55, 0.1); border-color: var(--gold-primary) !important; }
-    .icon-option:hover i { color: var(--gold-primary) !important; }
+    .icon-option { transition: all 0.2s; }
+    .icon-option:hover { background-color: #EFF6FF !important; border-color: var(--primary) !important; }
+    .icon-option:hover i { color: var(--primary) !important; }
 </style>
 @endpush
 @endsection
