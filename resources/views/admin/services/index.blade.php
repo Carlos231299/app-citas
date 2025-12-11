@@ -1,0 +1,275 @@
+@extends(request()->ajax() ? 'layouts.ajax' : 'layouts.admin')
+
+@section('title', 'Servicios - Admin')
+
+@section('content')
+<div class="d-flex justify-content-between align-items-center mb-4 text-dark">
+    <h2 class="fw-bold m-0" style="color: #333;">Servicios</h2>
+    <button class="btn btn-gold" data-bs-toggle="modal" data-bs-target="#createServiceModal">
+        <i data-lucide="plus"></i> Nuevo Servicio
+    </button>
+</div>
+
+<div class="card bg-white border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light text-secondary">
+                <tr>
+                    <th class="ps-4 py-3 border-0">Icono</th>
+                    <th class="py-3 border-0">Nombre</th>
+                    <th class="py-3 border-0">Precio</th>
+                    <th class="text-end pe-4 py-3 border-0">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($services as $service)
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex gap-1">
+                            @foreach(explode(',', $service->icon) as $icon)
+                                @if(trim($icon) !== '')
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-primary shadow-sm" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-{{ trim($icon) }} fs-5"></i>
+                                </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fw-bold text-dark">{{ $service->name }}</div>
+                        <small class="text-secondary">{{ Str::limit($service->description, 40) }}</small>
+                    </td>
+                    <td class="text-dark fw-bold">${{ number_format($service->price, 0, ',', '.') }}</td>
+                    <td class="text-end pe-4">
+                        <button class="btn btn-sm btn-outline-secondary me-1" onclick='editService(@json($service))'>
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <form action="{{ route('services.destroy', $service) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar servicio?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal fade" id="createServiceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold">Nuevo Servicio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('services.store') }}" method="POST" enctype="multipart/form-data" autocomplete="off">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">NOMBRE</label>
+                        <input type="text" name="name" class="form-control" required autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">PRECIO</label>
+                        <input type="number" name="price" class="form-control" required autocomplete="off">
+                    </div>
+                    
+                    <!-- Icon Logic: Image or Text -->
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">ICONO (BOOTSTRAP)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border text-secondary"><i class="bi bi-scissors"></i></span>
+                            <input type="text" name="icon" id="create_icon" class="form-control" placeholder="Ej: scissors, star" required autocomplete="off">
+                            <button type="button" class="btn btn-outline-secondary" onclick="openIconSelector('create_icon')">
+                                <i class="bi bi-grid"></i>
+                            </button>
+                        </div>
+                        <div class="form-text text-muted">
+                            Separa con comas para múltiples iconos. Ej: <code>scissors, person</code>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">DESCRIPCIÓN</label>
+                        <textarea name="description" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="submit" class="btn btn-gold px-4 fw-bold">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editServiceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold">Editar Servicio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editForm" method="POST" enctype="multipart/form-data" autocomplete="off">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">NOMBRE</label>
+                        <input type="text" name="name" id="edit_name" class="form-control" required autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">PRECIO</label>
+                        <input type="number" name="price" id="edit_price" class="form-control" required autocomplete="off">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">ICONO (BOOTSTRAP)</label>
+                        <div class="d-flex align-items-center mb-2">
+                            <div id="current_icon_display" class="me-2 text-primary fs-4"></div>
+                            <div class="input-group">
+                                <input type="text" name="icon" id="edit_icon" class="form-control" required autocomplete="off">
+                                <button type="button" class="btn btn-outline-secondary" onclick="openIconSelector('edit_icon')">
+                                    <i class="bi bi-grid"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">DESCRIPCIÓN</label>
+                        <textarea name="description" id="edit_description" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="submit" class="btn btn-gold px-4 fw-bold">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Icon Selector Modal -->
+<div class="modal fade" id="iconSelectorModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold">Seleccionar Icono</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="iconSearch" class="form-control mb-3" placeholder="Buscar icono..." autocomplete="off">
+                <div class="row g-2" id="iconGrid" style="max-height: 400px; overflow-y: auto;">
+                    <!-- Icons injected via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+    let editModal;
+    let iconModal;
+    let currentInputId = null;
+
+@push('scripts')
+<script>
+    let editModal;
+    let iconModal;
+    let currentInputId = null;
+
+    // Curated list of relevant icons (Bootstrap Icons)
+    const icons = [
+        'scissors', 'person', 'person-fill', 'person-lines-fill', 'emoji-smile',
+        'stars', 'star-fill', 'heart-fill', 'lightning-fill', 'gem',
+        'cup-hot', 'droplet-fill', 'palette', 'brush', 'toggle-on',
+        'clock', 'calendar-check', 'cash', 'credit-card', 'tiktok',
+        'instagram', 'whatsapp', 'facebook', 'geo-alt', 'house',
+        'shop', 'bag', 'cart', 'box-seam', 'gear', 
+        'person-circle', 'person-video', 'person-square', 'incognito', 'eyeglasses' 
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        editModal = new bootstrap.Modal(document.getElementById('editServiceModal'));
+        iconModal = new bootstrap.Modal(document.getElementById('iconSelectorModal'));
+        
+        loadIcons();
+        
+        // Filter Logic
+        document.getElementById('iconSearch').addEventListener('keyup', (e) => {
+            loadIcons(e.target.value.toLowerCase());
+        });
+    });
+
+    function loadIcons(filter = '') {
+        const grid = document.getElementById('iconGrid');
+        grid.innerHTML = '';
+        
+        icons.filter(i => i.includes(filter)).forEach(icon => {
+            const col = document.createElement('div');
+            col.className = 'col-3 col-md-2 text-center';
+            col.innerHTML = `
+                <div class="p-3 border border-secondary rounded cursor-pointer hover-gold icon-option" onclick="selectIcon('${icon}')">
+                    <i class="bi bi-${icon} fs-3 text-white"></i>
+                    <div class="small text-secondary mt-1 text-truncate">${icon}</div>
+                </div>
+            `;
+            grid.appendChild(col);
+        });
+    }
+
+    function openIconSelector(inputId) {
+        currentInputId = inputId;
+        iconModal.show();
+    }
+
+    function selectIcon(icon) {
+        const input = document.getElementById(currentInputId);
+        const currentVal = input.value.trim();
+        
+        if (currentVal) {
+            if (confirm('¿Agregar a los iconos existentes? (Cancelar para reemplazar)')) {
+                input.value = currentVal + ', ' + icon;
+            } else {
+                input.value = icon;
+            }
+        } else {
+            input.value = icon;
+        }
+        input.dispatchEvent(new Event('input'));
+        iconModal.hide();
+    }
+
+    function editService(service) {
+        document.getElementById('editForm').action = `/services/${service.id}`;
+        document.getElementById('edit_name').value = service.name;
+        document.getElementById('edit_price').value = service.price;
+        document.getElementById('edit_description').value = service.description || '';
+        document.getElementById('edit_icon').value = service.icon || 'scissors';
+        
+        const display = document.getElementById('current_icon_display');
+        const icons = (service.icon || 'scissors').split(',');
+        
+        let htmlHtml = '';
+        icons.forEach(icon => {
+            if(icon.trim()) {
+                htmlHtml += `<i class="bi bi-${icon.trim()} me-2 text-gold"></i>`;
+            }
+        });
+        display.innerHTML = htmlHtml;
+        
+        editModal.show();
+    }
+</script>
+
+<style>
+    .cursor-pointer { cursor: pointer; }
+    .icon-option:hover { background-color: rgba(212, 175, 55, 0.1); border-color: var(--gold-primary) !important; }
+    .icon-option:hover i { color: var(--gold-primary) !important; }
+</style>
+@endpush
+@endsection
