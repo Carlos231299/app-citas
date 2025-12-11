@@ -28,6 +28,7 @@ Route::middleware('guest')->group(function () {
     // Step 2: Verify Code
     Route::get('/verify-code', [AuthController::class, 'showVerifyCode'])->name('password.verify.show');
     Route::post('/verify-code', [AuthController::class, 'verifyCode'])->name('password.verify.check');
+    Route::post('/verify-code/resend', [AuthController::class, 'resendCode'])->name('password.verify.resend');
 
     // Step 3: Reset Password (only accessible via logic flow)
     Route::get('/reset-password', [AuthController::class, 'showResetPassword'])->name('password.reset.show');

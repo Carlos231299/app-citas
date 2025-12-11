@@ -93,7 +93,7 @@ class AuthController extends Controller
         $code = rand(100000, 999999);
         
         $user->verification_code = $code;
-        $user->verification_code_expires_at = now()->addMinutes(15);
+        $user->verification_code_expires_at = now()->addMinutes(5);
         $user->save();
 
         // Send Email
@@ -105,13 +105,39 @@ class AuthController extends Controller
 
         // Redirect to Step 2: Verify Code
         return redirect()->route('password.verify.show', ['email' => $user->email])
-            ->with('success', 'Código enviado. Por favor revísalo.');
+            ->with('success', 'Código enviado. Expira en 5 minutos.');
     }
 
     // Step 2: Show Code Form
     public function showVerifyCode(Request $request)
     {
         return view('auth.verify-code', ['email' => $request->email]);
+    }
+
+    // Resend Code Action
+    public function resendCode(Request $request)
+    {
+        // Re-use logical flow of sendResetCode but redirect back to verify
+        // We can just call sendResetCode internally or duplicate logic for cleaner redirect
+        $request->validate(['email' => 'required|email|exists:users,email']);
+        
+        $user = \App\Models\User::where('email', $request->email)->first();
+        
+        // Anti-spam check (optional, but good practice): Check if last code was sent < 30s ago? 
+        // For simplicity, just overwrite.
+        
+        $code = rand(100000, 999999);
+        $user->verification_code = $code;
+        $user->verification_code_expires_at = now()->addMinutes(5);
+        $user->save();
+
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\VerificationCode($code));
+            return redirect()->route('password.verify.show', ['email' => $user->email])
+                ->with('success', 'Nuevo código enviado.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['email' => 'Error al reenviar: ' . $e->getMessage()]);
+        }
     }
 
     // Step 2: Process Code

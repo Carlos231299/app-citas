@@ -27,10 +27,18 @@
         
                             <button type="submit" class="btn btn-gold w-100 py-3 fw-bold text-uppercase mb-3 shadow-gold-hover">Verificar Código</button>
                             
-                            <div class="mt-3">
-                                <a href="{{ route('password.request') }}" class="text-white-50 text-decoration-none small hover-gold">
-                                    <i class="bi bi-arrow-left"></i> Reenviar Código
-                                </a>
+                            <div class="mt-4">
+                                <div id="timer-container" class="text-white small mb-2">
+                                    El código expira en: <span id="timer" class="text-gold fw-bold">05:00</span>
+                                </div>
+
+                                <form action="{{ route('password.verify.resend') }}" method="POST" class="d-inline" autocomplete="off">
+                                    @csrf
+                                    <input type="hidden" name="email" value="{{ $email }}">
+                                    <button type="submit" id="resend-btn" class="btn btn-link text-white-50 text-decoration-none small hover-gold" disabled>
+                                        <i class="bi bi-arrow-repeat"></i> Reenviar Código
+                                    </button>
+                                </form>
                             </div>
                         </form>
                     </div>
@@ -39,4 +47,35 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let timeLeft = 300; // 5 minutes in seconds
+        const timerElement = document.getElementById('timer');
+        const resendBtn = document.getElementById('resend-btn');
+        const timerContainer = document.getElementById('timer-container');
+
+        const countdown = setInterval(() => {
+            const minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            timerElement.textContent = `${minutes}:${seconds}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                timerElement.textContent = "Expirado";
+                timerElement.classList.remove('text-gold');
+                timerElement.classList.add('text-danger');
+                
+                // Enable Resend Button
+                resendBtn.removeAttribute('disabled');
+                resendBtn.classList.remove('text-white-50');
+                resendBtn.classList.add('text-gold', 'fw-bold');
+            } else {
+                timeLeft--;
+            }
+        }, 1000);
+    });
+</script>
 @endsection

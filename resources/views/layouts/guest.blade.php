@@ -31,11 +31,25 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Kill Autocomplete
+        // Kill Autocomplete Aggressively
         document.addEventListener('DOMContentLoaded', function() {
-            const inputs = document.querySelectorAll('input');
-            inputs.forEach(input => {
+            // 1. Inputs: Readonly until focused + Random Autocomplete
+            document.querySelectorAll('input, textarea').forEach(input => {
                 input.setAttribute('autocomplete', 'off_random_' + Math.random().toString(36).substring(7));
+                
+                if (!input.hasAttribute('readonly')) {
+                    input.setAttribute('readonly', 'true');
+                    input.style.backgroundColor = input.tagName === 'TEXTAREA' || input.type === 'text' ? '' : 'inherit';
+                    
+                    const removeReadonly = function() { this.removeAttribute('readonly'); };
+                    input.addEventListener('focus', removeReadonly);
+                    input.addEventListener('click', removeReadonly);
+                }
+            });
+
+            // 2. Forms: Autocomplete Off
+            document.querySelectorAll('form').forEach(form => {
+                form.setAttribute('autocomplete', 'off');
             });
 
             // SweetAlert for Success

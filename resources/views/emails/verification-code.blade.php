@@ -21,7 +21,7 @@
         
         <span class="code">{{ $code }}</span>
         
-        <p style="color: #999; font-size: 14px;">Este código expirará en 15 minutos.</p>
+        <p style="color: #999; font-size: 14px;">Este código expirará en 5 minutos.</p>
         <p>Si no solicitaste este cambio, por favor ignora este correo.</p>
         
         <div class="footer">
