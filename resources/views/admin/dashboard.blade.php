@@ -8,7 +8,7 @@
     <!-- Stats Row -->
     <div class="row g-3 mb-4 animate-fade-in">
         <!-- Citas Hoy -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-primary">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -25,7 +25,7 @@
         </div>
 
         <!-- Ingresos -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-success">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -42,7 +42,7 @@
         </div>
 
         <!-- Pendientes -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-warning">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -52,6 +52,23 @@
                         <div>
                             <h6 class="text-secondary small text-uppercase mb-0 fw-bold">Pendientes</h6>
                             <h3 class="mb-0 fw-bold text-dark">{{ $stats['pending_today'] }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barberos Disponibles -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-info">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="bg-info bg-opacity-10 p-2 rounded-circle me-3">
+                            <i class="bi bi-people-fill text-info fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold">Barberos Disponibles</h6>
+                            <h3 class="mb-0 fw-bold text-dark">{{ $stats['active_barbers'] }}</h3>
                         </div>
                     </div>
                 </div>

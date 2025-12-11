@@ -165,7 +165,7 @@ class AppointmentController extends Controller
             'total_today' => $todaysAppointments->count(),
             'revenue_today' => $todaysAppointments->where('status', 'completed')->sum('price'),
             'pending_today' => $todaysAppointments->where('status', 'scheduled')->count(),
-            'active_barbers' => $todaysAppointments->unique('barber_id')->count()
+            'active_barbers' => Barber::where('is_active', true)->count()
         ];
 
         // Get appointments for Calendar (handled by API usually, but if initial render needs them?)
