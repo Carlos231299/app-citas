@@ -15,6 +15,17 @@ Route::post('/book', [AppointmentController::class, 'store'])->name('book');
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
+
+    // Registration
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
+
+    // Password Recovery
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetCode'])->name('password.email');
+    
+    Route::get('/reset-password', [AuthController::class, 'showResetPassword'])->name('password.reset.show');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
 // Admin Protected
