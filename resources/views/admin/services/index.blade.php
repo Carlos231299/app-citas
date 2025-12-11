@@ -3,59 +3,6 @@
 @section('title', 'Servicios - Admin')
 
 @section('content')
-<div class="card bg-white border-0 shadow-sm rounded-4">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="bg-light text-secondary">
-                <tr class="text-uppercase small fw-bold">
-                    <th class="ps-4 py-3 border-0 rounded-start">Icono</th>
-                    <th class="py-3 border-0">Nombre</th>
-                    <th class="py-3 border-0">Precio</th>
-                    <th class="text-end pe-4 py-3 border-0 rounded-end">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($services as $service)
-                <tr>
-                    <td class="ps-4">
-                        @php
-                            $icons = array_filter(explode(',', $service->icon));
-                            $firstIcon = trim($icons[0] ?? 'scissors');
-                            $count = count($icons);
-                        @endphp
-                        <div class="d-flex align-items-center">
-                            <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary" style="width: 40px; height: 40px;">
-                                <i class="bi bi-{{ $firstIcon }} fs-5"></i>
-                            </div>
-                            @if($count > 1)
-                                <span class="badge rounded-pill bg-light text-secondary border ms-2">+{{ $count - 1 }}</span>
-                            @endif
-                        </div>
-                    </td>
-                    <td>
-                        <div class="fw-bold text-dark mb-1">{{ $service->name }}</div>
-                        <div class="text-muted small text-truncate description-cell">
-                            {{ $service->description }}
-                        </div>
-                    </td>
-                    <td class="text-dark fw-bold">${{ number_format($service->price, 0, ',', '.') }}</td>
-                    <td class="text-end pe-4">
-                        <button class="btn btn-sm btn-light text-primary border me-1 mb-1" onclick='editService(@json($service))' title="Editar">
-                            <i class="bi bi-pencil-fill"></i>
-                        </button>
-                        <form action="{{ route('services.destroy', $service) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar servicio?')">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-light text-danger border mb-1" title="Eliminar"><i class="bi bi-trash-fill"></i></button>
-                        </form>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-</div>
-
 <!-- Create Modal -->
 <div class="modal fade" id="createServiceModal" tabindex="-1">
     <div class="modal-dialog">
