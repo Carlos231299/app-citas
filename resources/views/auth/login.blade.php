@@ -18,6 +18,8 @@
                         
                         <form action="{{ route('login') }}" method="POST" autocomplete="off">
                             @csrf
+                            <input type="text" style="display:none" autocomplete="username">
+                            <input type="password" style="display:none" autocomplete="current-password">
         
                             <div class="mb-3 text-start">
                                 <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 1px;">Correo Electrónico</label>

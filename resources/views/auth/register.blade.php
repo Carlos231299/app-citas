@@ -34,16 +34,16 @@
                                 <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Contraseña</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-key"></i></span>
-                                    <input type="password" name="password" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password">
+                                    <input type="text" name="password" class="form-control bg-transparent border-secondary text-white text-security" required autocomplete="off" placeholder="Mínimo 8 caracteres">
                                 </div>
                                 <div class="form-text text-white-50 small">Mínimo 8 caracteres, mayúscula, número y símbolo.</div>
                             </div>
 
                             <div class="mb-4 text-start">
-                                <label class="form-label text-secondary small text-uppercase">Confirmar Contraseña</label>
+                                <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Confirmar Contraseña</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-check-circle"></i></span>
-                                    <input type="password" name="password_confirmation" class="form-control bg-transparent border-secondary text-white" required>
+                                    <input type="text" name="password_confirmation" class="form-control bg-transparent border-secondary text-white text-security" required autocomplete="off" placeholder="Repite la contraseña">
                                 </div>
                             </div>
         

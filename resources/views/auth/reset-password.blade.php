@@ -14,6 +14,8 @@
                         
                         <form action="{{ route('password.update') }}" method="POST" autocomplete="off">
                             @csrf
+                            <input type="text" style="display:none" autocomplete="username">
+                            <input type="password" style="display:none" autocomplete="current-password">
                             
                             <!-- Hidden Fields (Passed from Verify Step) -->
                             <input type="hidden" name="email" value="{{ $email }}">
