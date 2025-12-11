@@ -15,24 +15,15 @@
                         <form action="{{ route('password.update') }}" method="POST" autocomplete="off">
                             @csrf
                             
-                            <div class="mb-3 text-start">
-                                <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Email</label>
-                                <input type="email" name="email" value="{{ request()->email ?? old('email') }}" class="form-control bg-transparent border-secondary text-white" readonly>
-                            </div>
+                            <!-- Hidden Fields (Passed from Verify Step) -->
+                            <input type="hidden" name="email" value="{{ $email }}">
+                            <input type="hidden" name="code" value="{{ $code }}">
 
-                            <div class="mb-3 text-start">
-                                <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Código de Verificación</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-123"></i></span>
-                                    <input type="text" name="code" class="form-control bg-transparent border-secondary text-white" placeholder="Ej: 123456" required autocomplete="off">
-                                </div>
-                            </div>
-                            
                             <div class="mb-3 text-start">
                                 <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Nueva Contraseña</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-lock"></i></span>
-                                    <input type="password" name="password" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password">
+                                    <input type="password" name="password" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password" autofocus placeholder="Mínimo 8 caracteres">
                                 </div>
                             </div>
 
@@ -40,7 +31,7 @@
                                 <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Confirmar Contraseña</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-check-circle"></i></span>
-                                    <input type="password" name="password_confirmation" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password">
+                                    <input type="password" name="password_confirmation" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password" placeholder="Repite la contraseña">
                                 </div>
                             </div>
         

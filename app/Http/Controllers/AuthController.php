@@ -103,13 +103,53 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'Error al enviar el correo: ' . $e->getMessage()]);
         }
 
-        return redirect()->route('password.reset.show', ['email' => $user->email])
-            ->with('success', 'Código enviado a tu correo.');
+        // Redirect to Step 2: Verify Code
+        return redirect()->route('password.verify.show', ['email' => $user->email])
+            ->with('success', 'Código enviado. Por favor revísalo.');
     }
 
+    // Step 2: Show Code Form
+    public function showVerifyCode(Request $request)
+    {
+        return view('auth.verify-code', ['email' => $request->email]);
+    }
+
+    // Step 2: Process Code
+    public function verifyCode(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'code' => 'required|string'
+        ]);
+
+        $user = \App\Models\User::where('email', $request->email)->first();
+
+        // Validate Code & Expiry
+        if ($user->verification_code !== $request->code) {
+            return back()->withErrors(['code' => 'El código es incorrecto.']);
+        }
+
+        if (now()->greaterThan($user->verification_code_expires_at)) {
+            return back()->withErrors(['code' => 'El código ha expirado. Solicita uno nuevo.']);
+        }
+
+        // Success: Show Step 3 (Reset Password Form) passing validated data
+        // We pass the code again to be submitted in the final form for double-check
+        return view('auth.reset-password', [
+            'email' => $request->email,
+            'code' => $request->code
+        ]);
+    }
+
+    // Step 3 is just the POST action now (View is rendered by verifyCode)
+    // kept for fallback if needed, but primarily verifyCode renders the view directly
     public function showResetPassword(Request $request)
     {
-        return view('auth.reset-password', ['email' => $request->email]);
+        // Fallback: If accessed directly without code, redirect to start
+        if (!$request->has('code')) {
+            return redirect()->route('password.request');
+        }
+        return view('auth.reset-password', ['email' => $request->email, 'code' => $request->code]);
     }
 
     public function resetPassword(Request $request)
@@ -129,14 +169,9 @@ class AuthController extends Controller
 
         $user = \App\Models\User::where('email', $request->email)->first();
 
-        // Validate Code
-        if ($user->verification_code !== $request->code) {
-            return back()->withErrors(['code' => 'El código es incorrecto.']);
-        }
-
-        // Validate Expiration
-        if (now()->greaterThan($user->verification_code_expires_at)) {
-            return back()->withErrors(['code' => 'El código ha expirado. Solicita uno nuevo.']);
+        // Double Check (Security)
+        if ($user->verification_code !== $request->code || now()->greaterThan($user->verification_code_expires_at)) {
+            return redirect()->route('password.request')->withErrors(['email' => 'La sesión de recuperación ha expirado.']);
         }
 
         // Reset Password
@@ -145,8 +180,7 @@ class AuthController extends Controller
         $user->verification_code_expires_at = null;
         $user->save();
 
-        Auth::login($user);
-
-        return redirect('/dashboard')->with('success', 'Contraseña restablecida exitosamente.');
+        // No Auto-Login
+        return redirect()->route('login')->with('success', 'Contraseña actualizada. Inicia sesión.');
     }
 }

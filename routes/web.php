@@ -21,9 +21,15 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
 
     // Password Recovery
+    // Password Recovery
     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
     Route::post('/forgot-password', [AuthController::class, 'sendResetCode'])->name('password.email');
     
+    // Step 2: Verify Code
+    Route::get('/verify-code', [AuthController::class, 'showVerifyCode'])->name('password.verify.show');
+    Route::post('/verify-code', [AuthController::class, 'verifyCode'])->name('password.verify.check');
+
+    // Step 3: Reset Password (only accessible via logic flow)
     Route::get('/reset-password', [AuthController::class, 'showResetPassword'])->name('password.reset.show');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
