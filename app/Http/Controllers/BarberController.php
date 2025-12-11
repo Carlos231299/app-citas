@@ -50,6 +50,11 @@ class BarberController extends Controller
         } 
         // If 'name' is missing, it's a partial AJAX update. We rely on $validated containing only what was sent.
         
+        // AUTO-DISABLE Logic: If is_active is being set to false, also disable special_mode
+        if (isset($validated['is_active']) && $validated['is_active'] == false) {
+            $validated['special_mode'] = false;
+        }
+
         $barber->update($validated);
 
         if ($request->wantsJson()) {

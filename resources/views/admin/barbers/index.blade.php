@@ -96,11 +96,11 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">NOMBRE COMPLETO</label>
-                        <input type="text" name="name" id="edit_name" class="form-control" required autocomplete="nop">
+                        <input type="text" name="name" id="edit_name" class="form-control" required autocomplete="off">
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">WHATSAPP</label>
-                        <input type="text" name="whatsapp_number" id="edit_whatsapp" class="form-control" autocomplete="nop">
+                        <input type="text" name="whatsapp_number" id="edit_whatsapp" class="form-control" autocomplete="off">
                     </div>
                 </div>
                 <div class="modal-footer border-top-0">
@@ -134,6 +134,16 @@
         if (field === 'is_active') {
             labelEl.textContent = newValue ? 'Activo' : 'Inactivo';
             labelEl.className = `form-check-label small pt-1 fw-bold ${newValue ? 'text-success' : 'text-muted'}`;
+
+            // Auto-disable Special Mode Switch in UI if Deactivating
+            if (newValue === 0) {
+                const specialSwitch = document.getElementById(`special_switch_${id}`);
+                const specialLabel = document.getElementById(`special_label_${id}`);
+                if(specialSwitch && specialSwitch.checked) {
+                    specialSwitch.checked = false;
+                    specialLabel.className = 'form-check-label small pt-1 fw-bold text-muted';
+                }
+            }
         } else {
              // For Special Mode, label text is static, just color changes
             labelEl.className = `form-check-label small pt-1 fw-bold ${newValue ? 'text-warning' : 'text-muted'}`;
