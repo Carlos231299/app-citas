@@ -45,6 +45,10 @@ class ReportController extends Controller
 
     public function pdf(Request $request)
     {
+        if (auth()->user()->role !== 'admin') {
+            abort(403);
+        }
+
         $appointments = $this->getFilteredAppointments($request);
         $total = $appointments->sum(fn($a) => $a->confirmed_price ?? $a->service->price ?? 0);
         $status = $request->input('status', 'all'); 
@@ -55,6 +59,10 @@ class ReportController extends Controller
 
     public function index(Request $request)
     {
+        if (auth()->user()->role !== 'admin') {
+            abort(403);
+        }
+
         $appointments = $this->getFilteredAppointments($request);
         
         // Calculate Totals using logic defined previously

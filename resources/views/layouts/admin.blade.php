@@ -44,6 +44,7 @@
                 <i class="bi bi-calendar-week-fill"></i> <span class="sidebar-text">Agenda</span>
             </a>
             
+            @if(auth()->user()->role === 'admin')
             <a class="nav-link sidebar-link {{ request()->routeIs('services.*') ? 'active' : '' }}" href="{{ route('services.index') }}" title="Servicios">
                 <i class="bi bi-scissors"></i> <span class="sidebar-text">Servicios</span>
             </a>
@@ -55,6 +56,7 @@
             <a class="nav-link sidebar-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') }}" title="Reportes">
                 <i class="bi bi-file-earmark-bar-graph-fill"></i> <span class="sidebar-text">Reportes</span>
             </a>
+            @endif
             
             <!-- Hidden Logout Form for Header Dropdown -->
             <form action="{{ route('logout') }}" method="POST" id="logout-form" class="d-none">

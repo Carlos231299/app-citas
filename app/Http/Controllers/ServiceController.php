@@ -10,12 +10,18 @@ class ServiceController extends Controller
 {
     public function index()
     {
+        if (auth()->user()->role !== 'admin') {
+            abort(403);
+        }
         $services = Service::all();
         return view('admin.services.index', compact('services'));
     }
 
     public function store(Request $request)
     {
+        if (auth()->user()->role !== 'admin') {
+            abort(403);
+        }
         $request->validate([
             'name' => 'required',
             'price' => 'required|numeric',
@@ -29,6 +35,9 @@ class ServiceController extends Controller
 
     public function update(Request $request, Service $service)
     {
+        if (auth()->user()->role !== 'admin') {
+            abort(403);
+        }
         $request->validate([
             'name' => 'required',
             'price' => 'required|numeric',
@@ -42,6 +51,9 @@ class ServiceController extends Controller
 
     public function destroy(Service $service)
     {
+        if (auth()->user()->role !== 'admin') {
+            abort(403);
+        }
         $service->delete();
         return redirect()->back()->with('success', 'Servicio eliminado correctamente.');
     }

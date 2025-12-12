@@ -9,12 +9,18 @@ class BarberController extends Controller
 {
     public function index()
     {
+        if (auth()->user()->role !== 'admin') {
+            abort(403);
+        }
         $barbers = Barber::all();
         return view('admin.barbers.index', compact('barbers'));
     }
 
     public function store(Request $request)
     {
+        if (auth()->user()->role !== 'admin') {
+            abort(403);
+        }
         $data = $request->validate([
             'name' => 'required',
             'whatsapp_number' => 'nullable',
@@ -28,6 +34,9 @@ class BarberController extends Controller
 
     public function update(Request $request, Barber $barber)
     {
+        if (auth()->user()->role !== 'admin') {
+            abort(403);
+        }
         $rules = [
             'name' => 'sometimes|required|string|max:255',
             'whatsapp_number' => 'nullable|string|max:20',
@@ -67,6 +76,9 @@ class BarberController extends Controller
 
     public function destroy(Barber $barber)
     {
+        if (auth()->user()->role !== 'admin') {
+            abort(403);
+        }
         // Toggle active instead of hard delete typically, but user asked for delete in summary implication
         $barber->delete();
         return redirect()->back()->with('success', "{$barber->name} eliminado correctamente.");
