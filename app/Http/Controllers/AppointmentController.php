@@ -269,16 +269,6 @@ class AppointmentController extends Controller
                 ];
             });
 
-        // Add 'Past Time' Mask for Today (Dims past hours)
-        $events->push([
-            'id' => 'past-mask',
-            'start' => Carbon::now()->startOfDay()->toIso8601String(),
-            'end' => Carbon::now()->toIso8601String(),
-            'display' => 'background',
-            'backgroundColor' => '#f1f5f9', // Light Slate Grey
-            'allDay' => false
-        ]);
-
         return response()->json($events);
     }
 

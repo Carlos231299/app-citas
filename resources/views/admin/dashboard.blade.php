@@ -166,9 +166,11 @@
             editable: false,
             selectable: true,
             selectMirror: true,
-            dayMaxEvents: false, // Expand all events (No "+1 more")
+            dayMaxEvents: false,
+            nowIndicator: true, // Red line for current time
+            navLinks: true, // Native click-to-nav support (Day headers become links)
             
-            // Interaction: Month -> Day
+            // Interaction: Month -> Day (Custom backup)
             dateClick: function(info) {
                 // If in month view, clicking a date goes to day view
                 if (calendarInstance.view.type === 'dayGridMonth') {
