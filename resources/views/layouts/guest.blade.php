@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Acceso - Barbería JR')</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}?v=2">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=2">
     <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}?v=2">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     
