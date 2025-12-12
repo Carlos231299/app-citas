@@ -6,6 +6,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\BarberController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 
 // ...
 

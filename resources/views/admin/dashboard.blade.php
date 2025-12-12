@@ -1,4 +1,4 @@
-@extends(request()->ajax() ? 'layouts.ajax' : 'layouts.admin')
+@extends('layouts.admin')
 
 @section('title', 'Dashboard - Barbería JR')
 @section('header', 'Agenda')
