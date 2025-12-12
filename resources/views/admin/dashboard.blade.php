@@ -461,19 +461,21 @@
                         <div class="col-6">
                              <label class="form-label fw-bold small text-muted">BARBERO</label>
                              <select id="edit-barber" class="form-select">
+                                <option value="" disabled>Selecciona...</option>
                                 ${barberOptions}
                              </select>
                         </div>
                         <div class="col-6">
                             <label class="form-label fw-bold small text-muted">FECHA</label>
-                            <input type="date" id="edit-date" class="form-control" min="${minDate}" value="${originalDate}">
+                            <input type="date" id="edit-date" class="form-control" min="${minDate}" value="${originalDate}" 
+                                   disabled title="Selecciona un barbero primero" style="cursor: not-allowed;">
                         </div>
                     </div>
 
                     <!-- Slots -->
                     <label class="form-label fw-bold small text-muted">HORARIO</label>
                     <div id="edit-slots-container" class="d-flex flex-wrap gap-2 p-3 border rounded bg-light" style="min-height: 60px; max-height: 150px; overflow-y: auto;">
-                        <span class="text-muted small">Cargando horarios...</span>
+                        <span class="text-muted small">Selecciona barbero y fecha...</span>
                     </div>
                     <input type="hidden" id="edit-time" value="${originalTime}">
                     <div id="edit-time-display" class="mt-2 text-primary fw-bold small text-end">Seleccionado: ${originalTime}</div>
@@ -501,32 +503,51 @@
                     else customContainer.classList.add('d-none');
                 }
                 serviceSelect.addEventListener('change', toggleCustom);
-                toggleCustom(); // Init
+                toggleCustom(); 
 
-                // 2. Fetch Slots Logic
+                // 2. Enable Date Logic
+                function toggleDate() {
+                    if(barberSelect.value) {
+                        dateInput.disabled = false;
+                        dateInput.style.cursor = 'text';
+                        dateInput.title = '';
+                    } else {
+                        dateInput.disabled = true;
+                        dateInput.style.cursor = 'not-allowed';
+                        dateInput.title = 'Selecciona un barbero primero';
+                    }
+                }
+                barberSelect.addEventListener('change', toggleDate);
+                // Trigger initially (it might be pre-selected)
+                toggleDate();
+
+                // 3. Fetch Slots Logic
                 function fetchSlots() {
                     const barberId = barberSelect.value;
                     const date = dateInput.value;
-                    if(!barberId || !date) {
-                         slotsContainer.innerHTML = '<small>Selecciona barbero y fecha</small>';
+                    
+                    if(!barberId) {
+                        slotsContainer.innerHTML = '<small>Selecciona un barbero primero.</small>';
+                        return;
+                    }
+                    if(!date) {
+                         slotsContainer.innerHTML = '<small>Selecciona una fecha.</small>';
                          return;
                     }
 
                     slotsContainer.innerHTML = '<div class="spinner-border spinner-border-sm text-primary"></div>';
 
-                    // Using simple axios if available or fetch
                     axios.get(`/api/slots?barber_id=${barberId}&date=${date}`)
                         .then(res => {
                             let validSlots = res.data; 
                             slotsContainer.innerHTML = '';
 
-                            // Inject Original Time if matching context
                             const isSameContext = (barberId == currentBarberId && date == originalDate);
                             
+                            // Inject original time if same context and not present
                             if(isSameContext && !validSlots.includes(originalTime)) {
                                 validSlots.push(originalTime);
                                 validSlots.sort((a,b) => {
-                                    // Basic AM/PM sort
                                     const dateA = new Date('1970/01/01 ' + a);
                                     const dateB = new Date('1970/01/01 ' + b);
                                     return dateA - dateB; 
@@ -547,7 +568,6 @@
                                 btn.onclick = () => {
                                     timeInput.value = t;
                                     timeDisplay.textContent = 'Seleccionado: ' + t;
-                                    // visual update
                                     Array.from(slotsContainer.children).forEach(c => c.className = 'btn btn-sm btn-outline-secondary');
                                     btn.className = 'btn btn-sm btn-primary';
                                 };
@@ -559,11 +579,19 @@
                         });
                 }
                 
-                barberSelect.addEventListener('change', () => { timeInput.value=''; timeDisplay.textContent=''; fetchSlots(); });
-                dateInput.addEventListener('change', () => { timeInput.value=''; timeDisplay.textContent=''; fetchSlots(); });
+                barberSelect.addEventListener('change', () => { 
+                    timeInput.value=''; timeDisplay.textContent=''; 
+                    fetchSlots(); 
+                });
+                dateInput.addEventListener('change', () => { 
+                    timeInput.value=''; timeDisplay.textContent=''; 
+                    fetchSlots(); 
+                });
 
-                // Init Slots
-                fetchSlots();
+                // Check init
+                if(barberSelect.value && dateInput.value) {
+                    fetchSlots();
+                }
             },
             preConfirm: () => {
                 const date = document.getElementById('edit-date').value;
