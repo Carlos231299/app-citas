@@ -175,7 +175,7 @@ body {
 
 /* Mobile Responsiveness */
 /* Mobile Responsiveness */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     .sidebar {
         position: fixed;
         height: 100vh;

@@ -148,11 +148,12 @@
                 e.preventDefault();
                 e.stopPropagation();
                 
+                // Use 768 as the strict cutoff matching CSS
                 if (window.innerWidth < 768) {
-                    sidebar.classList.toggle('open'); // Mobile: Toggle Open
-                    sidebar.classList.remove('collapsed'); // Ensure collapsed strict mode doesn't interfere
+                    sidebar.classList.toggle('open');
+                    sidebar.classList.remove('collapsed'); 
                 } else {
-                    sidebar.classList.toggle('collapsed'); // Desktop: Toggle Collapsed
+                    sidebar.classList.toggle('collapsed');
                 }
             }
 
