@@ -5,40 +5,18 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\BarberController;
-use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ProfileController;
 
-// Public Public
-Route::get('/', [AppointmentController::class, 'publicIndex'])->name('home');
-Route::post('/book', [AppointmentController::class, 'store'])->name('book');
-
-// Guest Auth
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
-
-    // Registration
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
-
-    // Password Recovery
-    // Password Recovery
-    Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
-    Route::post('/forgot-password', [AuthController::class, 'sendResetCode'])->name('password.email');
-    
-    // Step 2: Verify Code
-    Route::get('/verify-code', [AuthController::class, 'showVerifyCode'])->name('password.verify.show');
-    Route::post('/verify-code', [AuthController::class, 'verifyCode'])->name('password.verify.check');
-    Route::post('/verify-code/resend', [AuthController::class, 'resendCode'])->name('password.verify.resend');
-
-    // Step 3: Reset Password (only accessible via logic flow)
-    Route::get('/reset-password', [AuthController::class, 'showResetPassword'])->name('password.reset.show');
-    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
-});
+// ...
 
 // Admin Protected
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     
+    // Profile
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
     Route::get('/dashboard', [AppointmentController::class, 'index'])->name('dashboard');
     Route::get('/calendar', [AppointmentController::class, 'calendar'])->name('calendar');
     Route::resource('services', ServiceController::class);

@@ -172,3 +172,39 @@ body {
     height: 3px;
     background-color: var(--gold-primary);
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        height: 100vh;
+        z-index: 1050;
+        width: 250px;
+        left: 0;
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar.collapsed {
+        width: 0;
+        padding: 0;
+        left: -100%;
+        border: none;
+    }
+
+    /* Hide content when collapsed on mobile to prevent overflow */
+    .sidebar.collapsed * {
+        display: none !important;
+    }
+
+    /* Overlay for content when sidebar is open */
+    .sidebar:not(.collapsed)+.main-content::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1040;
+    }
+}

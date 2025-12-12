@@ -68,9 +68,34 @@
     <div class="main-content">
         <!-- Topbar -->
         <header class="mb-4 d-flex justify-content-between align-items-center">
-            <h2 class="h4 mb-0 fw-bold text-dark">@yield('header')</h2>
-            <div class="text-secondary">
-                Hola, <span class="fw-bold text-primary">{{ auth()->user()->name }}</span>
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-white border shadow-sm text-primary rounded-circle d-md-none" id="mobileSidebarToggle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+                <h2 class="h4 mb-0 fw-bold text-dark">@yield('header')</h2>
+            </div>
+            <div class="dropdown">
+                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-secondary" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="me-2 text-end d-none d-sm-block">
+                        <small class="d-block text-secondary">Hola,</small>
+                        <span class="fw-bold text-primary">{{ auth()->user()->name }}</span>
+                    </span>
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary fw-bold border border-primary-subtle" style="width: 40px; height: 40px;">
+                        {{ substr(auth()->user()->name, 0, 1) }}
+                    </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg text-small" aria-labelledby="dropdownUser1">
+                    <li>
+                        <div class="px-3 py-2">
+                            <span class="d-block fw-bold text-dark">{{ auth()->user()->name }}</span>
+                            <small class="text-secondary">{{ auth()->user()->email }}</small>
+                        </div>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person-gear me-2 text-primary"></i> Mi Perfil</a></li>
+                    <li><h6 class="dropdown-header text-uppercase small fw-bold mt-2">Sistema</h6></li>
+                    <li><a class="dropdown-item" href="#" onclick="confirmLogout()"><i class="bi bi-box-arrow-right me-2 text-danger"></i> Cerrar Sesión</a></li>
+                </ul>
             </div>
         </header>
 
@@ -118,17 +143,26 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Sidebar Toggle
+            // Sidebar Toggle (Desktop Internal)
             const sidebar = document.getElementById('sidebar');
             const toggle = document.getElementById('sidebarToggle');
+            const mobileToggle = document.getElementById('mobileSidebarToggle');
             
-            if(toggle && sidebar) {
-                toggle.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    sidebar.classList.toggle('collapsed');
-                });
+            function toggleSidebar(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                sidebar.classList.toggle('collapsed');
             }
+
+            if(toggle && sidebar) toggle.addEventListener('click', toggleSidebar);
+            if(mobileToggle && sidebar) mobileToggle.addEventListener('click', toggleSidebar);
+
+            // Close sidebar on mobile when clicking outside (overlay)
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth < 768 && !sidebar.contains(e.target) && !mobileToggle.contains(e.target) && !sidebar.classList.contains('collapsed')) {
+                    sidebar.classList.add('collapsed');
+                }
+            });
 
             // Clean Autocomplete
             document.querySelectorAll('form').forEach(form => {
