@@ -91,11 +91,24 @@
                         <li><a class="dropdown-item d-flex justify-content-between align-items-center rounded-2 py-2" href="#" data-view="dayGridMonth"><span>Mes</span><span class="text-muted small">M</span></a></li>
                         <li><a class="dropdown-item d-flex justify-content-between align-items-center rounded-2 py-2" href="#" data-view="listYear"><span>Año</span><span class="text-muted small">Y</span></a></li>
                         <li><a class="dropdown-item d-flex justify-content-between align-items-center rounded-2 py-2" href="#" data-view="listWeek"><span>Agenda</span><span class="text-muted small">A</span></a></li>
+                        <li><a class="dropdown-item d-flex justify-content-between align-items-center rounded-2 py-2" href="#" data-view="fourDay"><span>4 días</span><span class="text-muted small">X</span></a></li>
                         <li><hr class="dropdown-divider my-2"></li>
                         <li>
                             <div class="dropdown-item d-flex gap-2 align-items-center rounded-2 py-2" onclick="toggleOption(event, 'weekends')">
-                                <i class="bi bi-check-lg text-primary opacity-0" id="check-weekends"></i>
+                                <i class="bi bi-check-lg text-primary" id="check-weekends"></i>
                                 <span>Mostrar fines de semana</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="dropdown-item d-flex gap-2 align-items-center rounded-2 py-2" onclick="toggleOption(event, 'rejected')">
+                                <i class="bi bi-check-lg text-primary" id="check-rejected"></i>
+                                <span>Mostrar eventos rechazados</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="dropdown-item d-flex gap-2 align-items-center rounded-2 py-2" onclick="toggleOption(event, 'completed')">
+                                <i class="bi bi-check-lg text-primary" id="check-completed"></i>
+                                <span>Mostrar tareas completadas</span>
                             </div>
                         </li>
                     </ul>
@@ -110,12 +123,20 @@
 
 @push('scripts')
 <script>
-    let calendarState = { weekends: true };
+    // Global State for Filters
+    let calendarState = {
+        weekends: true,
+        showRejected: true, // Cancelled
+        showCompleted: true
+    };
     let calendarInstance = null;
 
     function initCalendar() {
         var calendarEl = document.getElementById('calendar');
         if(!calendarEl) return;
+        
+        // Initialize State UI
+        updateCheckboxes();
 
         calendarInstance = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
@@ -123,44 +144,101 @@
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: '' 
+                right: '' // Leaving empty to inject custom dropdown
             },
             navLinks: true, 
             height: '100%',
             contentHeight: 'auto',
             aspectRatio: 1.35,
+            handleWindowResize: true,
             locale: 'es',
-            weekends: true,
-            firstDay: 1,
+            weekends: true, // Default
+            firstDay: 1, // Lunes
             
-            // Format
-            slotLabelFormat: { hour: 'numeric', minute: '2-digit', meridiem: 'short', hour12: true },
-            eventTimeFormat: { hour: 'numeric', minute: '2-digit', meridiem: 'short', hour12: true },
+            // Time Format
+            slotMinTime: '08:00:00',
+            slotMaxTime: '21:00:00',
+            expandRows: true, 
+            stickyHeaderDates: true,
+            allDaySlot: false,
+            dayMaxEvents: true,
             
+            views: {
+                dayGridMonth: { dayMaxEvents: 2 },
+                timeGrid: { dayMaxEvents: true },
+                fourDay: {
+                    type: 'timeGrid',
+                    duration: { days: 4 },
+                    buttonText: '4 días'
+                },
+                listYear: { buttonText: 'Año' }
+            },
+            
+            slotLabelFormat: {
+                hour: 'numeric',
+                minute: '2-digit',
+                omitZeroMinute: false,
+                meridiem: 'short',
+                hour12: true
+            },
+            eventTimeFormat: {
+                hour: 'numeric',
+                minute: '2-digit',
+                meridiem: 'short',
+                hour12: true
+            },
             events: '/api/calendar/events',
             
-            // Render Hooks
+            // Logic for Hiding Events based on Filters
+            eventClassNames: function(arg) {
+                const props = arg.event.extendedProps;
+                let classes = [];
+                
+                // Filter: Rejected (Cancelled)
+                if (props.status === 'cancelled' && !calendarState.showRejected) {
+                    classes.push('d-none');
+                }
+                
+                // Filter: Completed
+                if (props.status === 'completed' && !calendarState.showCompleted) {
+                    classes.push('d-none');
+                }
+                
+                return classes;
+            },
+
+            // Lifecycle Hooks
             datesSet: function(info) {
+                // 1. Update View Dropdown text
                 const viewNameMap = {
                     'timeGridDay': 'Día',
                     'timeGridWeek': 'Semana',
                     'dayGridMonth': 'Mes',
                     'listYear': 'Año',
-                    'listWeek': 'Agenda'
+                    'listWeek': 'Agenda',
+                    'fourDay': '4 días'
                 };
                 const btn = document.getElementById('calendarViewBtn');
-                if(btn) btn.innerHTML = `<span>${viewNameMap[info.view.type] || 'Vista'}</span>`;
-                
-                // Mini Calendar
+                if(btn) {
+                    btn.innerHTML = `<span>${viewNameMap[info.view.type] || 'Vista'}</span>`;
+                }
+
+                // 2. Mini Calendar (Flatpickr) on Title
                 const titleEl = document.querySelector('.fc-toolbar-title');
                 if(titleEl && !titleEl._flatpickr) {
                     flatpickr(titleEl, {
                         locale: 'es',
                         defaultDate: calendarInstance.getDate(),
-                        dateFormat: "Y-m-d",
+                        dateFormat: "Y-m-d", // value format
                         position: 'auto center',
-                        disableMobile: "true",
-                        onChange: function(dates) { calendarInstance.gotoDate(dates[0]); }
+                        disableMobile: "true", // Force custom dropdown on mobile too if needed
+                        onChange: function(selectedDates, dateStr, instance) {
+                            calendarInstance.gotoDate(selectedDates[0]);
+                        },
+                        onOpen: function(selectedDates, dateStr, instance) {
+                            // Sync picker with current calendar date when opening
+                            instance.setDate(calendarInstance.getDate());
+                        }
                     });
                 }
             },
@@ -178,32 +256,65 @@
         
         calendarInstance.render();
 
-        // Inject Dropdown
+        // Inject Custom Dropdown into FullCalendar Toolbar
         const toolbarRight = document.querySelector('.fc-toolbar-chunk:last-child');
         const selector = document.getElementById('custom-view-selector');
+        
         if (toolbarRight && selector) {
             selector.classList.remove('d-none');
             toolbarRight.appendChild(selector);
             
+            // Re-bind dropdown clicks to calendar
             selector.querySelectorAll('[data-view]').forEach(item => {
                 item.addEventListener('click', (e) => {
                     e.preventDefault();
+                    // Find closest link if click was on span
                     const link = e.target.closest('a');
-                    if(link) calendarInstance.changeView(link.getAttribute('data-view'));
+                    const view = link.getAttribute('data-view');
+                    if(view) calendarInstance.changeView(view);
                 });
             });
         }
     }
 
+    // Toggle Logic
     function toggleOption(e, type) {
         e.preventDefault();
-        e.stopPropagation();
+        e.stopPropagation(); // Keep dropdown open
+
         if(type === 'weekends') {
             calendarState.weekends = !calendarState.weekends;
             calendarInstance.setOption('weekends', calendarState.weekends);
-            document.getElementById('check-weekends').classList.toggle('opacity-0');
+        } else if (type === 'rejected') {
+            calendarState.showRejected = !calendarState.showRejected;
+            calendarInstance.render(); // Re-trigger eventClassNames
+        } else if (type === 'completed') {
+            calendarState.showCompleted = !calendarState.showCompleted;
+            calendarInstance.render(); // Re-trigger eventClassNames
+        }
+
+        updateCheckboxes();
+    }
+
+    function updateCheckboxes() {
+        const checkMap = {
+            'weekends': calendarState.weekends,
+            'rejected': calendarState.showRejected,
+            'completed': calendarState.showCompleted
+        };
+
+        for (const [key, value] of Object.entries(checkMap)) {
+            const icon = document.getElementById(`check-${key}`);
+            if(icon) {
+                if(value) {
+                    icon.classList.remove('opacity-0');
+                } else {
+                    icon.classList.add('opacity-0');
+                }
+            }
         }
     }
+
 
     document.addEventListener('DOMContentLoaded', initCalendar);
 </script>
