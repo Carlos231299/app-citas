@@ -175,52 +175,57 @@ body {
 
 /* Mobile Responsiveness */
 /* Mobile Responsiveness */
-@media (max-width: 767.98px) {
+@media (max-width: 768px) {
+
+    /* 1. Sidebar Styles (Drawer Mode) */
     .sidebar {
         position: fixed;
-        height: 100vh;
-        z-index: 1050;
-        width: 260px;
-        /* Drawer width */
-        left: -260px;
-        /* Hidden by default */
-        transition: left 0.3s ease-in-out;
-        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Open Class to bring it back */
-    .sidebar.open {
+        top: 0;
+        bottom: 0;
         left: 0;
+        width: 260px;
+        z-index: 1050;
+        background-color: #ffffff;
+        /* Solid background */
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+
+        /* Animation Logic */
+        transition: transform 0.3s ease;
+        /* Smooth transition */
+        transform: translateX(-100%);
+        /* Hidden by default */
     }
 
-    /* Collapsed class is desktop concept, ensure it doesn't conflict or use it to mean 'hidden' if shared logic, 
-       but user specificed .open behavior. We force left: -260px on default sidebar mobile, so collapsed text logic matters less visually 
-       unless sidebar is open. */
+    /* Open State */
+    .sidebar.open {
+        transform: translateX(0);
+        /* Slide In */
+    }
+
+    /* Ensure desktop 'collapsed' class doesn't interfere visibly if present */
     .sidebar.collapsed {
-        left: -260px;
+        width: 260px;
+        transform: translateX(-100%);
     }
 
-    /* Ensure content inside sidebar is visible when open */
+    /* Content Visibility */
     .sidebar * {
         display: block !important;
-        /* Restore display if desktop collapsed hid it */
     }
 
     .sidebar .sidebar-text {
         display: inline !important;
     }
 
-    /* Main Content */
+    /* 2. Main Content (Full Width) */
     .main-content {
         width: 100%;
         margin-left: 0 !important;
         padding: 1rem;
-        /* Adjust padding for mobile */
         overflow-y: auto;
-        /* Scrollable */
     }
 
-    /* Overlay */
+    /* 3. Overlay (Backdrop) */
     .sidebar.open+.main-content::before {
         content: '';
         position: fixed;
@@ -231,6 +236,16 @@ body {
         background: rgba(0, 0, 0, 0.5);
         z-index: 1040;
         backdrop-filter: blur(2px);
+    }
+
+    /* 4. Button Visibility Overrides */
+    #mobileSidebarToggle {
+        display: flex !important;
+    }
+
+    #sidebarToggle {
+        display: none !important;
+        /* Hide internal toggle on mobile */
     }
 }
 

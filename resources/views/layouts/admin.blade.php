@@ -148,8 +148,8 @@
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Use 768 as the strict cutoff matching CSS
-                if (window.innerWidth < 768) {
+                // Use 768 as the threshold (inclusive for ipad portrait often)
+                if (window.innerWidth <= 768) {
                     sidebar.classList.toggle('open');
                     sidebar.classList.remove('collapsed'); 
                 } else {
@@ -163,7 +163,7 @@
             // Close sidebar on mobile when clicking outside (overlay)
             document.addEventListener('click', (e) => {
                 // If mobile, open, and click outside sidebar and not on toggles
-                if (window.innerWidth < 768 && 
+                if (window.innerWidth <= 768 && 
                     sidebar.classList.contains('open') && 
                     !sidebar.contains(e.target) && 
                     !mobileToggle.contains(e.target) && 
