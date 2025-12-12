@@ -57,10 +57,12 @@ class BarberController extends Controller
         $barber->update($validated);
 
         if ($request->wantsJson()) {
+            // Return JSON with the UPDATED object so frontend can update DOM if needed
             return response()->json(['success' => true, 'barber' => $barber]);
         }
 
-        return redirect()->back()->with('success', 'Barbero actualizado correctamente.');
+        // Custom success message with Barber Name
+        return redirect()->back()->with('success', "{$barber->name} actualizado correctamente.");
     }
 
     public function destroy(Barber $barber)
