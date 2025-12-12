@@ -13,7 +13,7 @@
                         <h3 class="mb-3 text-white">Verificar Identidad</h3>
                         <p class="text-secondary small mb-4">Ingresa el código de 6 dígitos enviado a <strong>{{ $email }}</strong>.</p>
                         
-                        <form action="{{ route('password.verify.check') }}" method="POST" autocomplete="off">
+                        <form action="{{ route('password.verify') }}" method="POST" autocomplete="off">
                             @csrf
                             <input type="hidden" name="email" value="{{ $email }}">
         
