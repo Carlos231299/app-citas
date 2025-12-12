@@ -69,6 +69,6 @@ class BarberController extends Controller
     {
         // Toggle active instead of hard delete typically, but user asked for delete in summary implication
         $barber->delete();
-        return redirect()->back()->with('success', 'Barbero eliminado.');
+        return redirect()->back()->with('success', "{$barber->name} eliminado correctamente.");
     }
 }
