@@ -325,8 +325,7 @@
                     icon: 'info',
                     showConfirmButton: false,
                     showCloseButton: true,
-                    showCancelButton: true,
-                    cancelButtonText: 'Cerrar',
+                    showCancelButton: false,
                     customClass: {
                         popup: 'rounded-4 shadow' // Simple rounded corners
                     }
