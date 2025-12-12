@@ -149,7 +149,7 @@
             navLinks: true, 
             height: '100%',
             contentHeight: 'auto',
-            aspectRatio: 1.35,
+            aspectRatio: window.innerWidth < 768 ? 0.65 : 1.35,
             handleWindowResize: true,
             locale: 'es',
             weekends: true, // Default
@@ -707,6 +707,11 @@
         #custom-view-selector .btn {
             width: 100%;
             justify-content: center;
+        }
+
+        /* Ensure Day Cells are Tall on Mobile */
+        .fc-daygrid-day-frame {
+            min-height: 100px !important;
         }
     }
     
