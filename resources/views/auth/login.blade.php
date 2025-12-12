@@ -33,7 +33,10 @@
                                 <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 1px;">Contraseña</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-lock"></i></span>
-                                    <input type="password" name="password" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password" placeholder="••••••••">
+                                    <input type="password" name="password" id="password" class="form-control bg-transparent border-secondary text-white" required autocomplete="current-password" placeholder="••••••••">
+                                    <button class="btn btn-outline-secondary text-white border-secondary bg-transparent" type="button" id="togglePassword" style="border-left: none;">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
                                 </div>
                             </div>
         
@@ -54,4 +57,22 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+
+        togglePassword.addEventListener('click', function (e) {
+            // Toggle the type attribute
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            
+            // Toggle the eye icon
+            const icon = this.querySelector('i');
+            icon.classList.toggle('bi-eye');
+            icon.classList.toggle('bi-eye-slash');
+        });
+    });
+</script>
 @endsection
