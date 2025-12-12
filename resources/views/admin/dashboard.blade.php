@@ -8,7 +8,7 @@
     <!-- Stats Row -->
     <div class="row g-3 mb-4 animate-fade-in">
         <!-- Citas Hoy -->
-        <div class="col-12 col-md-6 col-xl-3">
+        <div class="col-12 col-md-6">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-primary">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -25,7 +25,7 @@
         </div>
 
         <!-- Ingresos -->
-        <div class="col-12 col-md-6 col-xl-3">
+        <div class="col-12 col-md-6">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-success">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -42,7 +42,7 @@
         </div>
 
         <!-- Pendientes -->
-        <div class="col-12 col-md-6 col-xl-3">
+        <div class="col-12 col-md-6">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-warning">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -59,7 +59,7 @@
         </div>
 
         <!-- Barberos Disponibles -->
-        <div class="col-12 col-md-6 col-xl-3">
+        <div class="col-12 col-md-6">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-info">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -77,9 +77,9 @@
     </div>
 
     <!-- Calendar Container -->
-    <div class="card border-0 shadow-sm flex-grow-1 overflow-hidden">
-        <div class="card-body p-0 h-100" style="overflow-x: auto;">
-            <div id="calendar" class="h-100" style="min-width: 600px;"></div> <!-- Ensure min-width so table doesn't crush -->
+    <div class="card border-0 shadow-sm flex-grow-1 overflow-hidden" style="min-height: 500px;">
+        <div class="card-body p-3 h-100">
+            <div id="calendar" class="h-100"></div>
         </div>
     </div>
 </div>
@@ -93,42 +93,28 @@
         
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
+            themeSystem: 'bootstrap5',
             headerToolbar: {
-                left: window.innerWidth < 768 ? 'prev,next' : 'prev,next today',
+                left: 'prev,next today',
                 center: 'title',
-                right: window.innerWidth < 768 ? 'dayGridMonth,timeGridWeek,timeGridDay' : 'dayGridMonth,timeGridWeek,timeGridDay'
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
-            footerToolbar: window.innerWidth < 768 ? { right: 'today' } : false,
-            height: 'auto',
-            aspectRatio: window.innerWidth < 768 ? 0.8 : 1.35,
+            height: '100%', // Use container height
+            contentHeight: 'auto',
+            aspectRatio: 1.8, // Wider look
             handleWindowResize: true,
-            windowResize: function(view) {
-                if (window.innerWidth < 768) {
-                    calendar.changeView('timeGridDay');
-                    calendar.setOption('headerToolbar', {
-                        left: 'prev,next',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                    });
-                    calendar.setOption('footerToolbar', { right: 'today' });
-                    calendar.setOption('aspectRatio', 0.8);
-                } else {
-                    calendar.changeView('dayGridMonth');
-                    calendar.setOption('headerToolbar', {
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                    });
-                    calendar.setOption('footerToolbar', false);
-                    calendar.setOption('aspectRatio', 1.35);
-                }
-            },
             locale: 'es',
             slotMinTime: '08:00:00',
-            slotMaxTime: '18:00:00',
+            slotMaxTime: '20:00:00', // Extended slightly
             expandRows: true, 
             stickyHeaderDates: true,
             allDaySlot: false,
+            dayMaxEvents: true, // Allow "more" link instead of stretching
+            views: {
+                dayGridMonth: {
+                    dayMaxEvents: 3
+                }
+            },
             slotLabelFormat: {
                 hour: 'numeric',
                 minute: '2-digit',
@@ -141,26 +127,7 @@
                 hour12: true
             },
             events: '/api/calendar/events',
-            eventDidMount: function(info) {
-                // Tooltip logic
-                const event = info.event;
-                const props = event.extendedProps;
-                const tooltipContent = `
-                    <div class="text-start">
-                        <strong>${event.title}</strong><br>
-                        <small>${props.service}</small><br>
-                        <small class="text-warning">${props.barber}</small>
-                    </div>
-                `;
-                
-                new bootstrap.Tooltip(info.el, {
-                    title: tooltipContent,
-                    html: true,
-                    placement: 'top',
-                    trigger: 'hover',
-                    container: 'body'
-                });
-            },
+            // eventDidMount REMOVED to disable tooltips
             eventClick: function(info) {
                 const event = info.event;
                 const props = event.extendedProps;
@@ -213,7 +180,12 @@
                 });
             },
             windowResize: function(view) {
-                calendar.updateSize();
+                // Responsive view changes if needed
+                if(window.innerWidth < 768) {
+                    calendar.changeView('timeGridDay');
+                } else {
+                    calendar.changeView('dayGridMonth');
+                }
             }
         });
         calendar.render();
@@ -243,9 +215,7 @@
                 })
                 .then(response => {
                     Swal.fire('¡Listo!', 'La cita ha sido marcada como completada.', 'success');
-                    // Refresh
-                    initCalendar(); // OR location.reload() 
-                    // location.reload() might be safer to ensure fresh state
+                    // Reload
                     setTimeout(() => location.reload(), 1000); 
                 })
                 .catch(error => {
@@ -261,7 +231,6 @@
             title: 'Cancelar Cita',
             input: 'text',
             inputLabel: 'Motivo de cancelación',
-            inputPlaceholder: 'Ej: Cliente no asistió...',
             showCancelButton: true,
             confirmButtonText: 'Sí, Cancelar',
             confirmButtonColor: '#EF4444',
@@ -281,29 +250,68 @@
             }
         });
     };
-
-    // Run immediately
-    initCalendar();
+    
+    // Initial Load
     document.addEventListener('DOMContentLoaded', initCalendar);
 </script>
 <style>
-    /* Force Full Height for Calendar container */
-    #spa-content { height: 100%; display: flex; flex-direction: column; }
-    .fc { height: 100%; }
-    .fc-view-harness { height: 100% !important; }
-    
-    /* Clean Event Styling */
-    .fc-event {
-        cursor: pointer;
-        border: none !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        border-radius: 4px !important;
-        transition: transform 0.1s;
+    /* Custom Calendar Styling for Google Calendar Look */
+    .fc {
+        font-family: 'Outfit', sans-serif;
     }
-    .fc-event:hover {
-        transform: scale(1.02);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.15);
-        z-index: 50;
+    .fc-col-header-cell {
+        background-color: #F8FAFC;
+        padding: 10px 0;
+        border-bottom: 1px solid #E2E8F0;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        color: #64748B;
+    }
+    .fc-daygrid-day-number {
+        color: #334155;
+        font-weight: 500;
+        padding: 8px;
+    }
+    .fc-today-button {
+        background-color: #fff !important;
+        border: 1px solid #E2E8F0 !important;
+        color: #334155 !important;
+        text-transform: capitalize;
+        font-weight: 600;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .fc-today-button:disabled {
+        opacity: 0.6;
+    }
+    .fc-button-primary {
+        background-color: #fff;
+        border: 1px solid #E2E8F0;
+        color: #475569;
+    }
+    .fc-button-primary:hover {
+        background-color: #F1F5F9;
+        border-color: #CBD5E1;
+        color: #1E293B;
+    }
+    .fc-button-active {
+        background-color: #EFF6FF !important;
+        border-color: #BFDBFE !important;
+        color: #2563EB !important;
+    }
+    .fc-toolbar-title {
+        font-size: 1.25rem !important;
+        font-weight: 700;
+        color: #1E293B;
+    }
+    
+    /* Clean Event Chips */
+    .fc-event {
+        border: none !important;
+        border-radius: 4px;
+        padding: 2px 4px;
+        font-size: 0.85rem;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        margin: 1px 0;
     }
 </style>
 @endpush
