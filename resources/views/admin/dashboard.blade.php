@@ -743,36 +743,40 @@
         font-weight: 600 !important;
     }
 
-    /* NOW INDICATOR STYLING (Google Lollipop Style) - ULTIMATE FIX */
+    /* NOW INDICATOR STYLING (Google Lollipop Style) - ROBUST FIX */
     body .fc .fc-now-indicator-line {
-        border-color: #EA4335 !important;
-        border-width: 2px 0 0 0 !important;
-        border-style: solid !important;
+        border: none !important;
+        background-color: #EA4335 !important;
+        height: 2px !important; /* Explicit height */
         opacity: 1 !important;
         position: absolute;
         z-index: 99 !important;
-        overflow: visible !important; /* Critical: Allows the dot to show if it hangs out */
+        overflow: visible !important;
     }
     
     /* The Dot inside the day column */
     body .fc .fc-now-indicator-line::before {
         content: " " !important;
         position: absolute;
-        top: -6px; /* Center centered on the 2px line */
+        top: 50%; /* Center vertically relative to line */
         left: 0; 
         width: 12px;
         height: 12px;
         background-color: #EA4335 !important;
         border-radius: 50%;
         box-shadow: 0 0 4px rgba(234, 67, 53, 0.4);
-        transform: translateX(-50%); /* Center the dot on the start point */
+        transform: translate(-50%, -50%); /* perfectly center on the start tip */
         z-index: 100 !important;
         display: block !important;
     }
     
-    /* Hide the default axis arrow */
-    body .fc .fc-now-indicator-arrow {
+    /* Hide the default axis arrow - Target ALL known variants */
+    body .fc .fc-now-indicator-arrow,
+    body .fc .fc-timegrid-now-indicator-arrow,
+    .fc-now-indicator-arrow {
         display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
     }
     .fc-popover-close {
         opacity: 1 !important;
