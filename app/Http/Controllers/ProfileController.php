@@ -21,6 +21,7 @@ class ProfileController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
+            'avatar' => 'nullable|string',
             'current_password' => 'nullable|required_with:new_password',
             'new_password' => 'nullable|min:8|confirmed',
         ]);
@@ -35,6 +36,9 @@ class ProfileController extends Controller
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
+        if(isset($validated['avatar'])) {
+            $user->avatar = $validated['avatar'];
+        }
         $user->save();
 
         return back()->with('success', 'Perfil actualizado correctamente.');

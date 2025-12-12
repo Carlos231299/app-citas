@@ -14,6 +14,24 @@
 
                     <h5 class="fw-bold text-primary mb-4">Información Personal</h5>
                     
+                    <!-- Avatar Selection -->
+                    <div class="mb-4">
+                        <label class="form-label text-secondary small fw-bold mb-3">SELECCIONAR AVATAR</label>
+                        <input type="hidden" name="avatar" id="avatar_input" value="{{ old('avatar', $user->avatar ?? 'person') }}">
+                        <div class="d-flex flex-wrap gap-3">
+                            @php
+                                $avatars = ['person', 'person-gear', 'person-circle', 'emoji-smile', 'stars', 'heart-fill', 'lightning-fill', 'gem'];
+                            @endphp
+                            @foreach($avatars as $av)
+                                <div class="avatar-option rounded-circle border d-flex align-items-center justify-content-center cursor-pointer shadow-sm position-relative {{ (old('avatar', $user->avatar ?? 'person') == $av) ? 'active-avatar border-primary bg-primary bg-opacity-10 text-primary' : 'bg-white text-secondary' }}" 
+                                     style="width: 50px; height: 50px; transition: all 0.2s;"
+                                     onclick="selectAvatar('{{ $av }}', this)">
+                                    <i class="bi bi-{{ $av }} fs-4"></i>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">NOMBRE COMPLETO</label>
                         <input type="text" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
@@ -44,12 +62,33 @@
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-end mt-4">
+                    <div class="d-flex justify-content-end mt-4 gap-2">
+                        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary px-4 fw-bold">
+                            Cancelar
+                        </a>
                         <button type="submit" class="btn btn-primary px-4 fw-bold shadow-sm">
                             <i class="bi bi-save me-2"></i> Guardar Cambios
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function selectAvatar(avatar, element) {
+        document.getElementById('avatar_input').value = avatar;
+        
+        // Reset classes
+        document.querySelectorAll('.avatar-option').forEach(el => {
+            el.className = 'avatar-option rounded-circle border d-flex align-items-center justify-content-center cursor-pointer shadow-sm position-relative bg-white text-secondary';
+        });
+
+        // Set Active class
+        element.className = 'avatar-option rounded-circle border d-flex align-items-center justify-content-center cursor-pointer shadow-sm position-relative active-avatar border-primary bg-primary bg-opacity-10 text-primary';
+    }
+</script>
             </div>
         </div>
     </div>

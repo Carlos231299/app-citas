@@ -71,13 +71,13 @@
                 <h2 class="h4 mb-0 fw-bold text-dark">@yield('header')</h2>
             </div>
             <div class="dropdown">
-                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-secondary" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span class="me-2 text-end d-none d-sm-block">
-                        <small class="d-block text-secondary">Hola,</small>
-                        <span class="fw-bold text-primary">{{ auth()->user()->name }}</span>
-                    </span>
-                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary fw-bold border border-primary-subtle" style="width: 40px; height: 40px;">
-                        {{ substr(auth()->user()->name, 0, 1) }}
+                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle no-caret" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary fw-bold border border-primary-subtle transition-all hover-scale" style="width: 45px; height: 45px;">
+                        @if(auth()->user()->avatar)
+                            <i class="bi bi-{{ auth()->user()->avatar }} fs-5"></i>
+                        @else
+                            {{ substr(auth()->user()->name, 0, 1) }}
+                        @endif
                     </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg text-small" aria-labelledby="dropdownUser1">
