@@ -277,23 +277,17 @@
                 }
 
                 // Action Buttons (Top Right)
-                let headerActions = `
-                    <div class="d-flex gap-2" style="position: absolute; top: 12px; right: 12px; z-index: 10;">
-                        <button class="btn btn-light btn-sm rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: rgba(255,255,255,0.9); border: none;" onclick="Swal.close()">
-                             <i class="bi bi-x-lg" style="font-size: 1rem; color: #444;"></i>
-                        </button>
-                    </div>
-                `;
+                let headerActions = ''; // No custom close button
                 
                 // Add Edit/Delete for Appointments
                 if (props.type === 'appointment' && props.status === 'scheduled') {
                     headerActions = `
                         <div class="d-flex gap-2" style="position: absolute; top: 12px; right: 12px; z-index: 10;">
-                             <button class="btn btn-light btn-sm rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: rgba(255,255,255,0.9); border: none;" onclick="cancelAppointment(${event.id})" title="Cancelar">
-                                <i class="bi bi-trash" style="font-size: 1rem; color: #dc3545;"></i>
+                            <button onclick="cancelAppointment(${event.id})" class="btn btn-light rounded-circle p-0" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); border: none; color: white;" title="Cancelar">
+                                <i class="bi bi-trash-fill" style="font-size: 0.9rem;"></i>
                             </button>
-                            <button class="btn btn-light btn-sm rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: rgba(255,255,255,0.9); border: none;" onclick="Swal.close()">
-                                 <i class="bi bi-x-lg" style="font-size: 1rem; color: #444;"></i>
+                            <button onclick="editAppointment(${event.id})" class="btn btn-light rounded-circle p-0" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); border: none; color: white;" title="Editar">
+                                <i class="bi bi-pencil-fill" style="font-size: 0.9rem;"></i>
                             </button>
                         </div>
                     `;
@@ -382,24 +376,18 @@
                                 </div>
 
                                 ${footerActions}
-
-                                <!-- Fallback Close Button for Mobile -->
-                                <div class="mt-3 text-center d-md-none">
-                                    <button onclick="Swal.close()" class="btn btn-outline-secondary rounded-pill w-100 py-2">
-                                        Cerrar
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     `,
                     showConfirmButton: false,
-                    showCloseButton: false,
+                    showCloseButton: true, // Use Native Button
                     width: window.innerWidth < 768 ? '95%' : '400px',
                     padding: 0,
                     allowOutsideClick: true,
                     background: 'transparent',
                     customClass: {
-                        popup: 'google-modal-popup'
+                        popup: 'google-modal-popup',
+                        closeButton: 'google-native-close' /* Custom Class for styling */
                     },
                     backdrop: `rgba(0,0,0,0.4)`
                 });
@@ -626,11 +614,22 @@
         border-color: inherit; /* Ensure it takes the event color */
     }
 
-    /* Google Modal Close Button High Z-Index */
-    .google-modal-close {
-        z-index: 9999 !important;
-        width: 40px !important;
-        height: 40px !important;
+    /* Custom Native Close Button Styling */
+    .google-native-close {
+        color: white !important;
+        position: absolute !important;
+        top: 15px !important;
+        right: 15px !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        font-size: 2rem !important;
+        font-weight: 300 !important;
+        z-index: 99999 !important;
+        outline: none !important;
+    }
+    .google-native-close:hover {
+        color: rgba(255,255,255,0.8) !important;
+        background: transparent !important;
     }
 
     /* TYPE 3: List View (Agenda) - Fix Blank Issue */
