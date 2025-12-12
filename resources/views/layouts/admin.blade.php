@@ -92,6 +92,11 @@
                     </li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person-gear me-2 text-primary"></i> Mi Perfil</a></li>
+                    
+                    @if(auth()->user()->role === 'admin')
+                    <li><a class="dropdown-item" href="{{ route('users.index') }}"><i class="bi bi-people-fill me-2 text-primary"></i> Gestionar Usuarios</a></li>
+                    @endif
+
                     <li><h6 class="dropdown-header text-uppercase small fw-bold mt-2">Sistema</h6></li>
                     <li><a class="dropdown-item" href="#" onclick="confirmLogout()"><i class="bi bi-box-arrow-right me-2 text-danger"></i> Cerrar Sesión</a></li>
                 </ul>
