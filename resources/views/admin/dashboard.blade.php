@@ -346,6 +346,19 @@
                             ${props.service ? `<p class="mb-2"><strong><i class="bi bi-scissors me-2"></i>Servicio:</strong> ${props.service} ($${props.price})</p>` : ''}
                             <p class="mb-2"><strong><i class="bi bi-info-circle me-2"></i>Estado:</strong> ${statusBadge}</p>
                             ${props.custom_details ? `<p class="mb-0 text-muted small mt-3"><em>${props.custom_details}</em></p>` : ''}
+
+                            ${props.status === 'cancelled' ? 
+                                `<div class="mt-3 p-2 bg-danger bg-opacity-10 rounded border border-danger">
+                                    <strong class="text-danger d-block">Motivo de Cancelación:</strong> 
+                                    <span class="text-dark small">${props.cancellation_reason || 'No especificado'}</span>
+                                </div>` : ''
+                            }
+
+                            ${props.status === 'completed' ? 
+                                `<div class="mt-3 p-2 bg-success bg-opacity-10 rounded border border-success">
+                                    <strong class="text-success"><i class="bi bi-check-circle-fill me-1"></i> Completada con éxito</strong>
+                                </div>` : ''
+                            }
                         </div>
                         ${actionButtons}
                     `,
