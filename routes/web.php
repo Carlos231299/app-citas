@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [AppointmentController::class, 'index'])->name('dashboard');
     Route::get('/calendar', [AppointmentController::class, 'calendar'])->name('calendar');
+    Route::put('/appointments/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
     Route::resource('services', ServiceController::class);
     Route::resource('barbers', BarberController::class);
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');

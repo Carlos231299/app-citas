@@ -416,6 +416,24 @@
         }
     }
 
+    // Inject Server Data for JS
+    const serverData = {
+        services: @json($services),
+        barbers: @json($barbers)
+    };
+
+    // Filter Toggle Logic
+    window.toggleFilter = function(filterType) {
+        if (filterType === 'rejected') {
+             calendarState.showRejected = !calendarState.showRejected;
+             document.getElementById('toggleRejected').classList.toggle('active', calendarState.showRejected);
+        } else if (filterType === 'completed') {
+             calendarState.showCompleted = !calendarState.showCompleted;
+             document.getElementById('toggleCompleted').classList.toggle('active', calendarState.showCompleted);
+        }
+        calendarInstance.refetchEvents(); // Re-apply eventClassNames logic
+    };
+
     // Toggle Logic
     function toggleOption(e, type) {
         e.preventDefault();
@@ -435,6 +453,72 @@
         updateCheckboxes();
     }
 
+    // Edit Appointment Logic
+    window.editAppointment = function(id) {
+        // Close the detail modal first
+        Swal.close();
+
+        const event = calendarInstance.getEventById(id);
+        if (!event) return;
+
+        const props = event.extendedProps;
+        const currentServiceId = props.service_id;
+        const currentBarberId = props.barber_id;
+        
+        // Build Options
+        const serviceOptions = serverData.services.map(s => 
+            `<option value="${s.id}" ${s.id == currentServiceId ? 'selected' : ''}>${s.name} ($${s.price})</option>`
+        ).join('');
+
+        const barberOptions = serverData.barbers.map(b => 
+            `<option value="${b.id}" ${b.id == currentBarberId ? 'selected' : ''}>${b.name}</option>`
+        ).join('');
+
+        Swal.fire({
+            title: 'Editar Cita',
+            html: `
+                <div class="text-start">
+                    <label class="form-label">Fecha</label>
+                    <input type="date" id="edit-date" class="form-control mb-3" value="${event.start.toISOString().split('T')[0]}">
+                    
+                    <label class="form-label">Hora</label>
+                    <input type="time" id="edit-time" class="form-control mb-3" value="${event.start.toTimeString().substr(0,5)}">
+                    
+                    <label class="form-label">Servicio</label>
+                    <select id="edit-service" class="form-select mb-3">
+                        ${serviceOptions}
+                    </select>
+                    
+                    <label class="form-label">Barbero</label>
+                    <select id="edit-barber" class="form-select mb-3">
+                        ${barberOptions}
+                    </select>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Guardar Cambios',
+            cancelButtonText: 'Cancelar',
+            preConfirm: () => {
+                return {
+                    date: document.getElementById('edit-date').value,
+                    time: document.getElementById('edit-time').value,
+                    service_id: document.getElementById('edit-service').value,
+                    barber_id: document.getElementById('edit-barber').value
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.put(`/appointments/${id}`, result.value)
+                    .then(response => {
+                        Swal.fire('Actualizado', 'La cita se ha modificado correctamente', 'success');
+                        calendarInstance.refetchEvents();
+                    })
+                    .catch(error => {
+                        Swal.fire('Error', 'No se pudo actualizar la cita', 'error');
+                    });
+            }
+        });
+    };
     function updateCheckboxes() {
         const checkMap = {
             'weekends': calendarState.weekends,

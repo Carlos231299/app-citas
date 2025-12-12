@@ -168,10 +168,34 @@ class AppointmentController extends Controller
             'active_barbers' => Barber::where('is_active', true)->count()
         ];
 
+        $services = Service::all();
+        $barbers = Barber::where('is_active', true)->get();
+
         // Get appointments for Calendar (handled by API usually, but if initial render needs them?)
         // Actually, calendar fetches via API. We just need the view.
         
-        return view('admin.dashboard', compact('stats'));
+        return view('admin.dashboard', compact('stats', 'services', 'barbers'));
+    }
+
+    // Admin: Update Appointment
+    public function update(Request $request, Appointment $appointment)
+    {
+        $validated = $request->validate([
+            'date' => 'required|date',
+            'time' => 'required',
+            'barber_id' => 'required|exists:barbers,id',
+            'service_id' => 'required|exists:services,id'
+        ]);
+
+        $scheduledAt = Carbon::parse($validated['date'] . ' ' . $validated['time']);
+
+        $appointment->update([
+            'scheduled_at' => $scheduledAt,
+            'barber_id' => $validated['barber_id'],
+            'service_id' => $validated['service_id']
+        ]);
+
+        return response()->json(['message' => 'Cita actualizada correctamente']);
     }
 
     // Admin: Mark Complete with Price
@@ -233,6 +257,9 @@ class AppointmentController extends Controller
                     'extendedProps' => [
                         'type' => 'appointment',
                         'barber' => $appointment->barber->name,
+                         // Passing IDs for Edit Mode
+                        'barber_id' => $appointment->barber->id,
+                        'service_id' => $appointment->service->id,
                         'service' => $appointment->service->name,
                         'status' => $appointment->status,
                         'client_phone' => $appointment->client_phone,
