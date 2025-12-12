@@ -169,7 +169,7 @@
             selectable: true,
             selectMirror: true,
             dayMaxEvents: false,
-            nowIndicator: true, 
+            nowIndicator: false, // Disabled by user request
             
             // Interaction: Month -> Day
             navLinks: true, 
