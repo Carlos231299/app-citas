@@ -174,11 +174,20 @@ class AuthController extends Controller
 
                 $user->save();
                 event(new \Illuminate\Auth\Events\PasswordReset($user));
+                
+                // Send Confirmation Email
+                try {
+                    Mail::send('emails.password-changed', ['user' => $user], function ($m) use ($user) {
+                        $m->to($user->email)->subject('Contraseña Actualizada - Barbería JR');
+                    });
+                } catch (\Exception $e) {
+                    // Log error but don't fail the request
+                }
             }
         );
 
         if ($status === Password::PASSWORD_RESET) {
-            return redirect()->route('login')->with('status', '¡Tu contraseña ha sido restablecida!');
+            return redirect()->route('login')->with('success', '¡Tu contraseña ha sido restablecida! Te hemos enviado un correo de confirmación.');
         }
 
         return back()->withErrors(['email' => 'El token de reestablecimiento es inválido o el correo no coincide.']);
