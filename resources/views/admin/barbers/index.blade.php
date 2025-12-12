@@ -124,7 +124,7 @@
                     </div>
                 </div>
                 <div class="modal-footer border-top-0">
-                    <button type="submit" class="btn btn-gold px-4 fw-bold">Actualizar</button>
+                    <button type="submit" id="btnUpdateBarber" class="btn btn-gold px-4 fw-bold" disabled>Actualizar</button>
                 </div>
             </form>
         </div>
@@ -136,14 +136,45 @@
     let editModal;
     document.addEventListener('DOMContentLoaded', () => {
         editModal = new bootstrap.Modal(document.getElementById('editBarberModal'));
+        
+        // Dirty Check Logic
+        const nameInput = document.getElementById('edit_name');
+        const whatsappInput = document.getElementById('edit_whatsapp');
+        const btnUpdate = document.getElementById('btnUpdateBarber');
+        let initialName = '';
+        let initialWhatsapp = '';
+
+        function checkChanges() {
+            const currentName = nameInput.value.trim();
+            const currentWhatsapp = whatsappInput.value.trim();
+            
+            // Loose comparison to handle potential null vs empty string differences
+            const hasChanges = (currentName !== initialName) || (currentWhatsapp !== initialWhatsapp);
+            
+            btnUpdate.disabled = !hasChanges;
+        }
+
+        nameInput.addEventListener('input', checkChanges);
+        whatsappInput.addEventListener('input', checkChanges);
+        
+        // Hook into the open function to set initial state
+        window.editBarber = function(id, name, whatsapp) {
+            document.getElementById('editForm').action = `/barbers/${id}`;
+            
+            nameInput.value = name;
+            whatsappInput.value = whatsapp || '';
+            
+            initialName = name; // Store raw value
+            initialWhatsapp = whatsapp || ''; // Store normalized empty
+            
+            // Reset button state
+            btnUpdate.disabled = true;
+            
+            editModal.show();
+        };
     });
 
-    function editBarber(id, name, whatsapp) {
-        document.getElementById('editForm').action = `/barbers/${id}`;
-        document.getElementById('edit_name').value = name;
-        document.getElementById('edit_whatsapp').value = whatsapp || '';
-        editModal.show();
-    }
+    // Confirmation Logic
 
     // Confirmation Logic
     function confirmDelete(e) {
