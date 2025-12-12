@@ -33,14 +33,14 @@
                 <h1>¡Contraseña Actualizada!</h1>
                 <p>Te confirmamos que tu contraseña ha sido cambiada exitosamente.</p>
                 
-                <div class="alert-success">
-                    <p class="alert-text">✅ Todo está seguro</p>
-                    <p class="alert-text" style="font-weight: 400; margin-top: 5px;">Si realizaste este cambio, puedes ignorar este mensaje.</p>
+                <p style="color: #ef4444; font-weight: bold; margin-bottom: 20px;">
+                    Si no fuiste tú quien o el Administrador realizó este cambio, por favor restablezca su contraseña de inmediato.
+                </p>
+
+                <div style="margin-top: 30px;">
+                    <a href="{{ route('login') }}" class="btn" style="margin-right: 10px;">Iniciar Sesión</a>
+                    <a href="{{ route('password.request') }}" class="btn" style="background-color: #ef4444;">Restablecer Contraseña</a>
                 </div>
-
-                <p>Si no fuiste tú quien realizó este cambio, por favor contacta a soporte inmediatamente.</p>
-
-                <a href="{{ route('login') }}" class="btn">Ir al Login</a>
             </div>
 
             <!-- Footer -->
