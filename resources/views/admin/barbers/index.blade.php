@@ -74,8 +74,26 @@
 <!-- Create Modal -->
 <div class="modal fade" id="createBarberModal" tabindex="-1">
     <div class="modal-dialog">
-                <div class="modal-footer border-secondary">
-                    <button type="submit" class="btn btn-gold">Guardar</button>
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold">Nuevo Barbero</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('barbers.store') }}" method="POST" autocomplete="off">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">NOMBRE COMPLETO</label>
+                        <input type="text" name="name" class="form-control" required placeholder="Ej: Juan Pérez" autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">WHATSAPP</label>
+                        <input type="text" name="whatsapp_number" class="form-control" placeholder="Ej: 57300..." autocomplete="off">
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-gold px-4 fw-bold">Guardar</button>
                 </div>
             </form>
         </div>
