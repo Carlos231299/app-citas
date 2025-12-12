@@ -376,8 +376,6 @@
                                 </div>
 
                                 ${footerActions}
-                            </div>
-                                ${footerActions}
 
                                 <!-- Failsafe Close Button (Mobile) -->
                                 <div class="mt-3 text-center d-md-none">
@@ -408,7 +406,6 @@
                             btn.addEventListener('click', () => Swal.close());
                         }
                     }
-                });
                 });
             }
         });
