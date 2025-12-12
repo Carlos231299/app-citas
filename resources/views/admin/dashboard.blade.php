@@ -96,7 +96,7 @@
             headerToolbar: {
                 left: window.innerWidth < 768 ? 'prev,next' : 'prev,next today',
                 center: 'title',
-                right: window.innerWidth < 768 ? 'dayGridMonth,timeGridDay' : 'dayGridMonth,timeGridWeek,timeGridDay'
+                right: window.innerWidth < 768 ? 'dayGridMonth,timeGridWeek,timeGridDay' : 'dayGridMonth,timeGridWeek,timeGridDay'
             },
             footerToolbar: window.innerWidth < 768 ? { right: 'today' } : false,
             height: 'auto',
@@ -108,7 +108,7 @@
                     calendar.setOption('headerToolbar', {
                         left: 'prev,next',
                         center: 'title',
-                        right: 'dayGridMonth,timeGridDay'
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
                     });
                     calendar.setOption('footerToolbar', { right: 'today' });
                     calendar.setOption('aspectRatio', 0.8);
