@@ -169,7 +169,7 @@
             selectable: true,
             selectMirror: true,
             dayMaxEvents: false,
-            nowIndicator: false, // Disabled by user request
+            nowIndicator: true, // Enabled Google-style check
             
             // Interaction: Month -> Day
             navLinks: true, 
@@ -1120,5 +1120,50 @@
             to { transform: translateY(0); }
         }
     }
+    /* =========================================
+       GOOGLE CALENDAR STYLE "NOW INDICATOR" 
+       ========================================= */
+       
+    /* 1. Línea roja del día actual estilo Google */
+    .fc .fc-timegrid-now-indicator-line {
+        border-top: 2px solid #ea4335 !important; /* Rojo Google */
+        z-index: 100;
+    }
+
+    /* 2. Bolita roja al inicio de la línea */
+    .fc .fc-timegrid-now-indicator-arrow {
+        width: 12px !important;
+        height: 12px !important;
+        background: #ea4335 !important;
+        border-radius: 50%;
+        border: none !important;
+        margin-left: -6px !important; /* Centrada */
+        margin-top: -6px !important; 
+        z-index: 100;
+    }
+
+    /* 3. Círculo rojo en el día actual en vista MENSUAL */
+    .fc-daygrid-day.fc-day-today {
+        position: relative;
+    }
+    
+    .fc-daygrid-day.fc-day-today .fc-daygrid-day-top {
+        position: relative;
+        z-index: 2; /* Ensure date number is above circle if needed? No, usually separate */
+    }
+
+    .fc-daygrid-day.fc-day-today::after {
+        content: '';
+        position: absolute;
+        bottom: 4px;
+        left: 4px; /* Pegada al inicio, pero abajo? User said "Solo se ve la bolita" similar to Google */
+        /* Google Calendar Month View Today: Actually highlights the Number Circle. 
+           User's CSS snippet puts a dot at bottom left. I'll stick to their snippet. */
+        width: 10px;
+        height: 10px;
+        background: #ea4335;
+        border-radius: 50%;
+        pointer-events: none;
+    }    
 </style>
 @endpush
