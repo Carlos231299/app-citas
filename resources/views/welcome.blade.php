@@ -110,6 +110,7 @@
                             <!-- Date -->
                             <div class="col-md-6">
                                 <label class="form-label text-dark fw-bold small">FECHA</label>
+                                @php
                                     $minDate = now()->format('H') >= 18 ? now()->addDay()->format('Y-m-d') : now()->format('Y-m-d');
                                 @endphp
                                 <div onclick="checkBarberSelected()">
