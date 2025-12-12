@@ -20,13 +20,13 @@
                         <input type="hidden" name="avatar" id="avatar_input" value="{{ old('avatar', $user->avatar ?? 'person') }}">
                         <div class="d-flex flex-wrap gap-3">
                             @php
-                                $avatars = ['person', 'person-gear', 'person-circle', 'emoji-smile', 'stars', 'heart-fill', 'lightning-fill', 'gem'];
+                                $avatars = ['👨‍💼', '👩‍💼', '🧔', '👱‍♀️', '👨‍🦱', '👩‍🦱', '🦁', '🦊'];
                             @endphp
                             @foreach($avatars as $av)
-                                <div class="avatar-option rounded-circle border d-flex align-items-center justify-content-center cursor-pointer shadow-sm position-relative {{ (old('avatar', $user->avatar ?? 'person') == $av) ? 'active-avatar border-primary bg-primary bg-opacity-10 text-primary' : 'bg-white text-secondary' }}" 
-                                     style="width: 50px; height: 50px; transition: all 0.2s;"
+                                <div class="avatar-option rounded-circle border d-flex align-items-center justify-content-center cursor-pointer shadow-sm position-relative {{ (old('avatar', $user->avatar ?? '👨‍💼') == $av) ? 'active-avatar border-primary bg-primary bg-opacity-10' : 'bg-white' }}" 
+                                     style="width: 50px; height: 50px; transition: all 0.2s; font-size: 1.5rem;"
                                      onclick="selectAvatar('{{ $av }}', this)">
-                                    <i class="bi bi-{{ $av }} fs-4"></i>
+                                    {{ $av }}
                                 </div>
                             @endforeach
                         </div>
@@ -82,11 +82,11 @@
         
         // Reset classes
         document.querySelectorAll('.avatar-option').forEach(el => {
-            el.className = 'avatar-option rounded-circle border d-flex align-items-center justify-content-center cursor-pointer shadow-sm position-relative bg-white text-secondary';
+            el.className = 'avatar-option rounded-circle border d-flex align-items-center justify-content-center cursor-pointer shadow-sm position-relative bg-white';
         });
 
         // Set Active class
-        element.className = 'avatar-option rounded-circle border d-flex align-items-center justify-content-center cursor-pointer shadow-sm position-relative active-avatar border-primary bg-primary bg-opacity-10 text-primary';
+        element.className = 'avatar-option rounded-circle border d-flex align-items-center justify-content-center cursor-pointer shadow-sm position-relative active-avatar border-primary bg-primary bg-opacity-10';
     }
 </script>
             </div>

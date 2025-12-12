@@ -72,9 +72,9 @@
             </div>
             <div class="dropdown">
                 <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle no-caret" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary fw-bold border border-primary-subtle transition-all hover-scale" style="width: 45px; height: 45px;">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary fw-bold border border-primary-subtle transition-all hover-scale" style="width: 45px; height: 45px; font-size: 1.5rem;">
                         @if(auth()->user()->avatar)
-                            <i class="bi bi-{{ auth()->user()->avatar }} fs-5"></i>
+                            {{ auth()->user()->avatar }}
                         @else
                             {{ substr(auth()->user()->name, 0, 1) }}
                         @endif
