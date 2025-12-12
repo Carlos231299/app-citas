@@ -433,8 +433,12 @@
             `<option value="${b.id}" ${b.id == currentBarberId ? 'selected' : ''}>${b.name}</option>`
         ).join('');
 
-        // Min Date (Today)
-        const minDate = new Date().toISOString().split('T')[0];
+        // Min Date (Today - Local Time)
+        const todayObj = new Date();
+        const year = todayObj.getFullYear();
+        const month = String(todayObj.getMonth() + 1).padStart(2, '0');
+        const day = String(todayObj.getDate()).padStart(2, '0');
+        const minDate = `${year}-${month}-${day}`;
 
         Swal.fire({
             title: 'Editar Cita',
@@ -517,16 +521,15 @@
                             slotsContainer.innerHTML = '';
 
                             // Inject Original Time if matching context
-                            // If user is editing the SAME day and barber, their current time is "occupied" by them.
-                            // We must allow them to keep it.
                             const isSameContext = (barberId == currentBarberId && date == originalDate);
                             
                             if(isSameContext && !validSlots.includes(originalTime)) {
-                                // Add it to the list (maybe sorted, but appending is fine for transparency)
                                 validSlots.push(originalTime);
                                 validSlots.sort((a,b) => {
-                                    // simple sort by AM/PM text is tricky, detailed sort skipped for brevity, just append
-                                    // Actually, let's just make sure it's there.
+                                    // Basic AM/PM sort
+                                    const dateA = new Date('1970/01/01 ' + a);
+                                    const dateB = new Date('1970/01/01 ' + b);
+                                    return dateA - dateB; 
                                 });
                             }
 
@@ -570,6 +573,16 @@
                 const custom_details = document.getElementById('edit-custom-details').value;
 
                 // Validation
+                // 1. Check Date (No past dates)
+                const selectedDate = new Date(date + 'T00:00:00'); // Force local midnight
+                const today = new Date();
+                today.setHours(0,0,0,0);
+                
+                if (selectedDate < today) {
+                    Swal.showValidationMessage('No puedes seleccionar una fecha pasada.');
+                    return false;
+                }
+
                 if(!time) {
                     Swal.showValidationMessage('Debes seleccionar un horario válido.');
                     return false;
