@@ -173,7 +173,16 @@ body {
     background-color: var(--gold-primary);
 }
 
-/* Mobile Responsiveness */
+/* Default Sidebar Toggles (Desktop View) */
+#mobileSidebarToggle {
+    display: none;
+}
+
+#sidebarToggle {
+    display: flex;
+    /* Or whatever layout is needed, usually flex for centering icons */
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
 
@@ -183,49 +192,51 @@ body {
         top: 0;
         bottom: 0;
         left: 0;
-        width: 260px;
+        width: 260px !important;
+        /* Force width */
+        height: 100vh;
         z-index: 1050;
         background-color: #ffffff;
-        /* Solid background */
         box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
-
-        /* Animation Logic */
         transition: transform 0.3s ease;
-        /* Smooth transition */
         transform: translateX(-100%);
-        /* Hidden by default */
     }
 
     /* Open State */
     .sidebar.open {
         transform: translateX(0);
-        /* Slide In */
     }
 
-    /* Ensure desktop 'collapsed' class doesn't interfere visibly if present */
-    .sidebar.collapsed {
-        width: 260px;
-        transform: translateX(-100%);
-    }
-
-    /* Content Visibility */
-    .sidebar * {
-        display: block !important;
-    }
-
-    .sidebar .sidebar-text {
+    /* Prevent text hiding from collapsed class if present */
+    .sidebar.collapsed .sidebar-text,
+    .sidebar.collapsed .sidebar-header-text,
+    .sidebar.collapsed small {
         display: inline !important;
+        /* Ensure content is visible if class persists */
     }
 
-    /* 2. Main Content (Full Width) */
+    .sidebar.collapsed {
+        transform: translateX(-100%);
+        /* Maintain hidden state if collapsed class exists */
+        width: 260px !important;
+    }
+
+    .sidebar.collapsed.open {
+        transform: translateX(0);
+    }
+
+    /* 2. Main Content */
     .main-content {
         width: 100%;
         margin-left: 0 !important;
         padding: 1rem;
-        overflow-y: auto;
     }
 
-    /* 3. Overlay (Backdrop) */
+    /* 3. Overlay (Backdrop) when sidebar is open */
+    .sidebar.open+.main-content {
+        position: relative;
+    }
+
     .sidebar.open+.main-content::before {
         content: '';
         position: fixed;
@@ -238,15 +249,14 @@ body {
         backdrop-filter: blur(2px);
     }
 
-    /* 4. Button Visibility Overrides */
+    /* 4. Button Visibility Management */
+    /* Force show mobile toggle */
     #mobileSidebarToggle {
         display: flex !important;
     }
 
+    /* Force hide desktop toggle */
     #sidebarToggle {
         display: none !important;
-        /* Hide internal toggle on mobile */
     }
 }
-
-```
