@@ -35,7 +35,7 @@ Write-Host "Conectando al servidor para desplegar..." -ForegroundColor Cyan
 $sshKey = "C:\Users\Carlos\.ssh\pruebas.pem"
 $sshTarget = "ubuntu@ec2-54-193-203-69.us-west-1.compute.amazonaws.com"
 # Using single quotes for the command to prevent PS from interpreting special chars inside
-$remoteCmd = 'cd /var/www/html/app-citas && sudo git pull && sudo sed -i "s/MAIL_USERNAME=.*/MAIL_USERNAME=soporte.agendacitas@gmail.com/" .env && sudo sed -i "s/MAIL_PASSWORD=.*/MAIL_PASSWORD=''ialt zqdb ontn rybu''/" .env && sudo php artisan migrate --force && sudo php artisan optimize:clear && sudo systemctl restart nginx php8.2-fpm'
+$remoteCmd = 'cd /var/www/html/app-citas && sudo git pull && sudo php artisan migrate --force && sudo php artisan optimize:clear && sudo systemctl restart nginx php8.2-fpm'
 
 # Execute SSH
 ssh -i "$sshKey" -o StrictHostKeyChecking=no $sshTarget $remoteCmd
