@@ -65,7 +65,7 @@
         <!-- Topbar -->
         <header class="mb-4 d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-white border shadow-sm text-primary rounded-circle" id="mobileSidebarToggle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                <button class="btn btn-white border shadow-sm text-primary rounded-circle" id="mobileSidebarToggle" style="width: 40px; height: 40px; align-items: center; justify-content: center;">
                     <i class="bi bi-list fs-5"></i>
                 </button>
                 <h2 class="h4 mb-0 fw-bold text-dark">@yield('header')</h2>

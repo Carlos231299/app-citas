@@ -67,7 +67,7 @@
                             <i class="bi bi-people-fill text-info fs-4"></i>
                         </div>
                         <div class="text-center text-md-start">
-                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold">Disponibles</h6>
+                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold">Barberos Disponibles</h6>
                             <h3 class="mb-0 fw-bold text-dark">{{ $stats['active_barbers'] }}</h3>
                         </div>
                     </div>
@@ -258,58 +258,101 @@
         font-family: 'Outfit', sans-serif;
     }
     .fc-col-header-cell {
-        background-color: #F8FAFC;
-        padding: 10px 0;
-        border-bottom: 1px solid #E2E8F0;
+        background-color: transparent !important;
+        padding: 8px 0;
+        border: none !important;
+        border-bottom: 1px solid #E2E8F0 !important;
         text-transform: uppercase;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
+        font-weight: 600;
         color: #64748B;
     }
-    .fc-daygrid-day-number {
-        color: #334155;
-        font-weight: 500;
-        padding: 8px;
+    
+    /* Toolbar & Buttons */
+    .fc-toolbar-title {
+        font-size: 1.5rem !important;
+        font-weight: 400 !important;
+        color: #1E293B;
     }
-    .fc-today-button {
+    .fc-header-toolbar {
+        margin-bottom: 1.5rem !important;
+    }
+    
+    /* Buttons (Google Style) */
+    .fc-button {
         background-color: #fff !important;
         border: 1px solid #E2E8F0 !important;
         color: #334155 !important;
         text-transform: capitalize;
-        font-weight: 600;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        font-weight: 500 !important;
+        box-shadow: none !important;
+        padding: 6px 16px !important;
+        border-radius: 6px !important;
+        transition: all 0.2s;
     }
-    .fc-today-button:disabled {
-        opacity: 0.6;
+    .fc-button-group > .fc-button {
+        border-radius: 0 !important;
+        margin: 0 !important;
     }
-    .fc-button-primary {
-        background-color: #fff;
-        border: 1px solid #E2E8F0;
-        color: #475569;
+    .fc-button-group > .fc-button:first-child {
+        border-top-left-radius: 6px !important;
+        border-bottom-left-radius: 6px !important;
     }
-    .fc-button-primary:hover {
-        background-color: #F1F5F9;
-        border-color: #CBD5E1;
-        color: #1E293B;
+    .fc-button-group > .fc-button:last-child {
+        border-top-right-radius: 6px !important;
+        border-bottom-right-radius: 6px !important;
+    }
+    .fc-button:hover {
+        background-color: #F8FAFC !important;
+        color: #0F172A !important;
     }
     .fc-button-active {
         background-color: #EFF6FF !important;
         border-color: #BFDBFE !important;
         color: #2563EB !important;
+        font-weight: 600 !important;
     }
-    .fc-toolbar-title {
-        font-size: 1.25rem !important;
-        font-weight: 700;
-        color: #1E293B;
+    .fc-today-button {
+        margin-right: 12px !important;
+        border-radius: 6px !important;
+    }
+
+    /* Grid & Cells */
+    .fc-scrollgrid {
+        border: none !important;
+    }
+    .fc-daygrid-day-top {
+        flex-direction: row;
+        padding: 8px;
+    }
+    .fc-daygrid-day-number {
+        font-size: 0.9rem;
+        color: #334155;
+        font-weight: 500;
+        width: 28px; 
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    .fc-day-today .fc-daygrid-day-number {
+        background-color: #2563EB;
+        color: #fff;
+    }
+    .fc-day-today {
+        background-color: transparent !important; /* Remove yellow tint */
     }
     
     /* Clean Event Chips */
     .fc-event {
         border: none !important;
         border-radius: 4px;
-        padding: 2px 4px;
+        padding: 2px 6px;
         font-size: 0.85rem;
         box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        margin: 1px 0;
+        margin: 2px 0;
+        font-weight: 500;
     }
 </style>
 @endpush
