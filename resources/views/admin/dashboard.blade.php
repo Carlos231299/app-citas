@@ -377,18 +377,30 @@
 
                                 ${footerActions}
                             </div>
+                                ${footerActions}
+
+                                <!-- Failsafe Close Button (Mobile) -->
+                                <div class="mt-3 text-center d-md-none">
+                                    <button type="button" onclick="Swal.close()" class="btn btn-secondary w-100 py-2 rounded-pill">
+                                        Cerrar
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     `,
                     showConfirmButton: false,
-                    showCloseButton: false, // Removed X as requested
+                    showCloseButton: true, // Restore Native X
                     width: window.innerWidth < 768 ? '95%' : '400px',
                     padding: 0,
-                    allowOutsideClick: true, // Close on outside click
+                    allowOutsideClick: true,
+                    allowEscapeKey: true,
+                    returnFocus: false, // Prevents scroll jumping/locking
                     background: 'transparent',
                     customClass: {
-                        popup: 'google-modal-popup'
+                        popup: 'google-modal-popup',
+                        closeButton: 'google-native-close'
                     },
-                    backdrop: `rgba(0,0,0,0.6)` // Darker backdrop to encourage clicking
+                    backdrop: true
                 });
             }
         });
@@ -695,6 +707,24 @@
         margin-right: 6px;
         box-shadow: 0 0 0 1px rgba(255,255,255,0.5); /* Definition ring */
         border-color: inherit; /* Ensure it takes the event color */
+    }
+
+    /* Custom Native Close Button Styling */
+    .google-native-close {
+        color: white !important;
+        position: absolute !important;
+        top: 15px !important;
+        right: 15px !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        font-size: 2rem !important;
+        font-weight: 300 !important;
+        z-index: 99999 !important;
+        outline: none !important;
+    }
+    .google-native-close:hover {
+        color: rgba(255,255,255,0.8) !important;
+        background: transparent !important;
     }
 
 
