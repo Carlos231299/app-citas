@@ -404,9 +404,8 @@
         updateCheckboxes();
     }
 
-    // Edit Appointment Logic
+    // Edit Appointment Logic (Enhanced)
     window.editAppointment = function(id) {
-        // Close the detail modal first
         Swal.close();
 
         const event = calendarInstance.getEventById(id);
@@ -415,50 +414,183 @@
         const props = event.extendedProps;
         const currentServiceId = props.service_id;
         const currentBarberId = props.barber_id;
-        
+        const originalDate = event.start.toISOString().split('T')[0];
+        // Format time to 12h format "04:30 PM" to match API/Blade Logic
+        let hours = event.start.getHours();
+        let minutes = event.start.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; 
+        minutes = minutes < 10 ? '0'+minutes : minutes;
+        const originalTime = `${hours}:${minutes} ${ampm}`;
+
         // Build Options
         const serviceOptions = serverData.services.map(s => 
-            `<option value="${s.id}" ${s.id == currentServiceId ? 'selected' : ''}>${s.name} ($${s.price})</option>`
+            `<option value="${s.id}" data-custom="${s.is_custom || ['otro', 'otro servicio'].includes(s.name.toLowerCase())}" ${s.id == currentServiceId ? 'selected' : ''}>${s.name} ($${s.price})</option>`
         ).join('');
 
         const barberOptions = serverData.barbers.map(b => 
             `<option value="${b.id}" ${b.id == currentBarberId ? 'selected' : ''}>${b.name}</option>`
         ).join('');
 
+        // Min Date (Today)
+        const minDate = new Date().toISOString().split('T')[0];
+
         Swal.fire({
             title: 'Editar Cita',
             html: `
                 <div class="text-start">
-                    <label class="form-label">Fecha</label>
-                    <input type="date" id="edit-date" class="form-control mb-3" value="${event.start.toISOString().split('T')[0]}">
-                    
-                    <label class="form-label">Hora</label>
-                    <input type="time" id="edit-time" class="form-control mb-3" value="${event.start.toTimeString().substr(0,5)}">
-                    
-                    <label class="form-label">Servicio</label>
+                    <!-- Service -->
+                    <label class="form-label fw-bold small text-muted">SERVICIO</label>
                     <select id="edit-service" class="form-select mb-3">
                         ${serviceOptions}
                     </select>
+
+                    <!-- Custom Details (Hidden) -->
+                    <div id="edit-custom-details-container" class="mb-3 d-none">
+                        <label class="form-label fw-bold small text-muted">DETALLE (¿Qué te harás?)</label>
+                        <input type="text" id="edit-custom-details" class="form-control" placeholder="Ej: Rayitos, Tintura..." value="${props.custom_details || ''}">
+                    </div>
                     
-                    <label class="form-label">Barbero</label>
-                    <select id="edit-barber" class="form-select mb-3">
-                        ${barberOptions}
-                    </select>
+                    <!-- Date & Barber Row -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                             <label class="form-label fw-bold small text-muted">BARBERO</label>
+                             <select id="edit-barber" class="form-select">
+                                ${barberOptions}
+                             </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold small text-muted">FECHA</label>
+                            <input type="date" id="edit-date" class="form-control" min="${minDate}" value="${originalDate}">
+                        </div>
+                    </div>
+
+                    <!-- Slots -->
+                    <label class="form-label fw-bold small text-muted">HORARIO</label>
+                    <div id="edit-slots-container" class="d-flex flex-wrap gap-2 p-3 border rounded bg-light" style="min-height: 60px; max-height: 150px; overflow-y: auto;">
+                        <span class="text-muted small">Cargando horarios...</span>
+                    </div>
+                    <input type="hidden" id="edit-time" value="${originalTime}">
+                    <div id="edit-time-display" class="mt-2 text-primary fw-bold small text-end">Seleccionado: ${originalTime}</div>
                 </div>
             `,
+            width: '500px',
             showCancelButton: true,
             confirmButtonText: 'Guardar Cambios',
             cancelButtonText: 'Cancelar',
-            preConfirm: () => {
-                return {
-                    date: document.getElementById('edit-date').value,
-                    time: document.getElementById('edit-time').value,
-                    service_id: document.getElementById('edit-service').value,
-                    barber_id: document.getElementById('edit-barber').value
+            checkValidity: false,
+            didOpen: () => {
+                const serviceSelect = document.getElementById('edit-service');
+                const customContainer = document.getElementById('edit-custom-details-container');
+                const barberSelect = document.getElementById('edit-barber');
+                const dateInput = document.getElementById('edit-date');
+                const slotsContainer = document.getElementById('edit-slots-container');
+                const timeInput = document.getElementById('edit-time');
+                const timeDisplay = document.getElementById('edit-time-display');
+
+                // 1. Service Logic
+                function toggleCustom() {
+                    const option = serviceSelect.options[serviceSelect.selectedIndex];
+                    const isCustom = option.getAttribute('data-custom') === 'true';
+                    if(isCustom) customContainer.classList.remove('d-none');
+                    else customContainer.classList.add('d-none');
                 }
+                serviceSelect.addEventListener('change', toggleCustom);
+                toggleCustom(); // Init
+
+                // 2. Fetch Slots Logic
+                function fetchSlots() {
+                    const barberId = barberSelect.value;
+                    const date = dateInput.value;
+                    if(!barberId || !date) {
+                         slotsContainer.innerHTML = '<small>Selecciona barbero y fecha</small>';
+                         return;
+                    }
+
+                    slotsContainer.innerHTML = '<div class="spinner-border spinner-border-sm text-primary"></div>';
+
+                    // Using simple axios if available or fetch
+                    axios.get(`/api/slots?barber_id=${barberId}&date=${date}`)
+                        .then(res => {
+                            let validSlots = res.data; 
+                            slotsContainer.innerHTML = '';
+
+                            // Inject Original Time if matching context
+                            // If user is editing the SAME day and barber, their current time is "occupied" by them.
+                            // We must allow them to keep it.
+                            const isSameContext = (barberId == currentBarberId && date == originalDate);
+                            
+                            if(isSameContext && !validSlots.includes(originalTime)) {
+                                // Add it to the list (maybe sorted, but appending is fine for transparency)
+                                validSlots.push(originalTime);
+                                validSlots.sort((a,b) => {
+                                    // simple sort by AM/PM text is tricky, detailed sort skipped for brevity, just append
+                                    // Actually, let's just make sure it's there.
+                                });
+                            }
+
+                            if(!validSlots.length) {
+                                slotsContainer.innerHTML = '<span class="text-danger small">No hay horarios disponibles.</span>';
+                                return;
+                            }
+
+                            validSlots.forEach(t => {
+                                const btn = document.createElement('button');
+                                btn.type = 'button';
+                                btn.textContent = t;
+                                const isSelected = (timeInput.value === t);
+                                btn.className = `btn btn-sm ${isSelected ? 'btn-primary' : 'btn-outline-secondary'}`;
+                                btn.onclick = () => {
+                                    timeInput.value = t;
+                                    timeDisplay.textContent = 'Seleccionado: ' + t;
+                                    // visual update
+                                    Array.from(slotsContainer.children).forEach(c => c.className = 'btn btn-sm btn-outline-secondary');
+                                    btn.className = 'btn btn-sm btn-primary';
+                                };
+                                slotsContainer.appendChild(btn);
+                            });
+                        })
+                        .catch(err => {
+                            slotsContainer.innerHTML = '<small class="text-danger">Error al cargar horarios</small>';
+                        });
+                }
+                
+                barberSelect.addEventListener('change', () => { timeInput.value=''; timeDisplay.textContent=''; fetchSlots(); });
+                dateInput.addEventListener('change', () => { timeInput.value=''; timeDisplay.textContent=''; fetchSlots(); });
+
+                // Init Slots
+                fetchSlots();
+            },
+            preConfirm: () => {
+                const date = document.getElementById('edit-date').value;
+                const time = document.getElementById('edit-time').value;
+                const service_id = document.getElementById('edit-service').value;
+                const barber_id = document.getElementById('edit-barber').value;
+                const custom_details = document.getElementById('edit-custom-details').value;
+
+                // Validation
+                if(!time) {
+                    Swal.showValidationMessage('Debes seleccionar un horario válido.');
+                    return false;
+                }
+                // Check Custom
+                const serviceSelect = document.getElementById('edit-service');
+                const isCustom = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-custom') === 'true';
+                if(isCustom && !custom_details.trim()) {
+                     Swal.showValidationMessage('Debes especificar el detalle del servicio.');
+                     return false;
+                }
+
+                return {
+                    date, time, service_id, barber_id, custom_details
+                };
             }
         }).then((result) => {
             if (result.isConfirmed) {
+                // Show loading state
+                Swal.fire({title: 'Actualizando...', didOpen: () => Swal.showLoading()});
+                
                 axios.put(`/appointments/${id}`, result.value)
                     .then(response => {
                         Swal.fire('Actualizado', 'La cita se ha modificado correctamente', 'success');
