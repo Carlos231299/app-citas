@@ -67,7 +67,7 @@
                             <i class="bi bi-people-fill text-info fs-5"></i>
                         </div>
                         <div class="text-center text-md-start">
-                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold" style="font-size: 0.7rem;">Disponibles</h6>
+                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold" style="font-size: 0.7rem;">Barberos Disponibles</h6>
                             <h4 class="mb-0 fw-bold text-dark">{{ $stats['active_barbers'] }}</h4>
                         </div>
                     </div>
