@@ -162,7 +162,19 @@
             expandRows: true, 
             stickyHeaderDates: true,
             allDaySlot: false,
-            dayMaxEvents: true,
+            weekends: true,
+            editable: false,
+            selectable: true,
+            selectMirror: true,
+            dayMaxEvents: false, // Expand all events (No "+1 more")
+            
+            // Interaction: Month -> Day
+            dateClick: function(info) {
+                // If in month view, clicking a date goes to day view
+                if (calendarInstance.view.type === 'dayGridMonth') {
+                    calendarInstance.changeView('timeGridDay', info.dateStr);
+                }
+            },
             
             views: {
                 dayGridMonth: { dayMaxEvents: false }, // Expand all events (No "+1 more")
