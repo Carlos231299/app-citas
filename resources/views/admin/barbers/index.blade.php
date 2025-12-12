@@ -58,9 +58,9 @@
                             <hr class="dropdown-divider">
                         </li>
                         <li>
-                            <form action="{{ route('barbers.destroy', $barber) }}" method="POST">
+                            <form action="{{ route('barbers.destroy', $barber) }}" method="POST" onsubmit="confirmDelete(event)">
                                 @csrf @method('DELETE')
-                                <button class="dropdown-item py-2 text-danger" onclick="return confirm('¿Eliminar del equipo?')"><i class="bi bi-trash me-2"></i> Eliminar</button>
+                                <button type="submit" class="dropdown-item py-2 text-danger"><i class="bi bi-trash me-2"></i> Eliminar</button>
                             </form>
                         </li>
                     </ul>
@@ -108,7 +108,7 @@
                 <h5 class="modal-title fw-bold">Editar Barbero</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="editForm" method="POST" autocomplete="off">
+            <form id="editForm" method="POST" autocomplete="off" onsubmit="confirmUpdate(event)">
                 @csrf
                 @method('PUT')
                 <div class="modal-body">
@@ -141,6 +141,47 @@
         document.getElementById('edit_name').value = name;
         document.getElementById('edit_whatsapp').value = whatsapp || '';
         editModal.show();
+    }
+
+    // Confirmation Logic
+    function confirmDelete(e) {
+        e.preventDefault();
+        const form = e.target;
+        
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "Esta acción eliminará al barbero permanentemente del equipo.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#EF4444',
+            cancelButtonColor: '#CBD5E1',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    }
+
+    function confirmUpdate(e) {
+        e.preventDefault();
+        const form = e.target;
+        
+        Swal.fire({
+            title: '¿Guardar cambios?',
+            text: "Se actualizará la información del barbero.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#D4AF37', // Gold
+            cancelButtonColor: '#CBD5E1',
+            confirmButtonText: 'Sí, actualizar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
     }
 
     function toggleBarberStatus(id, field) {
