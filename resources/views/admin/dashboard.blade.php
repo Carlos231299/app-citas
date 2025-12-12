@@ -536,14 +536,11 @@
     }
 
     /* Google Style Events */
+    /* Google Style Events */
     /* Common interactions */
     .fc-event {
         cursor: pointer;
-        transition: transform 0.1s;
-    }
-    .fc-event:hover {
-        transform: scale(1.02);
-        z-index: 50;
+        /* Removed global transform to prevent breaking List View table rows */
     }
 
     /* TYPE 1: TimeGrid (Week/Day - Pills) */
@@ -554,6 +551,11 @@
         padding: 1px 4px;
         font-size: 0.85rem;
         font-weight: 500;
+        transition: transform 0.1s;
+    }
+    .fc-timegrid-event:hover {
+        transform: scale(1.02);
+        z-index: 50;
     }
     .fc-timegrid-event .fc-event-main {
         color: white; 
@@ -561,14 +563,17 @@
 
     /* TYPE 2: DayGrid (Month - Dots) */
     .fc-daygrid-event {
-        background: transparent !important; /* Remove background to show just dot + text */
+        background: transparent !important;
         border: none !important;
         margin-top: 1px !important;
         padding: 2px 4px !important;
+        transition: transform 0.1s;
     }
     .fc-daygrid-event:hover {
         background: rgba(0,0,0,0.05) !important;
         border-radius: 4px;
+        transform: scale(1.02);
+        z-index: 50;
     }
     .fc-daygrid-dot-event .fc-event-title,
     .fc-daygrid-dot-event .fc-event-time {
@@ -579,6 +584,18 @@
     .fc-daygrid-event-dot {
         border-width: 5px !important; /* Larger dot */
         margin-right: 6px;
+    }
+
+    /* TYPE 3: List View (Agenda) - Fix Blank Issue */
+    .fc-list-event {
+        cursor: pointer;
+    }
+    .fc-list-event:hover td {
+        background-color: #F8F9FA !important;
+    }
+    .fc-list-event-title {
+        color: #3C4043;
+        font-weight: 500;
     }
 
     /* Today Circle (Month View) */
