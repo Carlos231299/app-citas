@@ -144,8 +144,18 @@ class AuthController extends Controller
 
     public function showResetForm(Request $request, $token = null)
     {
+        // Strict Check: Validate that the token actually exists and is valid for this user
+        // This prevents the form from opening if the link is used or expired.
+        
+        $email = $request->email;
+        $user = \App\Models\User::where('email', $email)->first();
+
+        if (!$user || !Password::broker()->tokenExists($user, $token)) {
+             return redirect()->route('password.request')->withErrors(['email' => 'El enlace de recuperación es inválido, ha expirado o ya fue utilizado.']);
+        }
+
         return view('auth.reset-password')->with(
-            ['token' => $token, 'email' => $request->email]
+            ['token' => $token, 'email' => $email]
         );
     }
 
