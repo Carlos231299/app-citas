@@ -742,6 +742,20 @@
         font-size: 1.1rem !important;
         font-weight: 600 !important;
     }
+
+    /* NOW INDICATOR STYLING */
+    .fc-now-indicator-line {
+        border-color: #EA4335 !important; /* Google Red */
+        border-width: 2px !important;
+        box-shadow: 0 0 4px rgba(234, 67, 53, 0.4);
+        z-index: 99 !important;
+    }
+    .fc-now-indicator-arrow {
+        border-color: #EA4335 !important;
+        border-width: 6px 0 6px 8px !important; /* Make it bigger */
+        margin-top: -6px !important; /* Re-center */
+        z-index: 99 !important;
+    }
     .fc-popover-close {
         opacity: 1 !important;
         font-size: 1.2rem !important;
