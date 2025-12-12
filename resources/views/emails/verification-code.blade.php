@@ -21,8 +21,11 @@
         
         <span class="code">{{ $code }}</span>
         
-        <p style="color: #999; font-size: 14px;">Este código expirará en 5 minutos.</p>
-        <p>Si no solicitaste este cambio, por favor ignora este correo.</p>
+        <p style="color: #ffffff; font-size: 16px; font-weight: bold; margin-bottom: 30px;">
+            ⚠️ Este código expira en 5 minutos.
+        </p>
+        
+        <p style="font-size: 14px; color: #999;">Si no solicitaste este cambio, por favor ignora este correo.</p>
         
         <div class="footer">
             &copy; {{ date('Y') }} Barbería JR. Seguridad y Estilo.
