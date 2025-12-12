@@ -642,19 +642,43 @@
     /* Mobile Responsive Toolbar */
     @media (max-width: 768px) {
         .fc-header-toolbar {
-            flex-direction: column; /* Stack toolbar items */
+            flex-direction: column !important; /* Stack items vertically */
             gap: 12px;
-            align-items: center;
+            align-items: stretch !important; /* Full width items */
         }
+        
         .fc-toolbar-chunk {
             display: flex;
+            justify-content: center; /* Center buttons within chunk */
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        /* Center Title */
+        .fc-toolbar-chunk:nth-child(2) {
+            order: -1; /* Place title at top if desired, or keep as is. Default center is fine here */
+        }
+        
+        .fc-toolbar-title {
+            font-size: 1.25rem !important;
             justify-content: center;
             width: 100%;
         }
-        .fc-toolbar-title {
-            font-size: 1.25rem !important; /* Smaller title */
+
+        /* Adjust button sizes */
+        .fc-button {
+            padding: 0.25rem 0.75rem !important;
+            font-size: 0.85rem !important;
         }
-        /* Hide text in dropdown items on mobile if needed, or allow wrap */
+        
+        /* View Selector Dropdown - Mobile Friendly */
+        #custom-view-selector {
+            width: 100%;
+        }
+        #custom-view-selector .btn {
+            width: 100%;
+            justify-content: center;
+        }
     }
     
     /* Buttons (Google Style) */
