@@ -319,15 +319,258 @@
     document.addEventListener('DOMContentLoaded', initCalendar);
 </script>
 <style>
-    /* Minimal Styles for functionality first */
-    .fc-toolbar-title { cursor: pointer; }
-    .fc-toolbar-title:hover { background-color: #f1f5f9; border-radius: 4px; }
-    .fc-event { cursor: pointer; }
+    /* Custom Calendar Styling for Google Calendar Look */
+    .fc {
+        font-family: 'Outfit', sans-serif;
+    }
+    .fc-col-header-cell {
+        background-color: transparent !important;
+        padding: 8px 0;
+        border: none !important;
+        border-bottom: 1px solid #E2E8F0 !important;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #64748B;
+    }
     
-    /* Agenda View Fix */
-    .fc-list-event { cursor: pointer; }
-    .fc-list-event:hover td { background-color: #f8f9fa !important; }
-    .fc-list-event-title, .fc-list-event-time { color: #1e293b !important; }
-    .fc-list-table { color: #1e293b !important; }
+    /* Toolbar & Title (Mini Calendar Trigger) */
+    .fc-toolbar-title {
+        font-size: 1.5rem !important;
+        font-weight: 400 !important;
+        color: #1E293B;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 12px;
+        border-radius: 6px;
+        transition: background-color 0.2s;
+        position: relative; /* For Flatpickr positioning */
+    }
+    .fc-toolbar-title:hover {
+        background-color: #F1F5F9;
+    }
+    .fc-toolbar-title::after {
+        content: '\F229'; /* Bootstrap Icons: chevron-down */
+        font-family: 'bootstrap-icons';
+        font-size: 1rem;
+        color: #64748B;
+    }
+    .fc-header-toolbar {
+        margin-bottom: 1.5rem !important;
+    }
+
+    /* Google Style Events */
+    /* Common interactions */
+    .fc-event {
+        cursor: pointer;
+        /* Removed global transform to prevent breaking List View table rows */
+    }
+
+    /* TYPE 1: TimeGrid (Week/Day - Pills) */
+    .fc-timegrid-event {
+        border: none !important;
+        border-radius: 6px !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        padding: 1px 4px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: transform 0.1s;
+    }
+    .fc-timegrid-event:hover {
+        transform: scale(1.02);
+        z-index: 50;
+    }
+    .fc-timegrid-event .fc-event-main {
+        color: white; 
+    }
+
+    /* TYPE 2: DayGrid (Month - Dots) */
+    .fc-daygrid-event {
+        background: transparent !important;
+        border: none !important;
+        margin-top: 1px !important;
+        padding: 2px 4px !important;
+        transition: transform 0.1s;
+    }
+    .fc-daygrid-event:hover {
+        background: rgba(0,0,0,0.05) !important;
+        border-radius: 4px;
+        transform: scale(1.02);
+        z-index: 50;
+    }
+    .fc-daygrid-dot-event .fc-event-title,
+    .fc-daygrid-dot-event .fc-event-time {
+        color: #3C4043 !important; /* Dark text */
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+    .fc-daygrid-event-dot {
+        border-width: 5px !important; /* Larger dot */
+        margin-right: 6px;
+    }
+
+    /* TYPE 3: List View (Agenda) - Fix Blank Issue */
+    .fc-list-event {
+        cursor: pointer;
+    }
+    .fc-list-event:hover td {
+        background-color: #F8F9FA !important;
+    }
+    .fc-list-event-title {
+        color: #1E293B !important; /* Slate 800 */
+        font-weight: 500;
+    }
+    .fc-list-event-time {
+        color: #64748B !important; /* Slate 500 */
+        font-weight: 600;
+    }
+    .fc-list-day-cushion {
+        background-color: #F1F5F9 !important; /* Slate 100 */
+    }
+    .fc-list-day-text,
+    .fc-list-day-side-text {
+        color: #1E293B !important;
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+    /* Ensure dot is visible */
+    .fc-list-event-dot {
+        border-color: #2563EB !important; /* Primary blue fallback */
+    }
+    /* Force table text color generally */
+    .fc-list-table {
+        color: #1E293B !important;
+    }
+
+    /* Today Circle (Month View) */
+    .fc-daygrid-day.fc-day-today .fc-daygrid-day-top {
+        display: flex;
+        justify-content: center;
+        padding-top: 4px;
+    }
+    .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+        background-color: #1a73e8;
+        color: white !important;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        min-width: 28px; /* Prevent squash */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none !important;
+        font-size: 0.9rem;
+    }
+
+    /* Mobile Responsive Toolbar */
+    @media (max-width: 768px) {
+        .fc-header-toolbar {
+            flex-direction: column !important; /* Stack items vertically */
+            gap: 12px;
+            align-items: stretch !important; /* Full width items */
+        }
+        
+        .fc-toolbar-chunk {
+            display: flex;
+            justify-content: center; /* Center buttons within chunk */
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        /* Center Title */
+        .fc-toolbar-chunk:nth-child(2) {
+            order: -1; /* Place title at top if desired, or keep as is. Default center is fine here */
+        }
+        
+        .fc-toolbar-title {
+            font-size: 1.25rem !important;
+            justify-content: center;
+            width: 100%;
+        }
+
+        /* Adjust button sizes */
+        .fc-button {
+            padding: 0.25rem 0.75rem !important;
+            font-size: 0.85rem !important;
+        }
+        
+        /* View Selector Dropdown - Mobile Friendly */
+        #custom-view-selector {
+            width: 100%;
+        }
+        #custom-view-selector .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+    
+    /* Buttons (Google Style) */
+    .fc-button {
+        background-color: #fff !important;
+        border: 1px solid #E2E8F0 !important;
+        color: #334155 !important;
+        text-transform: capitalize;
+        font-weight: 500 !important;
+        box-shadow: none !important;
+        padding: 6px 16px !important;
+        border-radius: 6px !important;
+        transition: all 0.2s;
+    }
+    .fc-button-group > .fc-button {
+        border-radius: 0 !important;
+        margin: 0 !important;
+    }
+    .fc-button-group > .fc-button:first-child {
+        border-top-left-radius: 6px !important;
+        border-bottom-left-radius: 6px !important;
+    }
+    .fc-button-group > .fc-button:last-child {
+        border-top-right-radius: 6px !important;
+        border-bottom-right-radius: 6px !important;
+    }
+    .fc-button:hover {
+        background-color: #F8FAFC !important;
+        color: #0F172A !important;
+    }
+    .fc-button-active {
+        background-color: #EFF6FF !important;
+        border-color: #BFDBFE !important;
+        color: #2563EB !important;
+        font-weight: 600 !important;
+    }
+    .fc-today-button {
+        margin-right: 12px !important;
+        border-radius: 6px !important;
+    }
+
+    /* Grid & Cells */
+    .fc-scrollgrid {
+        border: none !important;
+    }
+    .fc-daygrid-day-top {
+        flex-direction: row;
+        padding: 8px;
+    }
+    .fc-daygrid-day-number {
+        font-size: 0.9rem;
+        color: #334155;
+        font-weight: 500;
+        width: 28px; 
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    .fc-day-today .fc-daygrid-day-number {
+        background-color: #2563EB;
+        color: #fff;
+    }
+    .fc-day-today {
+        background-color: transparent !important; /* Remove yellow tint */
+    }
+    
 </style>
 @endpush
