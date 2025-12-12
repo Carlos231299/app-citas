@@ -743,29 +743,32 @@
         font-weight: 600 !important;
     }
 
-    /* NOW INDICATOR STYLING (Google Lollipop Style) */
-    .fc-now-indicator-line {
+    /* NOW INDICATOR STYLING (Google Lollipop Style) - Force Specificity */
+    .fc .fc-now-indicator-line {
         border-color: #EA4335 !important;
-        border-width: 2px 0 0 0 !important; /* Top border only, 2px thick */
+        border-width: 2px 0 0 0 !important;
+        border-style: solid !important;
         opacity: 1 !important;
         position: absolute;
         z-index: 99 !important;
     }
+    
     /* The Dot inside the day column */
-    .fc-now-indicator-line::before {
+    .fc .fc-now-indicator-line::before {
         content: '';
         position: absolute;
-        top: -6px; /* Center perfectly on the 2px line */
-        left: -6px; /* Align with start of line */
+        top: -6px; /* Center centered on the 2px line */
+        left: 0; /* Align with valid start */
         width: 12px;
         height: 12px;
         background-color: #EA4335;
         border-radius: 50%;
         box-shadow: 0 0 4px rgba(234, 67, 53, 0.4);
+        transform: translateX(-50%); /* Center the dot on the start point */
     }
     
     /* Hide the default axis arrow */
-    .fc-now-indicator-arrow {
+    .fc .fc-now-indicator-arrow {
         display: none !important;
     }
     .fc-popover-close {
