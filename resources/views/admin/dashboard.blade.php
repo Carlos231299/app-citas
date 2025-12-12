@@ -669,6 +669,68 @@
         font-size: 0.9rem;
     }
 
+    /* GLOBAL FIX: "See More" Popover */
+    .fc-popover {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 90% !important;
+        max-width: 320px !important;
+        z-index: 10000 !important;
+        border-radius: 16px !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
+        border: none !important;
+    }
+    .fc-popover-header {
+        background-color: #f8f9fa !important;
+        padding: 12px 16px !important;
+        border-bottom: 1px solid #eee !important;
+        border-radius: 16px 16px 0 0 !important;
+    }
+    .fc-popover-title {
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+    }
+    .fc-popover-close {
+        opacity: 1 !important;
+        font-size: 1.2rem !important;
+        color: #666 !important;
+        background: #e9ecef !important;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        cursor: pointer !important;
+    }
+    .fc-popover-body {
+        max-height: 60vh !important;
+        overflow-y: auto !important;
+    }
+    /* Backdrop for popover */
+    .fc-popover-header::before { 
+        /* Hacky backdrop attached to header to avoid breaking FC positioning logic with a global fixed div */
+        content: '';
+        position: fixed;
+        top: -500vh;
+        left: -500vw;
+        width: 1000vw;
+        height: 1000vh;
+        background: rgba(0,0,0,0.5);
+        z-index: -1;
+        cursor: pointer;
+    }
+
+    /* Prevent Event Overflow (Horizontal) */
+    .fc-daygrid-event {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 100% !important;
+    }
+
     /* Mobile Responsive Toolbar */
     @media (max-width: 768px) {
         .fc-header-toolbar {
@@ -713,58 +775,6 @@
         /* Ensure Day Cells are Tall on Mobile */
         .fc-daygrid-day-frame {
             min-height: 100px !important;
-        }
-
-        /* Fix "See More" Popover on Mobile */
-        .fc-popover {
-            position: fixed !important;
-            top: 50% !important;
-            left: 50% !important;
-            transform: translate(-50%, -50%) !important;
-            width: 90% !important;
-            max-width: 320px !important;
-            z-index: 10000 !important;
-            border-radius: 16px !important;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
-            border: none !important;
-        }
-        .fc-popover-header {
-            background-color: #f8f9fa !important;
-            padding: 12px 16px !important;
-            border-bottom: 1px solid #eee !important;
-            border-radius: 16px 16px 0 0 !important;
-        }
-        .fc-popover-title {
-            font-size: 1.1rem !important;
-            font-weight: 600 !important;
-        }
-        .fc-popover-close {
-            opacity: 1 !important;
-            font-size: 1.2rem !important;
-            color: #666 !important;
-            background: #e9ecef !important;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-        .fc-popover-body {
-            max-height: 60vh !important;
-            overflow-y: auto !important;
-        }
-        /* Overlay backdrop for popover */
-        .fc-popover::before {
-            content: '';
-            position: fixed;
-            top: -100vh;
-            left: -100vw;
-            width: 300vw;
-            height: 300vh;
-            background: rgba(0,0,0,0.5);
-            z-index: -1;
-            pointer-events: auto; /* Catch clicks to close? FC usually handles this via document click */
         }
     }
     
