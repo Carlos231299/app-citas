@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -84,6 +85,16 @@ class UserController extends Controller
 
         if (!empty($validated['password'])) {
             $user->password = bcrypt($validated['password']);
+            
+            // Enviar correo de notificación
+            try {
+                Mail::send('emails.password-changed', ['user' => $user], function ($m) use ($user) {
+                    $m->to($user->email, $user->name)->subject('Tu contraseña ha sido actualizada');
+                });
+            } catch (\Exception $e) {
+                // Loguear error pero no detener el proceso
+                \Illuminate\Support\Facades\Log::error('Error enviando correo de cambio de contraseña: ' . $e->getMessage());
+            }
         }
 
         $user->save();
