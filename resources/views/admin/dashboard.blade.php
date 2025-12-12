@@ -251,51 +251,118 @@
                 const event = info.event;
                 const props = event.extendedProps;
                 
-                // Format Date 12h
-                const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+                // Format Date
+                const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
+                const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
+                
                 const dateStr = event.start.toLocaleDateString('es-ES', dateOptions);
+                const timeStr = event.start.toLocaleTimeString('es-ES', timeOptions);
+                const fullDateStr = `${dateStr} ⋅ ${timeStr}`;
 
+                // Header Style (Gradient based on status or random for "Birthday" look)
+                // Using a festive gradient for completed/special, standard blue for others
+                const bgGradient = props.status === 'completed' 
+                    ? 'linear-gradient(135deg, #34D399 0%, #059669 100%)' // Green
+                    : (props.status === 'cancelled' ? 'linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)' // Red
+                    : 'linear-gradient(135deg, #6366F1 0%, #3B82F6 100%)'); // Blue/Indigo
+
+                // Action Buttons (Complete/Cancel) HTML
                 let actionButtons = '';
                 if(props.status === 'scheduled') {
                     actionButtons = `
-                        <div class="d-grid gap-2 mt-4">
-                            <button onclick="completeAppointment(${event.id}, ${props.price})" class="btn btn-success fw-bold">
-                                <i class="bi bi-check-circle-fill me-2"></i>Marcar como Completada
+                        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                            <button onclick="Swal.close(); cancelAppointment(${event.id})" class="btn btn-light text-danger border-0 btn-sm rounded-3 fw-bold px-3">
+                                Cancelar
                             </button>
-                            <button onclick="cancelAppointment(${event.id})" class="btn btn-outline-danger">
-                                <i class="bi bi-x-circle me-2"></i>Cancelar Cita
+                            <button onclick="Swal.close(); completeAppointment(${event.id}, ${props.price})" class="btn btn-primary border-0 btn-sm rounded-3 fw-bold px-3">
+                                Completar
                             </button>
                         </div>
                     `;
                 }
 
                 Swal.fire({
-                    title: `<h4 class="mb-0 text-start">${event.title}</h4>`,
                     html: `
-                        <div class="text-start mt-3">
-                            <div class="mb-2"><strong class="text-secondary">Fecha:</strong> <span class="text-dark">${dateStr}</span></div>
-                            <div class="mb-2"><strong class="text-secondary">Barbero:</strong> <span class="text-dark">${props.barber}</span></div>
-                            <div class="mb-2"><strong class="text-secondary">Servicio:</strong> <span class="text-dark">${props.service}</span></div>
-                            <div class="mb-2"><strong class="text-secondary">Teléfono:</strong> <span class="text-dark">${props.client_phone}</span></div>
-                            <div class="mb-2"><strong class="text-secondary">Detalles:</strong> <span class="fst-italic text-dark">${props.custom_details || 'N/A'}</span></div>
-                            <div class="mb-2"><strong class="text-secondary">Estado:</strong> 
-                                <span class="badge ${props.status === 'completed' ? 'bg-success' : (props.status === 'cancelled' ? 'bg-danger' : 'bg-primary')}">
-                                    ${{
-                                        'scheduled': 'PROGRAMADA',
-                                        'completed': 'COMPLETADA',
-                                        'cancelled': 'CANCELADA'
-                                    }[props.status] || props.status.toUpperCase()}
-                                </span>
+                        <div style="overflow: hidden; border-radius: 16px;">
+                            <!-- Header -->
+                            <div class="position-relative p-4 text-white d-flex align-items-start justify-content-between" style="background: ${bgGradient}; min-height: 120px;">
+                                <div style="position: relative; z-index: 2;">
+                                    <!-- Optional Icon watermark could go here -->
+                                </div>
+                                <div class="d-flex gap-2" style="position: absolute; top: 15px; right: 15px; z-index: 10;">
+                                    <button class="btn btn-link text-white p-0 opacity-75 hover-opacity-100" onclick="editService(${event.id})">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </button>
+                                    <button class="btn btn-link text-white p-0 opacity-75 hover-opacity-100" onclick="Swal.close()">
+                                        <i class="bi bi-x-lg fs-5"></i>
+                                    </button>
+                                </div>
                             </div>
-                            ${actionButtons}
+
+                            <!-- Body -->
+                            <div class="text-start p-4 bg-white">
+                                <!-- Title -->
+                                <h3 class="fw-normal mb-1" style="color: #3C4043; font-family: 'Google Sans', 'Roboto', sans-serif;">
+                                    ${event.title}
+                                </h3>
+                                
+                                <!-- Date -->
+                                <div class="d-flex mt-3 mb-4">
+                                    <div class="me-3" style="width: 24px;"><i class="bi bi-clock text-secondary fs-5"></i></div>
+                                    <div>
+                                        <div class="fs-5 text-dark">${fullDateStr}</div>
+                                        ${props.duration ? `<div class="small text-muted">Duración: ${props.duration}</div>` : ''}
+                                    </div>
+                                </div>
+
+                                <!-- Details List -->
+                                <div class="d-flex mb-3">
+                                    <div class="me-3" style="width: 24px;"><i class="bi bi-person text-secondary fs-5"></i></div>
+                                    <div class="align-self-center text-secondary">${props.barber} (Barbero)</div>
+                                </div>
+
+                                <div class="d-flex mb-3">
+                                    <div class="me-3" style="width: 24px;"><i class="bi bi-scissors text-secondary fs-5"></i></div>
+                                    <div class="align-self-center text-secondary">${props.service}</div>
+                                </div>
+
+                                ${props.client_phone ? `
+                                <div class="d-flex mb-3">
+                                    <div class="me-3" style="width: 24px;"><i class="bi bi-telephone text-secondary fs-5"></i></div>
+                                    <div class="align-self-center text-secondary">${props.client_phone}</div>
+                                </div>` : ''}
+
+                                ${props.custom_details ? `
+                                <div class="d-flex mb-3">
+                                    <div class="me-3" style="width: 24px;"><i class="bi bi-justify-left text-secondary fs-5"></i></div>
+                                    <div class="align-self-center text-secondary">${props.custom_details}</div>
+                                </div>` : ''}
+                                
+                                <div class="d-flex mb-2">
+                                    <div class="me-3" style="width: 24px;"><i class="bi bi-tag text-secondary fs-5"></i></div>
+                                    <div class="align-self-center">
+                                        <span class="badge ${props.status === 'completed' ? 'bg-success' : (props.status === 'cancelled' ? 'bg-danger' : 'bg-primary')} rounded-pill px-3 fw-normal">
+                                            ${{
+                                                'scheduled': 'Programada',
+                                                'completed': 'Completada',
+                                                'cancelled': 'Cancelada'
+                                            }[props.status] || props.status}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                ${actionButtons}
+                            </div>
                         </div>
                     `,
                     showConfirmButton: false,
-                    showCloseButton: true,
-                    background: '#fff',
+                    showCloseButton: false, // Custom close button used
+                    background: 'transparent', // Let container handle background
                     customClass: {
-                        popup: 'rounded-4 shadow-lg'
-                    }
+                        popup: 'rounded-4 border-0 p-0 shadow-lg' // Remove default Swal padding
+                    },
+                    width: '450px'
                 });
             }
         });
@@ -466,6 +533,30 @@
     }
     .fc-header-toolbar {
         margin-bottom: 1.5rem !important;
+    }
+
+    /* Google Style Events */
+    .fc-event {
+        border: none !important;
+        border-radius: 6px !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        padding: 1px 4px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .fc-event:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        z-index: 50;
+    }
+    /* TimeGrid specific */
+    .fc-timegrid-event {
+        border-radius: 6px !important;
+    }
+    .fc-event-main {
+        color: white; /* Ensure text matches contrast, usually handled by server color but safe fallback */
     }
     
     /* Buttons (Google Style) */
