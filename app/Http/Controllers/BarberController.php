@@ -37,19 +37,19 @@ class BarberController extends Controller
 
         $validated = $request->validate($rules);
 
-        // Logic to distinguish between HTML Form submission (where unchecked checkboxes are missing)
-        // and AJAX partial update (where missing fields should be ignored).
-        
-        // If 'name' is present, it's a full form submission (from the Edit modal or Switch form fallback)
+        // Logic to distinguish between HTML Form submission and AJAX partial update.
+    
+        // If 'name' is present, it's the Edit Profile Modal. 
+        // This form DOES NOT have status switches, so we must NOT touch the status fields.
+        // We unset them ensuring the DB retains its current values.
         if ($request->has('name')) {
-             // Use boolean() to correctly interpret "0" (from hidden input) as false, 
-             // and "on"/"1" as true. Missing field (unchecked checkbox) also creates false.
-             $validated['is_active'] = $request->boolean('is_active');
-             $validated['special_mode'] = $request->boolean('special_mode');
+             unset($validated['is_active']);
+             unset($validated['special_mode']);
         } 
-        // If 'name' is missing, it's a partial AJAX update. We rely on $validated containing only what was sent.
+        // If 'name' is missing, it's a partial AJAX update (Switch Toggle). 
+        // We rely on $validated containing the new boolean states.
         
-        // AUTO-DISABLE Logic: If is_active is being set to false, also disable special_mode
+        // AUTO-DISABLE Logic (Only for switches): If is_active is explicitly disabled, also disable special_mode
         if (isset($validated['is_active']) && $validated['is_active'] == false) {
             $validated['special_mode'] = false;
         }
