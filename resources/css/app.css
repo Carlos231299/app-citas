@@ -181,22 +181,31 @@ body {
         z-index: 1050;
         width: 250px;
         left: 0;
+        transition: transform 0.3s ease-in-out;
+        transform: translateX(0);
         box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
     }
 
+    /* Properly hide sidebar on mobile when collapsed */
     .sidebar.collapsed {
-        width: 0;
-        padding: 0;
-        left: -100%;
-        border: none;
+        width: 250px;
+        /* Keep width defined for animation, but move off-screen */
+        transform: translateX(-100%) !important;
+
     }
 
-    /* Hide content when collapsed on mobile to prevent overflow */
+    /* Hide everything inside when collapsed to be sure */
     .sidebar.collapsed * {
         display: none !important;
     }
 
-    /* Overlay for content when sidebar is open */
+    /* Ensure main content takes full width */
+    .main-content {
+        width: 100%;
+        margin-left: 0 !important;
+    }
+
+    /* Overlay */
     .sidebar:not(.collapsed)+.main-content::before {
         content: '';
         position: fixed;
@@ -204,7 +213,11 @@ body {
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.4);
+        background: rgba(0, 0, 0, 0.5);
+        /* Darker overlay */
         z-index: 1040;
+        backdrop-filter: blur(2px);
     }
 }
+
+```

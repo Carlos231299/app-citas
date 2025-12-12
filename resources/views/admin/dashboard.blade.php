@@ -94,14 +94,38 @@
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             headerToolbar: {
-                left: 'prev,next today',
+                left: window.innerWidth < 768 ? 'prev,next' : 'prev,next today',
                 center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                right: window.innerWidth < 768 ? 'dayGridMonth,timeGridDay' : 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            footerToolbar: window.innerWidth < 768 ? { right: 'today' } : false,
+            height: 'auto',
+            aspectRatio: window.innerWidth < 768 ? 0.8 : 1.35,
+            handleWindowResize: true,
+            windowResize: function(view) {
+                if (window.innerWidth < 768) {
+                    calendar.changeView('timeGridDay');
+                    calendar.setOption('headerToolbar', {
+                        left: 'prev,next',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridDay'
+                    });
+                    calendar.setOption('footerToolbar', { right: 'today' });
+                    calendar.setOption('aspectRatio', 0.8);
+                } else {
+                    calendar.changeView('dayGridMonth');
+                    calendar.setOption('headerToolbar', {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    });
+                    calendar.setOption('footerToolbar', false);
+                    calendar.setOption('aspectRatio', 1.35);
+                }
             },
             locale: 'es',
             slotMinTime: '08:00:00',
             slotMaxTime: '18:00:00',
-            height: '100%',
             expandRows: true, 
             stickyHeaderDates: true,
             allDaySlot: false,
