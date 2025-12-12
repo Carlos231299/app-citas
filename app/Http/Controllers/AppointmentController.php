@@ -214,9 +214,10 @@ class AppointmentController extends Controller
         $start = Carbon::parse($request->start);
         $end = Carbon::parse($request->end);
 
-        $events = Appointment::with(['service', 'barber'])
+        // 1. Fetch Regular Appointments
+        $appointments = Appointment::with(['service', 'barber'])
             ->whereBetween('scheduled_at', [$start, $end])
-            ->where('status', '!=', 'request') // Exclude requests from calendar
+            ->where('status', '!=', 'request') 
             ->get()
             ->map(function ($appointment) {
                 $duration = 30; // Minutes
@@ -230,6 +231,7 @@ class AppointmentController extends Controller
                     'backgroundColor' => $this->getStatusColor($appointment->status),
                     'borderColor' => $this->getStatusColor($appointment->status),
                     'extendedProps' => [
+                        'type' => 'appointment',
                         'barber' => $appointment->barber->name,
                         'service' => $appointment->service->name,
                         'status' => $appointment->status,
@@ -240,7 +242,40 @@ class AppointmentController extends Controller
                 ];
             });
 
-        return response()->json($events);
+        // 2. Generate Static Holidays (Simulated for Demo/Context)
+        $holidays = collect([]);
+        $currentYear = $start->year; // Just use start year for simplicity in this window
+        
+        $holidayList = [
+            ['date' => "$currentYear-12-23", 'title' => '🎂 ¡Feliz cumpleaños!'],
+            ['date' => "$currentYear-12-24", 'title' => 'Noche Buena'],
+            ['date' => "$currentYear-12-25", 'title' => 'Navidad'],
+            ['date' => "$currentYear-12-31", 'title' => 'Año Viejo'],
+            ['date' => ($currentYear + 1) . "-01-01", 'title' => 'Año Nuevo'], // Handle Jan overlap roughly
+        ];
+
+        foreach ($holidayList as $h) {
+            $hDate = Carbon::parse($h['date']);
+            // Only add if within view range
+            if ($hDate->between($start, $end)) {
+                $holidays->push([
+                    'id' => 'holiday-' . $h['date'],
+                    'title' => $h['title'],
+                    'start' => $h['date'], 
+                    'allDay' => true,
+                    'display' => 'block', // Force block display for all-day look
+                    'backgroundColor' => $this->getStatusColor('holiday'),
+                    'borderColor' => $this->getStatusColor('holiday'),
+                    'classNames' => ['holiday-event'],
+                    'extendedProps' => [
+                        'type' => 'holiday',
+                        'status' => 'holiday'
+                    ]
+                ]);
+            }
+        }
+
+        return response()->json($appointments->merge($holidays));
     }
 
     private function getStatusColor($status)
@@ -248,6 +283,7 @@ class AppointmentController extends Controller
         return match ($status) {
             'completed' => '#10B981', // Success Green
             'cancelled' => '#EF4444', // Danger Red
+            'holiday'   => '#0B968B', // Teal/Google Holiday Green
             default => '#2563EB', // Primary Blue
         };
     }
