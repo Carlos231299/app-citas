@@ -8,14 +8,14 @@
     <!-- Stats Row -->
     <div class="row g-3 mb-4 animate-fade-in">
         <!-- Citas Hoy -->
-        <div class="col-12 col-md-6">
+        <div class="col-6 col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-primary">
                 <div class="card-body p-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
+                    <div class="d-flex flex-column flex-md-row align-items-center mb-2">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-md-3 mb-2 mb-md-0">
                             <i class="bi bi-calendar-event text-primary fs-4"></i>
                         </div>
-                        <div>
+                        <div class="text-center text-md-start">
                             <h6 class="text-secondary small text-uppercase mb-0 fw-bold">Citas Hoy</h6>
                             <h3 class="mb-0 fw-bold text-dark">{{ $stats['total_today'] }}</h3>
                         </div>
@@ -25,15 +25,15 @@
         </div>
 
         <!-- Ingresos -->
-        <div class="col-12 col-md-6">
+        <div class="col-6 col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-success">
                 <div class="card-body p-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="bg-success bg-opacity-10 p-2 rounded-circle me-3">
+                    <div class="d-flex flex-column flex-md-row align-items-center mb-2">
+                        <div class="bg-success bg-opacity-10 p-2 rounded-circle me-md-3 mb-2 mb-md-0">
                             <i class="bi bi-cash-stack text-success fs-4"></i>
                         </div>
-                        <div>
-                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold">Ingresos (Hoy)</h6>
+                        <div class="text-center text-md-start">
+                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold">Ingresos</h6>
                             <h3 class="mb-0 fw-bold text-dark">${{ number_format($stats['revenue_today'], 2) }}</h3>
                         </div>
                     </div>
@@ -42,14 +42,14 @@
         </div>
 
         <!-- Pendientes -->
-        <div class="col-12 col-md-6">
+        <div class="col-6 col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-warning">
                 <div class="card-body p-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="bg-warning bg-opacity-10 p-2 rounded-circle me-3">
+                    <div class="d-flex flex-column flex-md-row align-items-center mb-2">
+                        <div class="bg-warning bg-opacity-10 p-2 rounded-circle me-md-3 mb-2 mb-md-0">
                             <i class="bi bi-clock-history text-warning fs-4"></i>
                         </div>
-                        <div>
+                        <div class="text-center text-md-start">
                             <h6 class="text-secondary small text-uppercase mb-0 fw-bold">Pendientes</h6>
                             <h3 class="mb-0 fw-bold text-dark">{{ $stats['pending_today'] }}</h3>
                         </div>
@@ -59,15 +59,15 @@
         </div>
 
         <!-- Barberos Disponibles -->
-        <div class="col-12 col-md-6">
+        <div class="col-6 col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-info">
                 <div class="card-body p-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="bg-info bg-opacity-10 p-2 rounded-circle me-3">
+                    <div class="d-flex flex-column flex-md-row align-items-center mb-2">
+                        <div class="bg-info bg-opacity-10 p-2 rounded-circle me-md-3 mb-2 mb-md-0">
                             <i class="bi bi-people-fill text-info fs-4"></i>
                         </div>
-                        <div>
-                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold">Barberos Disponibles</h6>
+                        <div class="text-center text-md-start">
+                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold">Disponibles</h6>
                             <h3 class="mb-0 fw-bold text-dark">{{ $stats['active_barbers'] }}</h3>
                         </div>
                     </div>
@@ -77,8 +77,8 @@
     </div>
 
     <!-- Calendar Container -->
-    <div class="card border-0 shadow-sm flex-grow-1 overflow-hidden" style="min-height: 500px;">
-        <div class="card-body p-3 h-100">
+    <div class="card border-0 shadow-sm flex-grow-1 overflow-hidden" style="min-height: 600px;">
+        <div class="card-body p-0 p-md-3 h-100">
             <div id="calendar" class="h-100"></div>
         </div>
     </div>
@@ -99,21 +99,28 @@
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
-            height: '100%', // Use container height
+            navLinks: true, // can click day/week names to navigate views
+            height: '100%',
             contentHeight: 'auto',
-            aspectRatio: 1.8, // Wider look
+            aspectRatio: 1.35,
             handleWindowResize: true,
             locale: 'es',
             slotMinTime: '08:00:00',
-            slotMaxTime: '20:00:00', // Extended slightly
+            slotMaxTime: '21:00:00',
             expandRows: true, 
             stickyHeaderDates: true,
             allDaySlot: false,
-            dayMaxEvents: true, // Allow "more" link instead of stretching
+            dayMaxEvents: true,
             views: {
-                dayGridMonth: {
-                    dayMaxEvents: 3
-                }
+                dayGridMonth: { dayMaxEvents: 2 },
+                timeGrid: { dayMaxEvents: true }
+            },
+            buttonText: {
+                today:    'Hoy',
+                month:    'Mes',
+                week:     'Semana',
+                day:      'Día',
+                list:     'Lista'
             },
             slotLabelFormat: {
                 hour: 'numeric',
@@ -127,7 +134,6 @@
                 hour12: true
             },
             events: '/api/calendar/events',
-            // eventDidMount REMOVED to disable tooltips
             eventClick: function(info) {
                 const event = info.event;
                 const props = event.extendedProps;
@@ -178,14 +184,6 @@
                         popup: 'rounded-4 shadow-lg'
                     }
                 });
-            },
-            windowResize: function(view) {
-                // Responsive view changes if needed
-                if(window.innerWidth < 768) {
-                    calendar.changeView('timeGridDay');
-                } else {
-                    calendar.changeView('dayGridMonth');
-                }
             }
         });
         calendar.render();
