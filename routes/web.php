@@ -30,6 +30,7 @@ Route::middleware('guest')->group(function () {
     
     Route::get('/verify-code', [AuthController::class, 'showVerifyCode'])->name('password.verify.show');
     Route::post('/verify-code', [AuthController::class, 'verifyCode'])->name('password.verify');
+    Route::post('/verify-code/resend', [AuthController::class, 'resendCode'])->name('password.verify.resend');
     
     // Reset Password Action (View rendered by verifyCode)
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
