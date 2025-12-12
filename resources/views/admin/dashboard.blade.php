@@ -536,7 +536,6 @@
     }
 
     /* Google Style Events */
-    /* Google Style Events */
     /* Common interactions */
     .fc-event {
         cursor: pointer;
@@ -747,6 +746,5 @@
         background-color: transparent !important; /* Remove yellow tint */
     }
     
-
 </style>
 @endpush
