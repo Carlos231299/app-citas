@@ -79,17 +79,42 @@
     <!-- Calendar Container -->
     <div class="card border-0 shadow-sm flex-grow-1 overflow-hidden" style="min-height: 600px;">
         <div class="card-body p-0 p-md-3 h-100 position-relative">
-            <!-- Custom View Selector (Hidden in DOM, injected by JS) -->
+            <!-- Custom View Selector (Google Style) -->
             <div id="custom-view-selector" class="d-none">
                 <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle btn-sm fw-bold border-0 bg-transparent text-dark" type="button" id="calendarViewBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                        Mes
+                    <button class="btn btn-outline-secondary dropdown-toggle btn-sm fw-bold border-0 bg-transparent text-dark d-flex align-items-center gap-2" type="button" id="calendarViewBtn" data-bs-toggle="dropdown" aria-expanded="false" style="color: #3C4043 !important;">
+                        <span>Mes</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" aria-labelledby="calendarViewBtn">
-                        <li><a class="dropdown-item" href="#" data-view="dayGridMonth">Mes</a></li>
-                        <li><a class="dropdown-item" href="#" data-view="timeGridWeek">Semana</a></li>
-                        <li><a class="dropdown-item" href="#" data-view="timeGridDay">Día</a></li>
-                        <li><a class="dropdown-item" href="#" data-view="listWeek">Agenda</a></li>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 p-2" aria-labelledby="calendarViewBtn" style="min-width: 240px;">
+                        <!-- Views -->
+                        <li><a class="dropdown-item d-flex justify-content-between align-items-center rounded-2 py-2" href="#" data-view="timeGridDay"><span>Día</span><span class="text-muted small">D</span></a></li>
+                        <li><a class="dropdown-item d-flex justify-content-between align-items-center rounded-2 py-2" href="#" data-view="timeGridWeek"><span>Semana</span><span class="text-muted small">W</span></a></li>
+                        <li><a class="dropdown-item d-flex justify-content-between align-items-center rounded-2 py-2" href="#" data-view="dayGridMonth"><span>Mes</span><span class="text-muted small">M</span></a></li>
+                        <li><a class="dropdown-item d-flex justify-content-between align-items-center rounded-2 py-2" href="#" data-view="listYear"><span>Año</span><span class="text-muted small">Y</span></a></li>
+                        <li><a class="dropdown-item d-flex justify-content-between align-items-center rounded-2 py-2" href="#" data-view="listWeek"><span>Agenda</span><span class="text-muted small">A</span></a></li>
+                        <li><a class="dropdown-item d-flex justify-content-between align-items-center rounded-2 py-2" href="#" data-view="fourDay"><span>4 días</span><span class="text-muted small">X</span></a></li>
+                        
+                        <li><hr class="dropdown-divider my-2"></li>
+                        
+                        <!-- Toggles -->
+                        <li>
+                            <div class="dropdown-item d-flex gap-2 align-items-center rounded-2 py-2" onclick="toggleOption(event, 'weekends')">
+                                <i class="bi bi-check-lg text-primary opacity-0" id="check-weekends"></i>
+                                <span>Mostrar fines de semana</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="dropdown-item d-flex gap-2 align-items-center rounded-2 py-2" onclick="toggleOption(event, 'rejected')">
+                                <i class="bi bi-check-lg text-primary opacity-0" id="check-rejected"></i>
+                                <span>Mostrar eventos rechazados</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="dropdown-item d-flex gap-2 align-items-center rounded-2 py-2" onclick="toggleOption(event, 'completed')">
+                                <i class="bi bi-check-lg text-primary opacity-0" id="check-completed"></i>
+                                <span>Mostrar tareas completadas</span>
+                            </div>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -102,11 +127,22 @@
 
 @push('scripts')
 <script>
+    // Global State for Filters
+    let calendarState = {
+        weekends: true,
+        showRejected: true, // Cancelled
+        showCompleted: true
+    };
+    let calendarInstance = null;
+
     function initCalendar() {
         var calendarEl = document.getElementById('calendar');
         if(!calendarEl) return;
         
-        var calendar = new FullCalendar.Calendar(calendarEl, {
+        // Initialize State UI
+        updateCheckboxes();
+
+        calendarInstance = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             themeSystem: 'bootstrap5',
             headerToolbar: {
@@ -120,17 +156,28 @@
             aspectRatio: 1.35,
             handleWindowResize: true,
             locale: 'es',
+            weekends: true, // Default
+            firstDay: 1, // Lunes
+            
+            // Time Format
             slotMinTime: '08:00:00',
             slotMaxTime: '21:00:00',
             expandRows: true, 
             stickyHeaderDates: true,
             allDaySlot: false,
             dayMaxEvents: true,
+            
             views: {
                 dayGridMonth: { dayMaxEvents: 2 },
-                timeGrid: { dayMaxEvents: true }
+                timeGrid: { dayMaxEvents: true },
+                fourDay: {
+                    type: 'timeGrid',
+                    duration: { days: 4 },
+                    buttonText: '4 días'
+                },
+                listYear: { buttonText: 'Año' }
             },
-            // Enforce 12-hour format
+            
             slotLabelFormat: {
                 hour: 'numeric',
                 minute: '2-digit',
@@ -146,17 +193,41 @@
             },
             events: '/api/calendar/events',
             
+            // Logic for Hiding Events based on Filters
+            eventClassNames: function(arg) {
+                const props = arg.event.extendedProps;
+                let classes = [];
+                
+                // Filter: Rejected (Cancelled)
+                if (props.status === 'cancelled' && !calendarState.showRejected) {
+                    classes.push('d-none');
+                }
+                
+                // Filter: Completed
+                if (props.status === 'completed' && !calendarState.showCompleted) {
+                    classes.push('d-none');
+                }
+                
+                return classes;
+            },
+
             // Lifecycle Hooks
             datesSet: function(info) {
                 // Update dropdown text based on current view
                 const viewNameMap = {
-                    'dayGridMonth': 'Mes',
-                    'timeGridWeek': 'Semana',
                     'timeGridDay': 'Día',
-                    'listWeek': 'Agenda'
+                    'timeGridWeek': 'Semana',
+                    'dayGridMonth': 'Mes',
+                    'listYear': 'Año',
+                    'listWeek': 'Agenda',
+                    'fourDay': '4 días'
                 };
                 const btn = document.getElementById('calendarViewBtn');
-                if(btn) btn.innerText = viewNameMap[info.view.type] || 'Vista';
+                if(btn) {
+                    // Update text but keep the caret/style if needed, though innerText replaces content.
+                    // Let's rebuild the inner HTML to keep it clean
+                    btn.innerHTML = `<span>${viewNameMap[info.view.type] || 'Vista'}</span>`;
+                }
             },
             
             eventClick: function(info) {
@@ -212,7 +283,7 @@
             }
         });
         
-        calendar.render();
+        calendarInstance.render();
 
         // Inject Custom Dropdown into FullCalendar Toolbar
         const toolbarRight = document.querySelector('.fc-toolbar-chunk:last-child');
@@ -223,15 +294,56 @@
             toolbarRight.appendChild(selector);
             
             // Re-bind dropdown clicks to calendar
-            selector.querySelectorAll('.dropdown-item').forEach(item => {
+            selector.querySelectorAll('[data-view]').forEach(item => {
                 item.addEventListener('click', (e) => {
                     e.preventDefault();
-                    const view = e.target.getAttribute('data-view');
-                    if(view) calendar.changeView(view);
+                    // Find closest link if click was on span
+                    const link = e.target.closest('a');
+                    const view = link.getAttribute('data-view');
+                    if(view) calendarInstance.changeView(view);
                 });
             });
         }
     }
+
+    // Toggle Logic
+    function toggleOption(e, type) {
+        e.preventDefault();
+        e.stopPropagation(); // Keep dropdown open
+
+        if(type === 'weekends') {
+            calendarState.weekends = !calendarState.weekends;
+            calendarInstance.setOption('weekends', calendarState.weekends);
+        } else if (type === 'rejected') {
+            calendarState.showRejected = !calendarState.showRejected;
+            calendarInstance.render(); // Re-trigger eventClassNames
+        } else if (type === 'completed') {
+            calendarState.showCompleted = !calendarState.showCompleted;
+            calendarInstance.render(); // Re-trigger eventClassNames
+        }
+
+        updateCheckboxes();
+    }
+
+    function updateCheckboxes() {
+        const checkMap = {
+            'weekends': calendarState.weekends,
+            'rejected': calendarState.showRejected,
+            'completed': calendarState.showCompleted
+        };
+
+        for (const [key, value] of Object.entries(checkMap)) {
+            const icon = document.getElementById(`check-${key}`);
+            if(icon) {
+                if(value) {
+                    icon.classList.remove('opacity-0');
+                } else {
+                    icon.classList.add('opacity-0');
+                }
+            }
+        }
+    }
+
 
     // Actions
     window.completeAppointment = function(id, basePrice) {
