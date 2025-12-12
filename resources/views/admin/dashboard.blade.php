@@ -381,7 +381,7 @@
 
                                 <!-- Failsafe Close Button (Mobile) -->
                                 <div class="mt-3 text-center d-md-none">
-                                    <button type="button" onclick="Swal.close()" class="btn btn-secondary w-100 py-2 rounded-pill">
+                                    <button type="button" id="mobile-close-btn" class="btn btn-secondary w-100 py-2 rounded-pill">
                                         Cerrar
                                     </button>
                                 </div>
@@ -400,7 +400,15 @@
                         popup: 'google-modal-popup',
                         closeButton: 'google-native-close'
                     },
-                    backdrop: true
+                    backdrop: true,
+                    didOpen: () => {
+                        // Manually bind click to ensure it works on all mobile browsers
+                        const btn = document.getElementById('mobile-close-btn');
+                        if(btn) {
+                            btn.addEventListener('click', () => Swal.close());
+                        }
+                    }
+                });
                 });
             }
         });
@@ -784,16 +792,14 @@
 
     /* GLOBAL FIX: "See More" Popover */
     .fc-popover {
-        position: fixed !important;
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        width: 90% !important;
-        max-width: 320px !important;
+        /* ... existing styles ... */
         z-index: 10000 !important;
-        border-radius: 16px !important;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
-        border: none !important;
+        /* ... */
+    }
+
+    /* Force SweetAlert above everything */
+    .swal2-container {
+        z-index: 20000 !important;
     }
     .fc-popover-header {
         background-color: #f8f9fa !important;
