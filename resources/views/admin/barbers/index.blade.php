@@ -30,7 +30,7 @@
                         <!-- is_active Switch -->
                         <div class="form-check form-switch mb-2 d-flex align-items-center">
                             <input class="form-check-input me-2" type="checkbox" role="switch" id="active_switch_{{ $barber->id }}"
-                                onchange="toggleBarberStatus({{ $barber->id }}, 'is_active')" {{ $barber->is_active ? 'checked' : '' }}>
+                                onchange="toggleBarberStatus({{ $barber->id }}, 'is_active', '{{ addslashes($barber->name) }}')" {{ $barber->is_active ? 'checked' : '' }}>
                             <label class="form-check-label small pt-1 fw-bold {{ $barber->is_active ? 'text-success' : 'text-muted' }}" 
                                    id="active_label_{{ $barber->id }}" for="active_switch_{{ $barber->id }}">
                                 {{ $barber->is_active ? 'Activo' : 'Inactivo' }}
@@ -40,7 +40,7 @@
                         <!-- special_mode Switch -->
                         <div class="form-check form-switch d-flex align-items-center">
                             <input class="form-check-input me-2" type="checkbox" role="switch" id="special_switch_{{ $barber->id }}"
-                                onchange="toggleBarberStatus({{ $barber->id }}, 'special_mode')" {{ $barber->special_mode ? 'checked' : '' }}>
+                                onchange="toggleBarberStatus({{ $barber->id }}, 'special_mode', '{{ addslashes($barber->name) }}')" {{ $barber->special_mode ? 'checked' : '' }}>
                             <label class="form-check-label small pt-1 fw-bold {{ $barber->special_mode ? 'text-warning' : 'text-muted' }}" 
                                    id="special_label_{{ $barber->id }}" for="special_switch_{{ $barber->id }}">
                                 <i class="bi bi-moon-stars-fill me-1"></i> Extra
@@ -58,7 +58,7 @@
                             <hr class="dropdown-divider">
                         </li>
                         <li>
-                            <form action="{{ route('barbers.destroy', $barber) }}" method="POST" onsubmit="confirmDelete(event)">
+                            <form action="{{ route('barbers.destroy', $barber) }}" method="POST" onsubmit="confirmDelete(event, '{{ addslashes($barber->name) }}')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="dropdown-item py-2 text-danger"><i class="bi bi-trash me-2"></i> Eliminar</button>
                             </form>
@@ -175,15 +175,13 @@
     });
 
     // Confirmation Logic
-
-    // Confirmation Logic
-    function confirmDelete(e) {
+    function confirmDelete(e, name) {
         e.preventDefault();
         const form = e.target;
         
         Swal.fire({
             title: '¿Estás seguro?',
-            text: "Esta acción eliminará al barbero permanentemente del equipo.",
+            text: `Esta acción eliminará a ${name} permanentemente del equipo.`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#EF4444',
@@ -200,10 +198,11 @@
     function confirmUpdate(e) {
         e.preventDefault();
         const form = e.target;
+        const name = document.getElementById('edit_name').value;
         
         Swal.fire({
             title: '¿Guardar cambios?',
-            text: "Se actualizará la información del barbero.",
+            text: `Se actualizará la información de ${name}.`,
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#D4AF37', // Gold
@@ -217,7 +216,7 @@
         });
     }
 
-    function toggleBarberStatus(id, field) {
+    function toggleBarberStatus(id, field, name) {
         const switchEl = document.getElementById(field === 'is_active' ? `active_switch_${id}` : `special_switch_${id}`);
         const labelEl = document.getElementById(field === 'is_active' ? `active_label_${id}` : `special_label_${id}`);
         const newValue = switchEl.checked ? 1 : 0;
@@ -257,7 +256,7 @@
             });
             Toast.fire({
                 icon: 'success',
-                title: 'Actualizado correctamente'
+                title: `${name} actualizado correctamente`
             });
         })
         .catch(error => {
@@ -274,7 +273,7 @@
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'No se pudo actualizar el estado.',
+                text: `No se pudo actualizar a ${name}.`,
                 toast: true,
                 position: 'top-end',
                 timer: 3000
