@@ -187,69 +187,74 @@ body {
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
 
-    /* Force Block Layout to avoid Flexbox collapsing issues */
+    /* RESET: Force standard block layout */
     .admin-body {
-        display: block;
-        height: auto;
-        overflow: auto;
-        /* Let body scroll naturally */
+        display: block !important;
+        height: auto !important;
+        min-height: 100vh;
+        overflow-y: auto !important;
+        /* Allow natural page scroll */
+        position: relative;
     }
 
-    /* 1. Sidebar Styles (Drawer Mode) */
+    /* Sidebar: Offcanvas Drawer */
     .sidebar {
         position: fixed;
         top: 0;
         bottom: 0;
         left: 0;
-        width: 260px !important;
-        /* Force width */
+        width: 280px !important;
         height: 100vh;
         z-index: 1050;
+        /* Bootstrap Modal z-index */
         background-color: #ffffff;
         box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
         transition: transform 0.3s ease;
         transform: translateX(-100%);
+        /* Hidden by default */
+        display: flex !important;
+        /* Internal flex for nav items */
+        flex-direction: column;
     }
 
     /* Open State */
     .sidebar.open {
-        transform: translateX(0);
+        transform: translateX(0) !important;
     }
 
-    /* Prevent text hiding from collapsed class if present */
+    /* Ensure text is visible when open */
     .sidebar.collapsed .sidebar-text,
     .sidebar.collapsed .sidebar-header-text,
     .sidebar.collapsed small {
         display: inline !important;
-        /* Ensure content is visible if class persists */
     }
 
+    /* Override collapsed state hidden transform */
     .sidebar.collapsed {
         transform: translateX(-100%);
-        /* Maintain hidden state if collapsed class exists */
-        width: 260px !important;
+        width: 280px !important;
     }
 
     .sidebar.collapsed.open {
         transform: translateX(0);
     }
 
-    /* 2. Main Content */
+    /* Main Content: Full Width Static Block */
     .main-content {
-        width: 100%;
-        margin-left: 0 !important;
-        padding: 1rem;
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 1rem 1rem 3rem 1rem !important;
+        /* Add bottom padding */
+        height: auto !important;
         min-height: 100vh;
-        /* Ensure it covers screen */
-        overflow: visible;
-        /* Let parent handle scroll or auto */
+        overflow: visible !important;
+        transform: none !important;
+        /* Prevent layer creation issues */
+        opacity: 1 !important;
     }
 
-    /* 3. Overlay (Backdrop) when sidebar is open */
-    .sidebar.open+.main-content {
-        position: relative;
-    }
-
+    /* Overlay (Backdrop) */
     .sidebar.open+.main-content::before {
         content: '';
         position: fixed;
@@ -262,18 +267,16 @@ body {
         backdrop-filter: blur(2px);
     }
 
-    /* 4. Button Visibility Management */
-    /* Force show mobile toggle */
+    /* Toggles */
     #mobileSidebarToggle {
         display: flex !important;
     }
 
-    /* Force hide desktop toggle */
     #sidebarToggle {
         display: none !important;
     }
 
-    /* 5. Disable Animations on Mobile (Fix Blank Screen risks) */
+    /* DISABLE ANIMATIONS ON MOBILE */
     .animate-fade-in {
         animation: none !important;
         opacity: 1 !important;
