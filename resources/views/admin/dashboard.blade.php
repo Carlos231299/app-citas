@@ -6,18 +6,18 @@
 @section('content')
 <div class="d-flex flex-column h-100">
     <!-- Stats Row -->
-    <div class="row g-3 mb-4 animate-fade-in">
+    <div class="row g-2 mb-4 animate-fade-in">
         <!-- Citas Hoy -->
         <div class="col-6 col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-primary">
-                <div class="card-body p-3">
-                    <div class="d-flex flex-column flex-md-row align-items-center mb-2">
-                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-md-3 mb-2 mb-md-0">
-                            <i class="bi bi-calendar-event text-primary fs-4"></i>
+                <div class="card-body p-2">
+                    <div class="d-flex flex-column flex-md-row align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-md-2 mb-1 mb-md-0">
+                            <i class="bi bi-calendar-event text-primary fs-5"></i>
                         </div>
                         <div class="text-center text-md-start">
-                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold">Citas Hoy</h6>
-                            <h3 class="mb-0 fw-bold text-dark">{{ $stats['total_today'] }}</h3>
+                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold" style="font-size: 0.7rem;">Citas Hoy</h6>
+                            <h4 class="mb-0 fw-bold text-dark">{{ $stats['total_today'] }}</h4>
                         </div>
                     </div>
                 </div>
@@ -27,14 +27,14 @@
         <!-- Ingresos -->
         <div class="col-6 col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-success">
-                <div class="card-body p-3">
-                    <div class="d-flex flex-column flex-md-row align-items-center mb-2">
-                        <div class="bg-success bg-opacity-10 p-2 rounded-circle me-md-3 mb-2 mb-md-0">
-                            <i class="bi bi-cash-stack text-success fs-4"></i>
+                <div class="card-body p-2">
+                    <div class="d-flex flex-column flex-md-row align-items-center">
+                        <div class="bg-success bg-opacity-10 p-2 rounded-circle me-md-2 mb-1 mb-md-0">
+                            <i class="bi bi-cash-stack text-success fs-5"></i>
                         </div>
                         <div class="text-center text-md-start">
-                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold">Ingresos</h6>
-                            <h3 class="mb-0 fw-bold text-dark">${{ number_format($stats['revenue_today'], 2) }}</h3>
+                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold" style="font-size: 0.7rem;">Ingresos</h6>
+                            <h4 class="mb-0 fw-bold text-dark">${{ number_format($stats['revenue_today'], 2) }}</h4>
                         </div>
                     </div>
                 </div>
@@ -44,14 +44,14 @@
         <!-- Pendientes -->
         <div class="col-6 col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-warning">
-                <div class="card-body p-3">
-                    <div class="d-flex flex-column flex-md-row align-items-center mb-2">
-                        <div class="bg-warning bg-opacity-10 p-2 rounded-circle me-md-3 mb-2 mb-md-0">
-                            <i class="bi bi-clock-history text-warning fs-4"></i>
+                <div class="card-body p-2">
+                    <div class="d-flex flex-column flex-md-row align-items-center">
+                        <div class="bg-warning bg-opacity-10 p-2 rounded-circle me-md-2 mb-1 mb-md-0">
+                            <i class="bi bi-clock-history text-warning fs-5"></i>
                         </div>
                         <div class="text-center text-md-start">
-                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold">Pendientes</h6>
-                            <h3 class="mb-0 fw-bold text-dark">{{ $stats['pending_today'] }}</h3>
+                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold" style="font-size: 0.7rem;">Pendientes</h6>
+                            <h4 class="mb-0 fw-bold text-dark">{{ $stats['pending_today'] }}</h4>
                         </div>
                     </div>
                 </div>
@@ -61,14 +61,14 @@
         <!-- Barberos Disponibles -->
         <div class="col-6 col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-info">
-                <div class="card-body p-3">
-                    <div class="d-flex flex-column flex-md-row align-items-center mb-2">
-                        <div class="bg-info bg-opacity-10 p-2 rounded-circle me-md-3 mb-2 mb-md-0">
-                            <i class="bi bi-people-fill text-info fs-4"></i>
+                <div class="card-body p-2">
+                    <div class="d-flex flex-column flex-md-row align-items-center">
+                        <div class="bg-info bg-opacity-10 p-2 rounded-circle me-md-2 mb-1 mb-md-0">
+                            <i class="bi bi-people-fill text-info fs-5"></i>
                         </div>
                         <div class="text-center text-md-start">
-                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold">Barberos Disponibles</h6>
-                            <h3 class="mb-0 fw-bold text-dark">{{ $stats['active_barbers'] }}</h3>
+                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold" style="font-size: 0.7rem;">Disponibles</h6>
+                            <h4 class="mb-0 fw-bold text-dark">{{ $stats['active_barbers'] }}</h4>
                         </div>
                     </div>
                 </div>
@@ -78,7 +78,22 @@
 
     <!-- Calendar Container -->
     <div class="card border-0 shadow-sm flex-grow-1 overflow-hidden" style="min-height: 600px;">
-        <div class="card-body p-0 p-md-3 h-100">
+        <div class="card-body p-0 p-md-3 h-100 position-relative">
+            <!-- Custom View Selector (Hidden in DOM, injected by JS) -->
+            <div id="custom-view-selector" class="d-none">
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle btn-sm fw-bold border-0 bg-transparent text-dark" type="button" id="calendarViewBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                        Mes
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" aria-labelledby="calendarViewBtn">
+                        <li><a class="dropdown-item" href="#" data-view="dayGridMonth">Mes</a></li>
+                        <li><a class="dropdown-item" href="#" data-view="timeGridWeek">Semana</a></li>
+                        <li><a class="dropdown-item" href="#" data-view="timeGridDay">Día</a></li>
+                        <li><a class="dropdown-item" href="#" data-view="listWeek">Agenda</a></li>
+                    </ul>
+                </div>
+            </div>
+            
             <div id="calendar" class="h-100"></div>
         </div>
     </div>
@@ -97,9 +112,9 @@
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                right: '' // Leaving empty to inject custom dropdown
             },
-            navLinks: true, // can click day/week names to navigate views
+            navLinks: true, 
             height: '100%',
             contentHeight: 'auto',
             aspectRatio: 1.35,
@@ -115,17 +130,13 @@
                 dayGridMonth: { dayMaxEvents: 2 },
                 timeGrid: { dayMaxEvents: true }
             },
-            buttonText: {
-                today:    'Hoy',
-                month:    'Mes',
-                week:     'Semana',
-                day:      'Día',
-                list:     'Lista'
-            },
+            // Enforce 12-hour format
             slotLabelFormat: {
                 hour: 'numeric',
                 minute: '2-digit',
-                meridiem: 'short'
+                omitZeroMinute: false,
+                meridiem: 'short',
+                hour12: true
             },
             eventTimeFormat: {
                 hour: 'numeric',
@@ -134,12 +145,26 @@
                 hour12: true
             },
             events: '/api/calendar/events',
+            
+            // Lifecycle Hooks
+            datesSet: function(info) {
+                // Update dropdown text based on current view
+                const viewNameMap = {
+                    'dayGridMonth': 'Mes',
+                    'timeGridWeek': 'Semana',
+                    'timeGridDay': 'Día',
+                    'listWeek': 'Agenda'
+                };
+                const btn = document.getElementById('calendarViewBtn');
+                if(btn) btn.innerText = viewNameMap[info.view.type] || 'Vista';
+            },
+            
             eventClick: function(info) {
                 const event = info.event;
                 const props = event.extendedProps;
                 
-                // Format Date
-                const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                // Format Date 12h
+                const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
                 const dateStr = event.start.toLocaleDateString('es-ES', dateOptions);
 
                 let actionButtons = '';
@@ -186,7 +211,26 @@
                 });
             }
         });
+        
         calendar.render();
+
+        // Inject Custom Dropdown into FullCalendar Toolbar
+        const toolbarRight = document.querySelector('.fc-toolbar-chunk:last-child');
+        const selector = document.getElementById('custom-view-selector');
+        
+        if (toolbarRight && selector) {
+            selector.classList.remove('d-none');
+            toolbarRight.appendChild(selector);
+            
+            // Re-bind dropdown clicks to calendar
+            selector.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const view = e.target.getAttribute('data-view');
+                    if(view) calendar.changeView(view);
+                });
+            });
+        }
     }
 
     // Actions
