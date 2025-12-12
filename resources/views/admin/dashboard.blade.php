@@ -157,8 +157,10 @@
             firstDay: 1, // Lunes
             
             // Time Format
-            slotMinTime: '08:00:00',
-            slotMaxTime: '21:00:00',
+            // Time Format
+            slotMinTime: '00:00:00', // Full 24h
+            slotMaxTime: '24:00:00',
+            scrollTime: '06:00:00', // Start view at 6 AM
             expandRows: true, 
             stickyHeaderDates: true,
             allDaySlot: false,
@@ -167,16 +169,11 @@
             selectable: true,
             selectMirror: true,
             dayMaxEvents: false,
-            nowIndicator: true, // Red line for current time
-            navLinks: true, // Native click-to-nav support (Day headers become links)
+            nowIndicator: true, 
             
-            // Interaction: Month -> Day (Custom backup)
-            dateClick: function(info) {
-                // If in month view, clicking a date goes to day view
-                if (calendarInstance.view.type === 'dayGridMonth') {
-                    calendarInstance.changeView('timeGridDay', info.dateStr);
-                }
-            },
+            // Interaction: Month -> Day
+            navLinks: true, 
+            navLinkDayClick: 'timeGridDay',
             
             views: {
                 dayGridMonth: { dayMaxEvents: false }, // Expand all events (No "+1 more")
