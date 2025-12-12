@@ -7,6 +7,11 @@
     <div class="col-lg-8">
         
         <!-- Header -->
+        <div class="position-absolute top-0 end-0 p-3">
+            <a href="{{ route('login') }}" class="btn btn-outline-dark btn-sm rounded-pill px-3 fw-bold">
+                <i class="bi bi-person-fill me-1"></i> Iniciar Sesión
+            </a>
+        </div>
         <div class="text-center mb-5 mt-4">
             <h1 class="display-6 fw-bold text-dark">Barbería JR</h1>
             <p class="text-dark opacity-75 lead">“Un buen corte es como un buen café, te despierta y te hace sentir mejor. ¡Ven y visítanos!”</p>
