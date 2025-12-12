@@ -1146,18 +1146,9 @@
         z-index: 2; /* Ensure date number is above circle if needed? No, usually separate */
     }
 
+    /* 3. Círculo rojo en el día actual en vista MENSUAL (REMOVED by User Request) */
     .fc-daygrid-day.fc-day-today::after {
-        content: '';
-        position: absolute;
-        bottom: 4px;
-        left: 4px; /* Pegada al inicio, pero abajo? User said "Solo se ve la bolita" similar to Google */
-        /* Google Calendar Month View Today: Actually highlights the Number Circle. 
-           User's CSS snippet puts a dot at bottom left. I'll stick to their snippet. */
-        width: 10px;
-        height: 10px;
-        background: #ea4335;
-        border-radius: 50%;
-        pointer-events: none;
+        display: none !important;
     }    
 </style>
 @endpush
