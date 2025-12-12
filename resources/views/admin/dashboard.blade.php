@@ -1131,18 +1131,9 @@
         z-index: 100;
     }
 
-    /* 2. Bolita roja al inicio de la línea (Lollipop Head) */
+    /* 2. Bolita roja al inicio de la línea (REMOVED by User Request) */
     .fc .fc-timegrid-now-indicator-arrow {
-        width: 12px !important;
-        height: 12px !important;
-        background-color: #ea4335 !important;
-        border-radius: 50% !important;
-        border: none !important;
-        margin-left: -6px !important; /* Centrada en el eje */
-        margin-top: -6px !important; 
-        z-index: 101; /* Encima de la línea */
-        opacity: 1;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* Sutil sombra para resaltar */
+        display: none !important;
     }
 
     /* 3. Círculo rojo en el día actual en vista MENSUAL */
