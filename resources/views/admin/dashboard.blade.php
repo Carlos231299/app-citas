@@ -594,8 +594,29 @@
         background-color: #F8F9FA !important;
     }
     .fc-list-event-title {
-        color: #3C4043;
+        color: #1E293B !important; /* Slate 800 */
         font-weight: 500;
+    }
+    .fc-list-event-time {
+        color: #64748B !important; /* Slate 500 */
+        font-weight: 600;
+    }
+    .fc-list-day-cushion {
+        background-color: #F1F5F9 !important; /* Slate 100 */
+    }
+    .fc-list-day-text,
+    .fc-list-day-side-text {
+        color: #1E293B !important;
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+    /* Ensure dot is visible */
+    .fc-list-event-dot {
+        border-color: #2563EB !important; /* Primary blue fallback */
+    }
+    /* Force table text color generally */
+    .fc-list-table {
+        color: #1E293B !important;
     }
 
     /* Today Circle (Month View) */
