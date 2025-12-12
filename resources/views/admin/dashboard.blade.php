@@ -743,49 +743,6 @@
         font-weight: 600 !important;
     }
 
-    /* NOW INDICATOR STYLING - EXACT GOOGLE REPLICA (User Provided Specs) */
-    
-    /* 1. Global Overflow Fix for FC Containers */
-    .fc .fc-timegrid-now-indicator-container,
-    .fc .fc-timegrid-col, 
-    .fc .fc-timegrid-col-frame,
-    .fc .fc-scroller {
-        overflow: visible !important;
-    }
-
-    /* 2. The Line (rGFpCd equivalent) */
-    body .fc .fc-now-indicator-line {
-        border: none !important;
-        background-color: #EA4335 !important;
-        height: 2px !important;
-        opacity: 1 !important;
-        position: absolute;
-        z-index: 506 !important; /* One below the dot */
-        left: 0 !important; /* Ensure it starts at the edge */
-    }
-    
-    /* 3. The Dot (LvQ60d equivalent) */
-    body .fc .fc-now-indicator-line::before {
-        content: ""; /* Required */
-        background: #EA4335 !important;
-        border-radius: 50%;
-        position: absolute;
-        height: 12px !important;
-        width: 12px !important;
-        margin-left: -6px !important; /* 12px/2 = 6px to center. User said -6.5px but standard logic says 6px. I'll use -6px to be safe on the pixel grid */
-        margin-top: -5px !important; /* Pull up to center on line */
-        top: 0 !important; /* Anchor to top of line */
-        left: 0 !important; /* Anchor to start of line */
-        z-index: 507 !important; /* Exact z-index provided */
-        display: block !important;
-        box-shadow: none !important; /* Remove shadow to match flat design */
-    }
-    
-    /* 4. Kill the Arrow */
-    body .fc .fc-now-indicator-arrow, 
-    .fc-now-indicator-arrow {
-        display: none !important;
-    }
     .fc-popover-close {
         opacity: 1 !important;
         font-size: 1.2rem !important;
