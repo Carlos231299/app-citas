@@ -244,12 +244,151 @@
             },
             
             eventClick: function(info) {
-                const props = info.event.extendedProps;
-                // Simple Alert for now to verify interactions
+                const event = info.event;
+                const props = event.extendedProps;
+                
+                // Format Date
+                const dateOptions = { weekday: 'long', day: 'numeric', month: 'long' };
+                const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
+                
+                const dateStr = event.start.toLocaleDateString('es-ES', dateOptions);
+                const timeStr = event.allDay ? 'Todo el día' : event.start.toLocaleTimeString('es-ES', timeOptions);
+                
+                // Determine Styles based on Type
+                let headerContent = '';
+                let bgStyle = '';
+                let titleColor = '#1f1f1f';
+                
+                if (props.type === 'holiday') {
+                    // Holiday Style (like the image)
+                    bgStyle = 'background-color: #F8FAFE; background-image: url("https://www.gstatic.com/classroom/themes/img_birthday.jpg"); background-size: cover; background-position: center;';
+                    // Fallback gradient if image fails or for cleaner look:
+                    // bgStyle = 'background: linear-gradient(135deg, #FFD1DC 0%, #C1E1C1 100%);'; 
+                } else {
+                    // Appointment Style
+                    const statusColors = {
+                        'completed': 'linear-gradient(135deg, #34D399 0%, #059669 100%)',
+                        'cancelled': 'linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)',
+                        'scheduled': 'linear-gradient(135deg, #6366F1 0%, #3B82F6 100%)'
+                    };
+                    bgStyle = `background: ${statusColors[props.status] || statusColors['scheduled']}`;
+                    titleColor = '#ffffff'; // White text on dark gradients
+                }
+
+                // Action Buttons (Top Right)
+                let headerActions = `
+                    <div class="d-flex gap-2" style="position: absolute; top: 12px; right: 12px; z-index: 10;">
+                        <button class="btn btn-light btn-sm rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: rgba(255,255,255,0.9); border: none;" onclick="Swal.close()">
+                             <i class="bi bi-x-lg" style="font-size: 1rem; color: #444;"></i>
+                        </button>
+                    </div>
+                `;
+                
+                // Add Edit/Delete for Appointments
+                if (props.type === 'appointment' && props.status === 'scheduled') {
+                    headerActions = `
+                        <div class="d-flex gap-2" style="position: absolute; top: 12px; right: 12px; z-index: 10;">
+                             <button class="btn btn-light btn-sm rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: rgba(255,255,255,0.9); border: none;" onclick="cancelAppointment(${event.id})" title="Cancelar">
+                                <i class="bi bi-trash" style="font-size: 1rem; color: #dc3545;"></i>
+                            </button>
+                            <button class="btn btn-light btn-sm rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: rgba(255,255,255,0.9); border: none;" onclick="Swal.close()">
+                                 <i class="bi bi-x-lg" style="font-size: 1rem; color: #444;"></i>
+                            </button>
+                        </div>
+                    `;
+                }
+
+                // Bottom Actions (Complete)
+                let footerActions = '';
+                if(props.status === 'scheduled' && props.type !== 'holiday') {
+                    footerActions = `
+                        <div class="mt-4 pt-3 d-flex justify-content-end border-top">
+                            <button onclick="Swal.close(); completeAppointment(${event.id}, ${props.price})" class="btn btn-primary rounded-pill px-4 fw-bold border-0" style="background-color: #1a73e8;">
+                                Completar Cita
+                            </button>
+                        </div>
+                    `;
+                }
+
                 Swal.fire({
-                    title: info.event.title,
-                    text: `${props.service} - ${props.barber}`,
-                    icon: 'info'
+                    html: `
+                        <div class="google-card-modal">
+                            <!-- Header -->
+                            <div class="modal-header-graphic" style="${bgStyle}; height: 140px; position: relative; border-radius: 24px 24px 0 0;">
+                                ${headerActions}
+                            </div>
+
+                            <!-- Body -->
+                            <div class="p-4 text-start">
+                                <!-- Title Block -->
+                                <div class="mb-4">
+                                    <h3 class="fw-normal mb-1" style="font-family: 'Google Sans', 'Outfit', sans-serif; font-size: 1.75rem; color: #1f1f1f;">
+                                        ${event.title}
+                                    </h3>
+                                    <div class="text-muted" style="font-size: 0.95rem;">${dateStr}</div>
+                                </div>
+
+                                <!-- Info List -->
+                                <div class="d-flex flex-column gap-3">
+                                    <!-- Time -->
+                                    <div class="d-flex gap-3 align-items-start">
+                                        <div style="width: 24px;"><i class="bi bi-clock fs-5 text-secondary"></i></div>
+                                        <div>
+                                            <div class="text-dark" style="font-size: 0.95rem;">${timeStr}</div>
+                                            <div class="small text-muted">Hora de la cita</div>
+                                        </div>
+                                    </div>
+
+                                    ${props.barber ? `
+                                    <!-- Barber -->
+                                    <div class="d-flex gap-3 align-items-start">
+                                        <div style="width: 24px;"><i class="bi bi-person fs-5 text-secondary"></i></div>
+                                        <div>
+                                            <div class="text-dark" style="font-size: 0.95rem;">${props.barber}</div>
+                                            <div class="small text-muted">Barbero encargado</div>
+                                        </div>
+                                    </div>` : ''}
+
+                                    ${props.service ? `
+                                    <!-- Service -->
+                                    <div class="d-flex gap-3 align-items-start">
+                                        <div style="width: 24px;"><i class="bi bi-scissors fs-5 text-secondary"></i></div>
+                                        <div>
+                                            <div class="text-dark" style="font-size: 0.95rem;">${props.service}</div>
+                                            <div class="small text-muted">Servicio solicitado</div>
+                                        </div>
+                                    </div>` : ''}
+                                    
+                                    ${props.status && props.type !== 'holiday' ? `
+                                    <!-- Status Badge -->
+                                    <div class="d-flex gap-3 align-items-center mt-1">
+                                        <div style="width: 24px;"><i class="bi bi-tag fs-5 text-secondary"></i></div>
+                                        <span class="badge rounded-pill px-3 py-2 fw-normal" style="
+                                            background-color: ${props.status === 'completed' ? '#E6F4EA' : (props.status === 'cancelled' ? '#FCE8E6' : '#E8F0FE')}; 
+                                            color: ${props.status === 'completed' ? '#137333' : (props.status === 'cancelled' ? '#C5221F' : '#1967D2')}; 
+                                            font-size: 0.85rem;">
+                                            ${{
+                                                'scheduled': 'Programada',
+                                                'completed': 'Completada',
+                                                'cancelled': 'Cancelada'
+                                            }[props.status] || props.status}
+                                        </span>
+                                    </div>` : ''}
+                                </div>
+
+                                ${footerActions}
+                            </div>
+                        </div>
+                    `,
+                    showConfirmButton: false,
+                    showCloseButton: false,
+                    width: '400px',
+                    padding: 0,
+                    background: 'transparent',
+                    customClass: {
+                        popup: 'google-modal-popup'
+                    },
+                    backdrop: `rgba(0,0,0,0.4)`
                 });
             }
         });
@@ -317,6 +456,67 @@
 
 
     document.addEventListener('DOMContentLoaded', initCalendar);
+
+
+    // Actions
+    window.completeAppointment = function(id, basePrice) {
+        Swal.fire({
+            title: 'Confirmar Completado',
+            text: '¿Deseas finalizar esta cita?',
+            input: 'number',
+            inputValue: basePrice,
+            inputLabel: 'Precio Final Cobrado',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, Completar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#10B981',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Debes ingresar el precio cobrado';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.patch(`/appointments/${id}/complete`, {
+                    confirmed_price: result.value
+                })
+                .then(response => {
+                    Swal.fire('¡Listo!', 'La cita ha sido marcada como completada.', 'success');
+                    // Reload
+                    setTimeout(() => location.reload(), 1000); 
+                })
+                .catch(error => {
+                    console.error(error);
+                    Swal.fire('Error', 'No se pudo actualizar la cita.', 'error');
+                });
+            }
+        });
+    };
+
+    window.cancelAppointment = function(id) {
+        Swal.fire({
+            title: 'Cancelar Cita',
+            input: 'text',
+            inputLabel: 'Motivo de cancelación',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, Cancelar',
+            confirmButtonColor: '#EF4444',
+            cancelButtonText: 'Volver'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.patch(`/appointments/${id}/cancel`, {
+                    reason: result.value
+                })
+                .then(response => {
+                    Swal.fire('Cancelada', 'La cita ha sido cancelada.', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                })
+                .catch(error => {
+                    Swal.fire('Error', 'No se pudo cancelar la cita.', 'error');
+                });
+            }
+        });
+    };    
 </script>
 <style>
     /* Custom Calendar Styling for Google Calendar Look */
@@ -572,5 +772,38 @@
         background-color: transparent !important; /* Remove yellow tint */
     }
     
+    /* Google Card Modal Styles */
+    .google-modal-popup {
+        border-radius: 28px !important;
+        /* Default Desktop */
+    }
+
+    .modal-header-graphic {
+        /* Placeholder pattern if no image */
+        background-color: #f1f5f9;
+    }
+
+    /* Mobile Responsive Popup (Bottom Sheet) */
+    @media (max-width: 768px) {
+        .swal2-container {
+            align-items: flex-end !important; /* Align to bottom */
+            padding-bottom: 0 !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        .google-modal-popup {
+            width: 100% !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+            border-top-left-radius: 24px !important;
+            border-top-right-radius: 24px !important;
+            margin: 0 !important;
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+    }
 </style>
 @endpush
