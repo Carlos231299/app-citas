@@ -53,14 +53,10 @@
                 <i class="bi bi-file-earmark-bar-graph-fill"></i> <span class="sidebar-text">Reportes</span>
             </a>
             
-            <div class="mt-auto px-3 mb-4">
-                <form action="{{ route('logout') }}" method="POST" id="logout-form">
-                    @csrf
-                    <button type="button" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2 overflow-hidden" title="Salir" onclick="confirmLogout()" style="z-index: 1002; position: relative;">
-                        <i class="bi bi-box-arrow-right"></i> <span class="sidebar-text">Salir</span>
-                    </button>
-                </form>
-            </div>
+            <!-- Hidden Logout Form for Header Dropdown -->
+            <form action="{{ route('logout') }}" method="POST" id="logout-form" class="d-none">
+                @csrf
+            </form>
         </nav>
     </div>
 
