@@ -359,7 +359,14 @@
                                         </div>
                                     </div>` : ''}
                                     
-                                    ${props.status && props.type !== 'holiday' ? `
+                                    ${props.status && props.type !== 'holiday' ? (() => {
+                                        const statusLabels = {
+                                            'scheduled': 'Programada',
+                                            'completed': 'Completada',
+                                            'cancelled': 'Cancelada'
+                                        };
+                                        const label = statusLabels[props.status] || props.status;
+                                        return `
                                     <!-- Status Badge -->
                                     <div class="d-flex gap-3 align-items-center mt-1">
                                         <div style="width: 24px;"><i class="bi bi-tag fs-5 text-secondary"></i></div>
@@ -367,13 +374,10 @@
                                             background-color: ${props.status === 'completed' ? '#E6F4EA' : (props.status === 'cancelled' ? '#FCE8E6' : '#E8F0FE')}; 
                                             color: ${props.status === 'completed' ? '#137333' : (props.status === 'cancelled' ? '#C5221F' : '#1967D2')}; 
                                             font-size: 0.85rem;">
-                                            ${{
-                                                'scheduled': 'Programada',
-                                                'completed': 'Completada',
-                                                'cancelled': 'Cancelada'
-                                            }[props.status] || props.status}
+                                            ${label}
                                         </span>
-                                    </div>` : ''}
+                                    </div>`;
+                                    })() : ''}
                                 </div>
 
                                 ${footerActions}
