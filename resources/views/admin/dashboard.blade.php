@@ -319,7 +319,7 @@
                             </div>
 
                             <!-- Body -->
-                            <div class="p-4 text-start">
+                            <div class="p-4 text-start bg-white rounded-bottom-4">
                                 <!-- Title Block -->
                                 <div class="mb-4">
                                     <h3 class="fw-normal mb-1" style="font-family: 'Google Sans', 'Outfit', sans-serif; font-size: 1.75rem; color: #1f1f1f;">
