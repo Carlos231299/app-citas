@@ -264,7 +264,8 @@ class AppointmentController extends Controller
                         'status' => $appointment->status,
                         'client_phone' => $appointment->client_phone,
                         'custom_details' => $appointment->custom_details ?? 'Sin detalles adicionales',
-                        'price' => $appointment->service->price
+                        'price' => $appointment->service->price,
+                        'cancellation_reason' => $appointment->cancellation_reason
                     ]
                 ];
             });

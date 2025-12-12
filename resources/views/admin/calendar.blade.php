@@ -80,6 +80,20 @@
                                     }[props.status] || props.status.toUpperCase()}
                                 </span>
                             </div>
+                            
+                            ${props.status === 'cancelled' ? 
+                                `<div class="mb-2 p-2 bg-danger bg-opacity-10 rounded border border-danger">
+                                    <strong class="text-danger">Motivo de Cancelación:</strong> 
+                                    <div class="text-dark small mt-1">${props.cancellation_reason || 'No especificado'}</div>
+                                </div>` : ''
+                            }
+
+                            ${props.status === 'completed' ? 
+                                `<div class="mb-2 p-2 bg-success bg-opacity-10 rounded border border-success">
+                                    <strong class="text-success"><i class="bi bi-check-circle-fill me-1"></i> Completada con éxito</strong>
+                                </div>` : ''
+                            }
+
                             ${actionButtons}
                         </div>
                     `,
