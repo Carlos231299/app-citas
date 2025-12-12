@@ -276,135 +276,59 @@
                     titleColor = '#ffffff'; // White text on dark gradients
                 }
 
-                // Action Buttons (Top Right)
-                let headerActions = ''; // No custom close button
-                
-                // Add Edit/Delete for Appointments
-                if (props.type === 'appointment' && props.status === 'scheduled') {
-                    headerActions = `
-                        <div class="d-flex gap-2" style="position: absolute; top: 12px; right: 12px; z-index: 10;">
-                            <button onclick="cancelAppointment(${event.id})" class="btn btn-light rounded-circle p-0" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); border: none; color: white;" title="Cancelar">
-                                <i class="bi bi-trash-fill" style="font-size: 0.9rem;"></i>
-                            </button>
-                            <button onclick="editAppointment(${event.id})" class="btn btn-light rounded-circle p-0" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); border: none; color: white;" title="Editar">
-                                <i class="bi bi-pencil-fill" style="font-size: 0.9rem;"></i>
-                            </button>
-                        </div>
-                    `;
+                // STANDARD SWEETALERT 2 DESIGN
+                let statusBadge = '';
+                if (props.status && props.type !== 'holiday') {
+                    const colors = { 
+                        'scheduled': 'primary', 
+                        'completed': 'success', 
+                        'cancelled': 'danger' 
+                    };
+                    const labels = { 
+                        'scheduled': 'Programada', 
+                        'completed': 'Completada', 
+                        'cancelled': 'Cancelada' 
+                    };
+                    const color = colors[props.status] || 'secondary';
+                    const label = labels[props.status] || props.status;
+                    statusBadge = `<span class="badge bg-${color}">${label}</span>`;
                 }
 
-                // Bottom Actions (Complete)
-                let footerActions = '';
-                if(props.status === 'scheduled' && props.type !== 'holiday') {
-                    footerActions = `
-                        <div class="mt-4 pt-3 d-flex justify-content-end border-top">
-                            <button onclick="Swal.close(); completeAppointment(${event.id}, ${props.price})" class="btn btn-primary rounded-pill px-4 fw-bold border-0" style="background-color: #1a73e8;">
-                                Completar Cita
+                // Action Buttons (Standard Bootstrap)
+                let actionButtons = '';
+                if (props.type === 'appointment' && props.status === 'scheduled') {
+                    actionButtons = `
+                        <div class="d-flex justify-content-center gap-2 mt-4">
+                            <button onclick="editAppointment(${event.id})" class="btn btn-primary px-4">
+                                <i class="bi bi-pencil-fill me-1"></i> Editar
+                            </button>
+                            <button onclick="cancelAppointment(${event.id})" class="btn btn-danger px-4">
+                                <i class="bi bi-trash-fill me-1"></i> Cancelar
                             </button>
                         </div>
                     `;
                 }
 
                 Swal.fire({
+                    title: event.title,
                     html: `
-                        <div class="google-card-modal">
-                            <!-- Header -->
-                            <div class="modal-header-graphic" style="${bgStyle}; height: 140px; position: relative; border-radius: 24px 24px 0 0;">
-                                ${headerActions}
-                            </div>
-
-                            <!-- Body -->
-                            <div class="p-4 text-start bg-white rounded-bottom-4">
-                                <!-- Title Block -->
-                                <div class="mb-4">
-                                    <h3 class="fw-normal mb-1" style="font-family: 'Google Sans', 'Outfit', sans-serif; font-size: 1.75rem; color: #1f1f1f;">
-                                        ${event.title}
-                                    </h3>
-                                    <div class="text-muted" style="font-size: 0.95rem;">${dateStr}</div>
-                                </div>
-
-                                <!-- Info List -->
-                                <div class="d-flex flex-column gap-3">
-                                    <!-- Time -->
-                                    <div class="d-flex gap-3 align-items-start">
-                                        <div style="width: 24px;"><i class="bi bi-clock fs-5 text-secondary"></i></div>
-                                        <div>
-                                            <div class="text-dark" style="font-size: 0.95rem;">${timeStr}</div>
-                                            <div class="small text-muted">Hora de la cita</div>
-                                        </div>
-                                    </div>
-
-                                    ${props.barber ? `
-                                    <!-- Barber -->
-                                    <div class="d-flex gap-3 align-items-start">
-                                        <div style="width: 24px;"><i class="bi bi-person fs-5 text-secondary"></i></div>
-                                        <div>
-                                            <div class="text-dark" style="font-size: 0.95rem;">${props.barber}</div>
-                                            <div class="small text-muted">Barbero encargado</div>
-                                        </div>
-                                    </div>` : ''}
-
-                                    ${props.service ? `
-                                    <!-- Service -->
-                                    <div class="d-flex gap-3 align-items-start">
-                                        <div style="width: 24px;"><i class="bi bi-scissors fs-5 text-secondary"></i></div>
-                                        <div>
-                                            <div class="text-dark" style="font-size: 0.95rem;">${props.service}</div>
-                                            <div class="small text-muted">Servicio solicitado</div>
-                                        </div>
-                                    </div>` : ''}
-                                    
-                                    ${props.status && props.type !== 'holiday' ? (() => {
-                                        const statusLabels = {
-                                            'scheduled': 'Programada',
-                                            'completed': 'Completada',
-                                            'cancelled': 'Cancelada'
-                                        };
-                                        const label = statusLabels[props.status] || props.status;
-                                        return `
-                                    <!-- Status Badge -->
-                                    <div class="d-flex gap-3 align-items-center mt-1">
-                                        <div style="width: 24px;"><i class="bi bi-tag fs-5 text-secondary"></i></div>
-                                        <span class="badge rounded-pill px-3 py-2 fw-normal" style="
-                                            background-color: ${props.status === 'completed' ? '#E6F4EA' : (props.status === 'cancelled' ? '#FCE8E6' : '#E8F0FE')}; 
-                                            color: ${props.status === 'completed' ? '#137333' : (props.status === 'cancelled' ? '#C5221F' : '#1967D2')}; 
-                                            font-size: 0.85rem;">
-                                            ${label}
-                                        </span>
-                                    </div>`;
-                                    })() : ''}
-                                </div>
-
-                                ${footerActions}
-
-                                <!-- Failsafe Close Button (Mobile) -->
-                                <div class="mt-3 text-center d-md-none">
-                                    <button type="button" id="mobile-close-btn" class="btn btn-secondary w-100 py-2 rounded-pill">
-                                        Cerrar
-                                    </button>
-                                </div>
-                            </div>
+                        <div class="text-start fs-6">
+                            <p class="mb-2"><strong><i class="bi bi-calendar-event me-2"></i>Fecha:</strong> ${dateStr}</p>
+                            <p class="mb-2"><strong><i class="bi bi-clock me-2"></i>Hora:</strong> ${timeStr}</p>
+                            ${props.barber ? `<p class="mb-2"><strong><i class="bi bi-person me-2"></i>Barbero:</strong> ${props.barber}</p>` : ''}
+                            ${props.service ? `<p class="mb-2"><strong><i class="bi bi-scissors me-2"></i>Servicio:</strong> ${props.service} ($${props.price})</p>` : ''}
+                            <p class="mb-2"><strong><i class="bi bi-info-circle me-2"></i>Estado:</strong> ${statusBadge}</p>
+                            ${props.custom_details ? `<p class="mb-0 text-muted small mt-3"><em>${props.custom_details}</em></p>` : ''}
                         </div>
+                        ${actionButtons}
                     `,
+                    icon: 'info',
                     showConfirmButton: false,
-                    showCloseButton: true, // Restore Native X
-                    width: window.innerWidth < 768 ? '95%' : '400px',
-                    padding: 0,
-                    allowOutsideClick: true,
-                    allowEscapeKey: true,
-                    returnFocus: false, // Prevents scroll jumping/locking
-                    background: 'transparent',
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    cancelButtonText: 'Cerrar',
                     customClass: {
-                        popup: 'google-modal-popup',
-                        closeButton: 'google-native-close'
-                    },
-                    backdrop: true,
-                    didOpen: () => {
-                        // Manually bind click to ensure it works on all mobile browsers
-                        const btn = document.getElementById('mobile-close-btn');
-                        if(btn) {
-                            btn.addEventListener('click', () => Swal.close());
-                        }
+                        popup: 'rounded-4 shadow' // Simple rounded corners
                     }
                 });
             }
