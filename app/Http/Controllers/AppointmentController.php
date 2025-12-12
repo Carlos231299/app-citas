@@ -171,7 +171,7 @@ class AppointmentController extends Controller
         // Get appointments for Calendar (handled by API usually, but if initial render needs them?)
         // Actually, calendar fetches via API. We just need the view.
         
-        return view('admin.dashboard', compact('stats'));
+        return view('admin.debug', compact('stats'));
     }
 
     // Admin: Mark Complete with Price
