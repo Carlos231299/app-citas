@@ -747,15 +747,6 @@
         background-color: transparent !important; /* Remove yellow tint */
     }
     
-    /* Clean Event Chips */
-    .fc-event {
-        border: none !important;
-        border-radius: 4px;
-        padding: 2px 6px;
-        font-size: 0.85rem;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        margin: 2px 0;
-        font-weight: 500;
-    }
+
 </style>
 @endpush
