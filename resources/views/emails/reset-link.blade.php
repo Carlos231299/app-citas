@@ -42,7 +42,7 @@
 
                 <!-- Critical Info -->
                 <div class="alert">
-                    <p class="alert-text">⚠️ <strong>Importante:</strong> Este enlace expira en 60 minutos.</p>
+                    <p class="alert-text">⚠️ <strong>Importante:</strong> Este enlace expira en 5 minutos.</p>
                     <p class="alert-text" style="font-weight: 400; margin-top: 5px;">Si no solicitaste este cambio, no es necesario realizar ninguna acción.</p>
                 </div>
 
