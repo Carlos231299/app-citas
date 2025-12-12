@@ -64,8 +64,7 @@ class DemoContentSeeder extends Seeder
                     'barber_id' => $barberId,
                     'scheduled_at' => $scheduledAt,
                     'status' => 'scheduled', // Default
-                    'custom_details' => 'Cita generada automáticamente (Demo)',
-                    'price' => $service->price
+                    'custom_details' => 'Cita generada automáticamente (Demo)'
                 ]);
             }
         }
