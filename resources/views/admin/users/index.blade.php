@@ -92,7 +92,16 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">CONTRASEÑA</label>
-                        <input type="password" name="password" class="form-control" required minlength="6">
+                        <input type="password" name="password" id="create_password" class="form-control" required minlength="8" autocomplete="new-password">
+                        <!-- Checklist Create -->
+                        <div class="mt-2">
+                            <ul class="list-unstyled mb-0 small ps-1" id="create-password-requirements">
+                                <li data-req="length" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Mínimo 8 caracteres</li>
+                                <li data-req="upper" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Una mayúscula</li>
+                                <li data-req="number" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Un número</li>
+                                <li data-req="special" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Un símbolo (@$!%*?&)</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer border-top-0">
@@ -133,7 +142,17 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">NUEVA CONTRASEÑA (Opcional)</label>
-                        <input type="password" name="password" class="form-control" placeholder="Dejar en blanco para mantener actual" minlength="6">
+                        <input type="password" name="password" id="edit_password" class="form-control" placeholder="Dejar en blanco para mantener actual" minlength="8" autocomplete="new-password">
+                        <!-- Checklist Edit -->
+                        <div class="mt-2">
+                             <small class="text-muted d-block mb-1">Requisitos (Solo si cambias contraseña):</small>
+                            <ul class="list-unstyled mb-0 small ps-1" id="edit-password-requirements">
+                                <li data-req="length" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Mínimo 8 caracteres</li>
+                                <li data-req="upper" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Una mayúscula</li>
+                                <li data-req="number" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Un número</li>
+                                <li data-req="special" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Un símbolo (@$!%*?&)</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer border-top-0">
@@ -156,8 +175,15 @@
             document.getElementById('edit_name').value = name;
             document.getElementById('edit_email').value = email;
             document.getElementById('edit_role').value = role;
+            document.getElementById('edit_password').value = ''; // Reset password field
+             // Reset requirements visuals
+             resetChecklist('edit-password-requirements');
             editModal.show();
         };
+
+        // Initialize Password Validation
+        setupPasswordChecklist('create_password', 'create-password-requirements');
+        setupPasswordChecklist('edit_password', 'edit-password-requirements');
     });
 
     function confirmDelete(e, name) {
@@ -176,6 +202,62 @@
             if (result.isConfirmed) {
                 form.submit();
             }
+        });
+    }
+
+    // Reusable Password Checklist Logic
+    function setupPasswordChecklist(inputId, listId) {
+        const input = document.getElementById(inputId);
+        const list = document.getElementById(listId);
+        if (!input || !list) return;
+
+        input.addEventListener('input', function() {
+             const val = input.value;
+             if(val.length === 0 && inputId.includes('edit')) {
+                 resetChecklist(listId); // If empty on edit, reset to gray
+                 return;
+             }
+             updateChecklist(list, val);
+        });
+    }
+
+    function updateChecklist(listElement, value) {
+        const items = listElement.querySelectorAll('li');
+        
+        items.forEach(li => {
+            const type = li.getAttribute('data-req');
+            let isValid = false;
+
+            if (type === 'length') isValid = value.length >= 8;
+            if (type === 'upper') isValid = /[A-Z]/.test(value);
+            if (type === 'number') isValid = /[0-9]/.test(value);
+            if (type === 'special') isValid = /[@$!%*?&]/.test(value);
+
+            const icon = li.querySelector('i');
+            if (isValid) {
+                li.classList.remove('text-muted');
+                li.classList.add('text-success', 'text-decoration-line-through', 'fw-bold');
+                icon.classList.remove('bi-circle');
+                icon.classList.add('bi-check-circle-fill');
+            } else {
+                li.classList.add('text-muted');
+                li.classList.remove('text-success', 'text-decoration-line-through', 'fw-bold');
+                icon.classList.add('bi-circle');
+                icon.classList.remove('bi-check-circle-fill');
+            }
+        });
+    }
+
+    function resetChecklist(listId) {
+        const list = document.getElementById(listId);
+        if(!list) return;
+        const items = list.querySelectorAll('li');
+        items.forEach(li => {
+            li.classList.add('text-muted');
+            li.classList.remove('text-success', 'text-decoration-line-through', 'fw-bold');
+            const icon = li.querySelector('i');
+            icon.classList.add('bi-circle');
+            icon.classList.remove('bi-check-circle-fill');
         });
     }
 </script>

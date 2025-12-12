@@ -39,8 +39,61 @@
                                         <i class="bi bi-eye"></i>
                                     </button>
                                 </div>
-                                <div class="form-text text-white-50 small">Mínimo 8 caracteres, mayúscula, número y símbolo.</div>
+                                <!-- Password Requirements Checklist -->
+                                <div class="mt-2 text-start">
+                                    <small class="text-gold fw-bold">Requisitos:</small>
+                                    <ul class="list-unstyled mb-0 small ps-1" id="password-requirements">
+                                        <li id="req-length" class="text-white-50"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Mínimo 8 caracteres</li>
+                                        <li id="req-upper" class="text-white-50"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Una mayúscula</li>
+                                        <li id="req-number" class="text-white-50"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Un número</li>
+                                        <li id="req-special" class="text-white-50"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Un símbolo (@$!%*?&)</li>
+                                    </ul>
+                                </div>
                             </div>
+
+<script>
+    // Injected Script for Checklist Logic (scoped to this block to avoid collisions if placed in main script)
+    document.addEventListener('DOMContentLoaded', function() {
+        const passInput = document.getElementById('password');
+        
+        // Requirements Elements
+        const reqLength = document.getElementById('req-length');
+        const reqUpper = document.getElementById('req-upper');
+        const reqNumber = document.getElementById('req-number');
+        const reqSpecial = document.getElementById('req-special');
+
+        function updateRequirement(element, isValid) {
+            const icon = element.querySelector('i');
+            if (isValid) {
+                element.classList.remove('text-white-50');
+                element.classList.add('text-success', 'text-decoration-line-through');
+                icon.classList.remove('bi-circle');
+                icon.classList.add('bi-check-circle-fill');
+            } else {
+                element.classList.add('text-white-50');
+                element.classList.remove('text-success', 'text-decoration-line-through');
+                icon.classList.add('bi-circle');
+                icon.classList.remove('bi-check-circle-fill');
+            }
+        }
+
+        passInput.addEventListener('input', function() {
+            const val = passInput.value;
+            
+            // 1. Length 8
+            updateRequirement(reqLength, val.length >= 8);
+            
+            // 2. Uppercase
+            updateRequirement(reqUpper, /[A-Z]/.test(val));
+
+            // 3. Number
+            updateRequirement(reqNumber, /[0-9]/.test(val));
+
+            // 4. Special Char
+            updateRequirement(reqSpecial, /[@$!%*?&]/.test(val));
+        });
+    });
+</script>
 
                             <div class="mb-4 text-start">
                                 <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Confirmar Contraseña</label>
@@ -109,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (pass === confirm) {
             confirmPassword.classList.remove('is-invalid');
             confirmPassword.classList.add('is-valid'); // Bootstrap green border
-            matchMessage.textContent = 'Las contraseñas coinciden correctly.';
+            matchMessage.textContent = 'Las contraseñas coinciden';
             matchMessage.className = 'form-text small text-success fw-bold';
         } else {
             confirmPassword.classList.remove('is-valid');

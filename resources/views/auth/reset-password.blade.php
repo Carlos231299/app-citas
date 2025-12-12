@@ -25,15 +25,19 @@
                                 <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Nueva Contraseña</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-lock"></i></span>
-                                    <input type="password" name="password" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password" autofocus placeholder="">
+                                    <input type="password" name="password" id="password" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password" autofocus placeholder="">
+                                    <button class="btn btn-outline-secondary border-start-0 text-secondary" type="button" id="togglePassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
                                 </div>
-                                <div class="text-white-50 small mt-2">
-                                    <i class="bi bi-info-circle me-1"></i> La contraseña debe cumplir:
-                                    <ul class="mb-0 ps-3 mt-1" style="font-size: 0.85rem;">
-                                        <li>Mínimo 8 caracteres</li>
-                                        <li>Al menos 1 mayúscula</li>
-                                        <li>Al menos 1 número</li>
-                                        <li>Al menos 1 símbolo (@$!%*?&)</li>
+                                <!-- Checklist -->
+                                <div class="mt-2">
+                                     <small class="text-gold fw-bold">Requisitos:</small>
+                                    <ul class="list-unstyled mb-0 small ps-1" id="password-requirements">
+                                        <li id="req-length" class="text-white-50"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Mínimo 8 caracteres</li>
+                                        <li id="req-upper" class="text-white-50"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Una mayúscula</li>
+                                        <li id="req-number" class="text-white-50"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Un número</li>
+                                        <li id="req-special" class="text-white-50"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Un símbolo (@$!%*?&)</li>
                                     </ul>
                                 </div>
                             </div>
@@ -42,7 +46,10 @@
                                 <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Confirmar Contraseña</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-check-circle"></i></span>
-                                    <input type="password" name="password_confirmation" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password" placeholder="Repite la contraseña">
+                                    <input type="password" name="password_confirmation" id="password_confirmation" class="form-control bg-transparent border-secondary text-white" required autocomplete="new-password" placeholder="Repite la contraseña">
+                                    <button class="btn btn-outline-secondary border-start-0 text-secondary" type="button" id="toggleConfirmPassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
                                 </div>
                             </div>
         
@@ -54,4 +61,62 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elements
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('password_confirmation');
+        const togglePassword = document.getElementById('togglePassword');
+        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+        
+        // Checklist Elements
+        const reqLength = document.getElementById('req-length');
+        const reqUpper = document.getElementById('req-upper');
+        const reqNumber = document.getElementById('req-number');
+        const reqSpecial = document.getElementById('req-special');
+
+        // Toggle Visibility
+        function toggleVisibility(input, button) {
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            const icon = button.querySelector('i');
+            icon.classList.toggle('bi-eye');
+            icon.classList.toggle('bi-eye-slash');
+        }
+
+        if(togglePassword) {
+            togglePassword.addEventListener('click', function() { toggleVisibility(password, this); });
+        }
+        if(toggleConfirmPassword) {
+            toggleConfirmPassword.addEventListener('click', function() { toggleVisibility(confirmPassword, this); });
+        }
+
+        // Validation Logic
+        function updateRequirement(element, isValid) {
+            const icon = element.querySelector('i');
+            if (isValid) {
+                element.classList.remove('text-white-50');
+                element.classList.add('text-success', 'text-decoration-line-through');
+                icon.classList.remove('bi-circle');
+                icon.classList.add('bi-check-circle-fill');
+            } else {
+                element.classList.add('text-white-50');
+                element.classList.remove('text-success', 'text-decoration-line-through');
+                icon.classList.add('bi-circle');
+                icon.classList.remove('bi-check-circle-fill');
+            }
+        }
+
+        if(password) {
+            password.addEventListener('input', function() {
+                const val = password.value;
+                updateRequirement(reqLength, val.length >= 8);
+                updateRequirement(reqUpper, /[A-Z]/.test(val));
+                updateRequirement(reqNumber, /[0-9]/.test(val));
+                updateRequirement(reqSpecial, /[@$!%*?&]/.test(val));
+            });
+        }
+    });
+</script>
 @endsection
