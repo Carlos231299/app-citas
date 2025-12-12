@@ -12,9 +12,8 @@ use App\Http\Controllers\ReportController;
 // ...
 
 // Public Route (Redirect to Login or Landing)
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+Route::get('/', [AppointmentController::class, 'publicIndex'])->name('welcome');
+Route::post('/book', [AppointmentController::class, 'store'])->name('book');
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
