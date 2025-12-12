@@ -536,27 +536,87 @@
     }
 
     /* Google Style Events */
+    /* Common interactions */
     .fc-event {
+        cursor: pointer;
+        transition: transform 0.1s;
+    }
+    .fc-event:hover {
+        transform: scale(1.02);
+        z-index: 50;
+    }
+
+    /* TYPE 1: TimeGrid (Week/Day - Pills) */
+    .fc-timegrid-event {
         border: none !important;
         border-radius: 6px !important;
         box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         padding: 1px 4px;
         font-size: 0.85rem;
         font-weight: 500;
-        cursor: pointer;
-        transition: transform 0.1s, box-shadow 0.1s;
     }
-    .fc-event:hover {
-        transform: scale(1.02);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        z-index: 50;
+    .fc-timegrid-event .fc-event-main {
+        color: white; 
     }
-    /* TimeGrid specific */
-    .fc-timegrid-event {
-        border-radius: 6px !important;
+
+    /* TYPE 2: DayGrid (Month - Dots) */
+    .fc-daygrid-event {
+        background: transparent !important; /* Remove background to show just dot + text */
+        border: none !important;
+        margin-top: 1px !important;
+        padding: 2px 4px !important;
     }
-    .fc-event-main {
-        color: white; /* Ensure text matches contrast, usually handled by server color but safe fallback */
+    .fc-daygrid-event:hover {
+        background: rgba(0,0,0,0.05) !important;
+        border-radius: 4px;
+    }
+    .fc-daygrid-dot-event .fc-event-title,
+    .fc-daygrid-dot-event .fc-event-time {
+        color: #3C4043 !important; /* Dark text */
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+    .fc-daygrid-event-dot {
+        border-width: 5px !important; /* Larger dot */
+        margin-right: 6px;
+    }
+
+    /* Today Circle (Month View) */
+    .fc-daygrid-day.fc-day-today .fc-daygrid-day-top {
+        display: flex;
+        justify-content: center;
+        padding-top: 4px;
+    }
+    .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+        background-color: #1a73e8;
+        color: white !important;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        min-width: 28px; /* Prevent squash */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none !important;
+        font-size: 0.9rem;
+    }
+
+    /* Mobile Responsive Toolbar */
+    @media (max-width: 768px) {
+        .fc-header-toolbar {
+            flex-direction: column; /* Stack toolbar items */
+            gap: 12px;
+            align-items: center;
+        }
+        .fc-toolbar-chunk {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        .fc-toolbar-title {
+            font-size: 1.25rem !important; /* Smaller title */
+        }
+        /* Hide text in dropdown items on mobile if needed, or allow wrap */
     }
     
     /* Buttons (Google Style) */
