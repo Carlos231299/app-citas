@@ -42,11 +42,10 @@ class BarberController extends Controller
         
         // If 'name' is present, it's a full form submission (from the Edit modal or Switch form fallback)
         if ($request->has('name')) {
-             // For HTML forms, missing checkbox means false. 
-             // We explicitly check presence for these if we are in "Form Mode".
-             // Note: validation cleaned them, but we need to force boolean logic for form submit.
-             $validated['is_active'] = $request->has('is_active');
-             $validated['special_mode'] = $request->has('special_mode');
+             // Use boolean() to correctly interpret "0" (from hidden input) as false, 
+             // and "on"/"1" as true. Missing field (unchecked checkbox) also creates false.
+             $validated['is_active'] = $request->boolean('is_active');
+             $validated['special_mode'] = $request->boolean('special_mode');
         } 
         // If 'name' is missing, it's a partial AJAX update. We rely on $validated containing only what was sent.
         
