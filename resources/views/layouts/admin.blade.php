@@ -30,7 +30,7 @@
                 <h4 class="fw-bold text-primary mb-0 text-nowrap">Barbería JR</h4>
                 <small class="text-secondary text-nowrap">Panel de Gestión</small>
             </div>
-            <button class="btn bg-white border shadow-sm text-primary rounded-circle" id="sidebarToggle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+            <button class="btn bg-white border shadow-sm text-primary rounded-circle d-none d-md-flex" id="sidebarToggle" style="width: 40px; height: 40px; align-items: center; justify-content: center;">
                 <i class="bi bi-list fs-5"></i>
             </button>
         </div>
