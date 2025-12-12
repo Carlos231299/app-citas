@@ -743,30 +743,31 @@
         font-weight: 600 !important;
     }
 
-    /* NOW INDICATOR STYLING (Google Lollipop Style) - ROBUST FIX */
+    /* NOW INDICATOR STYLING (Google Lollipop Style) - THICKER & VISIBLE */
     body .fc .fc-now-indicator-line {
         border: none !important;
         background-color: #EA4335 !important;
-        height: 2px !important; /* Explicit height */
+        height: 4px !important; /* Thicker line requested */
         opacity: 1 !important;
         position: absolute;
         z-index: 99 !important;
         overflow: visible !important;
+        border-radius: 0 4px 4px 0; /* Soften the right end */
     }
     
     /* The Dot inside the day column */
     body .fc .fc-now-indicator-line::before {
         content: " " !important;
         position: absolute;
-        top: 50%; /* Center vertically relative to line */
-        left: 0; 
-        width: 12px;
-        height: 12px;
+        top: 50%; 
+        left: 0; /* Start exactly at the beginning of the line */
+        width: 16px; /* Larger dot */
+        height: 16px;
         background-color: #EA4335 !important;
         border-radius: 50%;
-        box-shadow: 0 0 4px rgba(234, 67, 53, 0.4);
-        transform: translate(-50%, -50%); /* perfectly center on the start tip */
-        z-index: 100 !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Shadow for depth */
+        transform: translate(-25%, -50%); /* Only pull back slightly, not fully half */
+        z-index: 101 !important;
         display: block !important;
     }
     
