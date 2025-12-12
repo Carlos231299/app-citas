@@ -36,8 +36,9 @@
                                     <ul class="list-unstyled mb-0 small ps-1" id="password-requirements">
                                         <li id="req-length" class="text-white-50"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Mínimo 8 caracteres</li>
                                         <li id="req-upper" class="text-white-50"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Una mayúscula</li>
+                                        <li id="req-lower" class="text-white-50"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Una minúscula</li>
                                         <li id="req-number" class="text-white-50"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Un número</li>
-                                        <li id="req-special" class="text-white-50"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Un símbolo (@$!%*?&)</li>
+                                        <li id="req-special" class="text-white-50"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Un símbolo (@$!%*?&.)</li>
                                     </ul>
                                 </div>
                             </div>
@@ -73,6 +74,7 @@
         // Checklist Elements
         const reqLength = document.getElementById('req-length');
         const reqUpper = document.getElementById('req-upper');
+        const reqLower = document.getElementById('req-lower');
         const reqNumber = document.getElementById('req-number');
         const reqSpecial = document.getElementById('req-special');
 
@@ -113,8 +115,9 @@
                 const val = password.value;
                 updateRequirement(reqLength, val.length >= 8);
                 updateRequirement(reqUpper, /[A-Z]/.test(val));
+                updateRequirement(reqLower, /[a-z]/.test(val));
                 updateRequirement(reqNumber, /[0-9]/.test(val));
-                updateRequirement(reqSpecial, /[@$!%*?&]/.test(val));
+                updateRequirement(reqSpecial, /[@$!%*?&.]/.test(val));
             });
         }
     });

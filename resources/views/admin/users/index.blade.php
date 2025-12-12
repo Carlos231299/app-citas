@@ -98,8 +98,9 @@
                             <ul class="list-unstyled mb-0 small ps-1" id="create-password-requirements">
                                 <li data-req="length" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Mínimo 8 caracteres</li>
                                 <li data-req="upper" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Una mayúscula</li>
+                                <li data-req="lower" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Una minúscula</li>
                                 <li data-req="number" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Un número</li>
-                                <li data-req="special" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Un símbolo (@$!%*?&)</li>
+                                <li data-req="special" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Un símbolo (@$!%*?&.)</li>
                             </ul>
                         </div>
                     </div>
@@ -149,8 +150,9 @@
                             <ul class="list-unstyled mb-0 small ps-1" id="edit-password-requirements">
                                 <li data-req="length" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Mínimo 8 caracteres</li>
                                 <li data-req="upper" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Una mayúscula</li>
+                                <li data-req="lower" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Una minúscula</li>
                                 <li data-req="number" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Un número</li>
-                                <li data-req="special" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Un símbolo (@$!%*?&)</li>
+                                <li data-req="special" class="text-muted"><i class="bi bi-circle me-1" style="font-size: 0.6rem;"></i> Un símbolo (@$!%*?&.)</li>
                             </ul>
                         </div>
                     </div>
@@ -230,8 +232,9 @@
 
             if (type === 'length') isValid = value.length >= 8;
             if (type === 'upper') isValid = /[A-Z]/.test(value);
+            if (type === 'lower') isValid = /[a-z]/.test(value);
             if (type === 'number') isValid = /[0-9]/.test(value);
-            if (type === 'special') isValid = /[@$!%*?&]/.test(value);
+            if (type === 'special') isValid = /[@$!%*?&.]/.test(value);
 
             const icon = li.querySelector('i');
             if (isValid) {

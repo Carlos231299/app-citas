@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -31,7 +33,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
+            'password' => ['required', Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()],
             'role' => 'required|in:admin,user',
             'avatar' => 'nullable|image|max:1024',
         ]);
@@ -67,7 +69,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'role' => 'required|in:admin,user',
-            'password' => 'nullable|min:6', // Optional on update
+            'password' => ['nullable', Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()],
             'avatar' => 'nullable|image|max:1024',
         ]);
 
