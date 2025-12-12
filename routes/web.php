@@ -43,6 +43,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [AppointmentController::class, 'index'])->name('dashboard');
     Route::get('/calendar', [AppointmentController::class, 'calendar'])->name('calendar');
     Route::put('/appointments/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
+    Route::patch('/appointments/{appointment}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::patch('/appointments/{appointment}/complete', [AppointmentController::class, 'complete'])->name('appointments.complete');
     Route::resource('services', ServiceController::class);
     Route::resource('barbers', BarberController::class);
     Route::resource('users', UserController::class);

@@ -50,7 +50,7 @@
                             <i class="bi bi-clock-history text-warning fs-5"></i>
                         </div>
                         <div class="text-center text-md-start">
-                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold" style="font-size: 0.7rem;">Pendientes</h6>
+                            <h6 class="text-secondary small text-uppercase mb-0 fw-bold" style="font-size: 0.7rem;">Citas pendientes hoy</h6>
                             <h4 class="mb-0 fw-bold text-dark">{{ $stats['pending_today'] }}</h4>
                         </div>
                     </div>
