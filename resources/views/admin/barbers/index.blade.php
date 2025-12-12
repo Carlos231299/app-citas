@@ -53,7 +53,7 @@
                         <i class="bi bi-three-dots-vertical text-secondary"></i>
                     </button>
                     <ul class="dropdown-menu border-0 shadow-sm">
-                        <li><button class="dropdown-item py-2" type="button" onclick="editBarber({{ $barber->id }}, '{{ addslashes($barber->name) }}', '{{ $barber->whatsapp_number }}')"><i class="bi bi-pencil me-2 text-warning"></i> Editar</button></li>
+                        <li><button class="dropdown-item py-2" type="button" onclick="editBarber({{ $barber->id }}, '{{ addslashes($barber->name) }}', '{{ $barber->whatsapp_number }}', {{ $barber->is_active ? 1 : 0 }}, {{ $barber->special_mode ? 1 : 0 }})"><i class="bi bi-pencil me-2 text-warning"></i> Editar</button></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
@@ -88,7 +88,8 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">WHATSAPP</label>
-                        <input type="text" name="whatsapp_number" class="form-control" placeholder="Ej: 57300..." autocomplete="off">
+                        <input type="tel" name="whatsapp_number" class="form-control" placeholder="Ej: 300..." autocomplete="off"
+                               oninput="this.value = this.value.replace(/[^0-9+]/g, '')" pattern="[0-9+]*">
                     </div>
                 </div>
                 <div class="modal-footer border-top-0">
@@ -111,6 +112,10 @@
             <form id="editForm" method="POST" autocomplete="off" onsubmit="confirmUpdate(event)">
                 @csrf
                 @method('PUT')
+                <!-- Preserve Status -->
+                <input type="hidden" name="is_active" id="edit_is_active">
+                <input type="hidden" name="special_mode" id="edit_special_mode">
+                
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">NOMBRE COMPLETO</label>
@@ -118,7 +123,8 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">WHATSAPP</label>
-                        <input type="text" name="whatsapp_number" id="edit_whatsapp" class="form-control" autocomplete="off">
+                        <input type="tel" name="whatsapp_number" id="edit_whatsapp" class="form-control" autocomplete="off"
+                               oninput="this.value = this.value.replace(/[^0-9+]/g, '')" pattern="[0-9+]*">
                     </div>
                 </div>
                 <div class="modal-footer border-top-0">
@@ -136,10 +142,12 @@
         editModal = new bootstrap.Modal(document.getElementById('editBarberModal'));
     });
 
-    function editBarber(id, name, whatsapp) {
+    function editBarber(id, name, whatsapp, isActive, specialMode) {
         document.getElementById('editForm').action = `/barbers/${id}`;
         document.getElementById('edit_name').value = name;
         document.getElementById('edit_whatsapp').value = whatsapp || '';
+        document.getElementById('edit_is_active').value = isActive; 
+        document.getElementById('edit_special_mode').value = specialMode;
         editModal.show();
     }
 
