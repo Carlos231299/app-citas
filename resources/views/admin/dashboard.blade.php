@@ -8,7 +8,7 @@
     <!-- Stats Row -->
     <div class="row g-3 mb-4 animate-fade-in">
         <!-- Citas Hoy -->
-        <div class="col-md-3">
+        <div class="col-12 col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-primary">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -25,7 +25,7 @@
         </div>
 
         <!-- Ingresos -->
-        <div class="col-md-3">
+        <div class="col-12 col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-success">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -42,7 +42,7 @@
         </div>
 
         <!-- Pendientes -->
-        <div class="col-md-3">
+        <div class="col-12 col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-warning">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -59,7 +59,7 @@
         </div>
 
         <!-- Barberos Disponibles -->
-        <div class="col-md-3">
+        <div class="col-12 col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-info">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -78,8 +78,8 @@
 
     <!-- Calendar Container -->
     <div class="card border-0 shadow-sm flex-grow-1 overflow-hidden">
-        <div class="card-body p-0 h-100">
-            <div id="calendar" class="h-100"></div>
+        <div class="card-body p-0 h-100" style="overflow-x: auto;">
+            <div id="calendar" class="h-100" style="min-width: 600px;"></div> <!-- Ensure min-width so table doesn't crush -->
         </div>
     </div>
 </div>

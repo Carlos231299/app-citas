@@ -147,7 +147,13 @@
             function toggleSidebar(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                sidebar.classList.toggle('collapsed');
+                
+                if (window.innerWidth < 768) {
+                    sidebar.classList.toggle('open'); // Mobile: Toggle Open
+                    sidebar.classList.remove('collapsed'); // Ensure collapsed strict mode doesn't interfere
+                } else {
+                    sidebar.classList.toggle('collapsed'); // Desktop: Toggle Collapsed
+                }
             }
 
             if(toggle && sidebar) toggle.addEventListener('click', toggleSidebar);
@@ -155,8 +161,14 @@
 
             // Close sidebar on mobile when clicking outside (overlay)
             document.addEventListener('click', (e) => {
-                if (window.innerWidth < 768 && !sidebar.contains(e.target) && !mobileToggle.contains(e.target) && !sidebar.classList.contains('collapsed')) {
-                    sidebar.classList.add('collapsed');
+                // If mobile, open, and click outside sidebar and not on toggles
+                if (window.innerWidth < 768 && 
+                    sidebar.classList.contains('open') && 
+                    !sidebar.contains(e.target) && 
+                    !mobileToggle.contains(e.target) && 
+                    !toggle.contains(e.target)) {
+                    
+                    sidebar.classList.remove('open');
                 }
             });
 

@@ -174,39 +174,54 @@ body {
 }
 
 /* Mobile Responsiveness */
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
         height: 100vh;
         z-index: 1050;
-        width: 250px;
-        left: 0;
-        transition: transform 0.3s ease-in-out;
-        transform: translateX(0);
+        width: 260px;
+        /* Drawer width */
+        left: -260px;
+        /* Hidden by default */
+        transition: left 0.3s ease-in-out;
         box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
     }
 
-    /* Properly hide sidebar on mobile when collapsed */
+    /* Open Class to bring it back */
+    .sidebar.open {
+        left: 0;
+    }
+
+    /* Collapsed class is desktop concept, ensure it doesn't conflict or use it to mean 'hidden' if shared logic, 
+       but user specificed .open behavior. We force left: -260px on default sidebar mobile, so collapsed text logic matters less visually 
+       unless sidebar is open. */
     .sidebar.collapsed {
-        width: 250px;
-        /* Keep width defined for animation, but move off-screen */
-        transform: translateX(-100%) !important;
-
+        left: -260px;
     }
 
-    /* Hide everything inside when collapsed to be sure */
-    .sidebar.collapsed * {
-        display: none !important;
+    /* Ensure content inside sidebar is visible when open */
+    .sidebar * {
+        display: block !important;
+        /* Restore display if desktop collapsed hid it */
     }
 
-    /* Ensure main content takes full width */
+    .sidebar .sidebar-text {
+        display: inline !important;
+    }
+
+    /* Main Content */
     .main-content {
         width: 100%;
         margin-left: 0 !important;
+        padding: 1rem;
+        /* Adjust padding for mobile */
+        overflow-y: auto;
+        /* Scrollable */
     }
 
     /* Overlay */
-    .sidebar:not(.collapsed)+.main-content::before {
+    .sidebar.open+.main-content::before {
         content: '';
         position: fixed;
         top: 0;
@@ -214,7 +229,6 @@ body {
         right: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.5);
-        /* Darker overlay */
         z-index: 1040;
         backdrop-filter: blur(2px);
     }
