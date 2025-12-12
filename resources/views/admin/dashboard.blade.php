@@ -382,13 +382,21 @@
                                 </div>
 
                                 ${footerActions}
+
+                                <!-- Fallback Close Button for Mobile -->
+                                <div class="mt-3 text-center d-md-none">
+                                    <button onclick="Swal.close()" class="btn btn-outline-secondary rounded-pill w-100 py-2">
+                                        Cerrar
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     `,
                     showConfirmButton: false,
                     showCloseButton: false,
-                    width: '400px',
+                    width: window.innerWidth < 768 ? '95%' : '400px',
                     padding: 0,
+                    allowOutsideClick: true,
                     background: 'transparent',
                     customClass: {
                         popup: 'google-modal-popup'
