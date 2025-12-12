@@ -743,35 +743,40 @@
         font-weight: 600 !important;
     }
 
-    /* NOW INDICATOR STYLING (Google Lollipop Style) - THICKER & VISIBLE */
+    /* NOW INDICATOR STYLING (Google Lollipop Style) - OVERFLOW UNLOCKED */
+    
+    /* 1. Unlock Overflow on the Container so the Dot can "breathe" */
+    .fc .fc-timegrid-now-indicator-container {
+        overflow: visible !important;
+    }
+
+    /* 2. The Line */
     body .fc .fc-now-indicator-line {
         border: none !important;
         background-color: #EA4335 !important;
-        height: 4px !important; /* Thicker line requested */
+        height: 2px !important; /* Authentic Google Thickness */
         opacity: 1 !important;
         position: absolute;
         z-index: 99 !important;
         overflow: visible !important;
-        border-radius: 0 4px 4px 0; /* Soften the right end */
     }
     
-    /* The Dot inside the day column */
+    /* 3. The Dot inside the day column */
     body .fc .fc-now-indicator-line::before {
         content: " " !important;
         position: absolute;
         top: 50%; 
-        left: 0; /* Start exactly at the beginning of the line */
-        width: 16px; /* Larger dot */
-        height: 16px;
+        left: 0; 
+        width: 12px;
+        height: 12px;
         background-color: #EA4335 !important;
         border-radius: 50%;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Shadow for depth */
-        transform: translate(-25%, -50%); /* Only pull back slightly, not fully half */
+        transform: translate(-4px, -50%); /* Center on start, slightly inside */
         z-index: 101 !important;
         display: block !important;
     }
     
-    /* Hide the default axis arrow - Target ALL known variants */
+    /* 4. Kill the Arrow */
     body .fc .fc-now-indicator-arrow,
     body .fc .fc-timegrid-now-indicator-arrow,
     .fc-now-indicator-arrow {
