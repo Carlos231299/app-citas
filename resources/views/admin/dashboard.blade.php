@@ -521,6 +521,23 @@
                 // Trigger initially (it might be pre-selected)
                 toggleDate();
 
+                // 2.5 Strict Date Validation
+                const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
+                
+                // If the original date is in the past, clear it to force user to pick new
+                if(dateInput.value < todayStr) {
+                    dateInput.value = '';
+                }
+
+                dateInput.addEventListener('input', function() {
+                   if(this.value && this.value < todayStr) {
+                       this.value = '';
+                       Swal.showValidationMessage('No puedes seleccionar fechas pasadas.');
+                   } else {
+                       Swal.resetValidationMessage(); 
+                   }
+                });
+
                 // 3. Fetch Slots Logic
                 function fetchSlots() {
                     const barberId = barberSelect.value;
@@ -588,9 +605,11 @@
                     fetchSlots(); 
                 });
 
-                // Check init
+                // Check init - only load if date is valid
                 if(barberSelect.value && dateInput.value) {
                     fetchSlots();
+                } else {
+                    slotsContainer.innerHTML = '<small>Selecciona una fecha válida.</small>';
                 }
             },
             preConfirm: () => {
