@@ -184,7 +184,16 @@ body {
 }
 
 /* Mobile Responsiveness */
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
+
+    /* Force Block Layout to avoid Flexbox collapsing issues */
+    .admin-body {
+        display: block;
+        height: auto;
+        overflow: auto;
+        /* Let body scroll naturally */
+    }
 
     /* 1. Sidebar Styles (Drawer Mode) */
     .sidebar {
@@ -230,6 +239,10 @@ body {
         width: 100%;
         margin-left: 0 !important;
         padding: 1rem;
+        min-height: 100vh;
+        /* Ensure it covers screen */
+        overflow: visible;
+        /* Let parent handle scroll or auto */
     }
 
     /* 3. Overlay (Backdrop) when sidebar is open */
@@ -259,24 +272,36 @@ body {
     #sidebarToggle {
         display: none !important;
     }
+
+    /* 5. Disable Animations on Mobile (Fix Blank Screen risks) */
+    .animate-fade-in {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
 }
+
 /* Google Calendar Dropdown Styles */
 #custom-view-selector .dropdown-item {
     cursor: pointer;
     font-size: 0.9rem;
     color: #3C4043;
 }
+
 #custom-view-selector .dropdown-item:hover {
     background-color: #F1F3F4;
 }
+
 #custom-view-selector .dropdown-item i.bi-check-lg {
     font-size: 1.2rem;
     width: 20px;
 }
+
 #custom-view-selector .dropdown-menu {
     border: none;
-    box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 2px 6px 2px rgba(60,64,67,0.15) !important;
+    box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15) !important;
 }
+
 .opacity-0 {
     opacity: 0 !important;
-} 
+}
