@@ -24,15 +24,11 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
     
-    // Password Recovery
+    // Password Recovery (Link based)
     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
-    Route::post('/forgot-password', [AuthController::class, 'sendResetCode'])->name('password.email');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
     
-    Route::get('/verify-code', [AuthController::class, 'showVerifyCode'])->name('password.verify.show');
-    Route::post('/verify-code', [AuthController::class, 'verifyCode'])->name('password.verify');
-    Route::post('/verify-code/resend', [AuthController::class, 'resendCode'])->name('password.verify.resend');
-    
-    // Reset Password Action (View rendered by verifyCode)
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 

@@ -11,7 +11,7 @@
                     <div class="card-body p-5 text-center">
                         <i class="bi bi-envelope-exclamation text-gold fs-1 mb-3"></i>
                         <h3 class="mb-3 text-white">Recuperar Acceso</h3>
-                        <p class="text-secondary small mb-4">Ingresa tu email y te enviaremos un código.</p>
+                        <p class="text-secondary small mb-4">Ingresa tu email y te enviaremos un enlace de recuperación.</p>
                         
                         <form action="{{ route('password.email') }}" method="POST" autocomplete="off">
                             @csrf
@@ -24,7 +24,7 @@
                                 </div>
                             </div>
         
-                            <button type="submit" class="btn btn-gold w-100 py-3 fw-bold text-uppercase mb-3 shadow-gold-hover">Enviar Código</button>
+                            <button type="submit" class="btn btn-gold w-100 py-3 fw-bold text-uppercase mb-3 shadow-gold-hover">Enviar Enlace</button>
                             
                             <div class="mt-3">
                                 <a href="{{ route('login') }}" class="text-white-50 text-decoration-none small hover-gold">

@@ -18,8 +18,8 @@
                             <input type="password" style="display:none" autocomplete="current-password">
                             
                             <!-- Hidden Fields (Passed from Verify Step) -->
+                            <input type="hidden" name="token" value="{{ $token }}">
                             <input type="hidden" name="email" value="{{ $email }}">
-                            <input type="hidden" name="code" value="{{ $code }}">
 
                             <div class="mb-3 text-start">
                                 <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Nueva Contraseña</label>

@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -115,76 +119,41 @@ class AuthController extends Controller
     }
 
     // Resend Code Action
-    public function resendCode(Request $request)
+    public function sendResetLink(Request $request)
     {
-        // Re-use logical flow of sendResetCode but redirect back to verify
-        // We can just call sendResetCode internally or duplicate logic for cleaner redirect
-        $request->validate(['email' => 'required|email|exists:users,email']);
+        $request->validate(['email' => 'required|email']);
         
-        $user = \App\Models\User::where('email', $request->email)->first();
-        
-        // Anti-spam check (optional, but good practice): Check if last code was sent < 30s ago? 
-        // For simplicity, just overwrite.
-        
-        $code = rand(100000, 999999);
-        $user->verification_code = $code;
-        $user->verification_code_expires_at = now()->addMinutes(5);
-        $user->save();
+        $status = Password::sendResetLink(
+            $request->only('email'),
+            function ($user, string $token) {
+                 // Custom Mail Logic if needed, or use default Notifiable
+                 // But we want to use our custom view:
+                 $url = route('password.reset', ['token' => $token, 'email' => $user->email]);
+                 Mail::send('emails.reset-link', ['url' => $url, 'user' => $user], function ($m) use ($user) {
+                     $m->to($user->email)->subject('Restablecer Contraseña - Barbería JR');
+                 });
+            }
+        );
 
-        try {
-            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\VerificationCode($code));
-            return redirect()->route('password.verify.show', ['email' => $user->email])
-                ->with('success', 'Nuevo código enviado.');
-        } catch (\Exception $e) {
-            return back()->withErrors(['email' => 'Error al reenviar: ' . $e->getMessage()]);
+        if ($status === Password::RESET_LINK_SENT) {
+            return back()->with('status', '¡Enlacé de recuperación enviado! Revisa tu correo.');
         }
+
+        return back()->withErrors(['email' => 'No podemos encontrar un usuario con ese correo electrónico.']);
     }
 
-    // Step 2: Process Code
-    public function verifyCode(Request $request)
+    public function showResetForm(Request $request, $token = null)
     {
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-            'code' => 'required|string'
-        ]);
-
-        $user = \App\Models\User::where('email', $request->email)->first();
-
-        // Validate Code & Expiry
-        if ($user->verification_code !== $request->code) {
-            return back()->withErrors(['code' => 'El código es incorrecto.']);
-        }
-
-        if (now()->greaterThan($user->verification_code_expires_at)) {
-            return back()->withErrors(['code' => 'El código ha expirado. Solicita uno nuevo.']);
-        }
-
-        // Success: Show Step 3 (Reset Password Form) passing validated data
-        // Flash the success message for SweetAlert to pick up
-        session()->flash('success', 'Código verificado exitosamente. Ingrese su nueva contraseña.');
-
-        return view('auth.reset-password', [
-            'email' => $request->email,
-            'code' => $request->code
-        ]);
-    }
-
-    // Step 3 is just the POST action now (View is rendered by verifyCode)
-    // kept for fallback if needed, but primarily verifyCode renders the view directly
-    public function showResetPassword(Request $request)
-    {
-        // Fallback: If accessed directly without code, redirect to start
-        if (!$request->has('code')) {
-            return redirect()->route('password.request');
-        }
-        return view('auth.reset-password', ['email' => $request->email, 'code' => $request->code]);
+        return view('auth.reset-password')->with(
+            ['token' => $token, 'email' => $request->email]
+        );
     }
 
     public function resetPassword(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|exists:users,email',
-            'code' => 'required|string',
+            'token' => 'required',
+            'email' => 'required|email',
             'password' => [
                 'required', 
                 'confirmed', 
@@ -192,23 +161,26 @@ class AuthController extends Controller
                     ->mixedCase()
                     ->numbers()
                     ->symbols()
+                    ->uncompromised()
             ],
         ]);
 
-        $user = \App\Models\User::where('email', $request->email)->first();
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->setRememberToken(Str::random(60));
 
-        // Double Check (Security)
-        if ($user->verification_code !== $request->code || now()->greaterThan($user->verification_code_expires_at)) {
-            return redirect()->route('password.request')->withErrors(['email' => 'La sesión de recuperación ha expirado.']);
+                $user->save();
+                event(new \Illuminate\Auth\Events\PasswordReset($user));
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            return redirect()->route('login')->with('status', '¡Tu contraseña ha sido restablecida!');
         }
 
-        // Reset Password
-        $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
-        $user->verification_code = null;
-        $user->verification_code_expires_at = null;
-        $user->save();
-
-        // No Auto-Login
-        return redirect()->route('login')->with('success', 'Contraseña actualizada. Inicia sesión.');
+        return back()->withErrors(['email' => 'El token de reestablecimiento es inválido o el correo no coincide.']);
     }
 }
