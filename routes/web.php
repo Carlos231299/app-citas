@@ -9,6 +9,11 @@ use App\Http\Controllers\ProfileController;
 
 // ...
 
+// Public Route (Redirect to Login or Landing)
+Route::get('/', function () {
+    return redirect()->route('login');
+});
+
 // Admin Protected
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

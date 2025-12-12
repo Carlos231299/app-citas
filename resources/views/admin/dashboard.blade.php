@@ -213,7 +213,7 @@
 
             // Lifecycle Hooks
             datesSet: function(info) {
-                // Update dropdown text based on current view
+                // 1. Update View Dropdown text
                 const viewNameMap = {
                     'timeGridDay': 'Día',
                     'timeGridWeek': 'Semana',
@@ -224,9 +224,26 @@
                 };
                 const btn = document.getElementById('calendarViewBtn');
                 if(btn) {
-                    // Update text but keep the caret/style if needed, though innerText replaces content.
-                    // Let's rebuild the inner HTML to keep it clean
                     btn.innerHTML = `<span>${viewNameMap[info.view.type] || 'Vista'}</span>`;
+                }
+
+                // 2. Mini Calendar (Flatpickr) on Title
+                const titleEl = document.querySelector('.fc-toolbar-title');
+                if(titleEl && !titleEl._flatpickr) {
+                    flatpickr(titleEl, {
+                        locale: 'es',
+                        defaultDate: calendarInstance.getDate(),
+                        dateFormat: "Y-m-d", // value format
+                        position: 'auto center',
+                        disableMobile: "true", // Force custom dropdown on mobile too if needed
+                        onChange: function(selectedDates, dateStr, instance) {
+                            calendarInstance.gotoDate(selectedDates[0]);
+                        },
+                        onOpen: function(selectedDates, dateStr, instance) {
+                            // Sync picker with current calendar date when opening
+                            instance.setDate(calendarInstance.getDate());
+                        }
+                    });
                 }
             },
             
@@ -424,11 +441,28 @@
         color: #64748B;
     }
     
-    /* Toolbar & Buttons */
+    /* Toolbar & Title (Mini Calendar Trigger) */
     .fc-toolbar-title {
         font-size: 1.5rem !important;
         font-weight: 400 !important;
         color: #1E293B;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 12px;
+        border-radius: 6px;
+        transition: background-color 0.2s;
+        position: relative; /* For Flatpickr positioning */
+    }
+    .fc-toolbar-title:hover {
+        background-color: #F1F5F9;
+    }
+    .fc-toolbar-title::after {
+        content: '\F229'; /* Bootstrap Icons: chevron-down */
+        font-family: 'bootstrap-icons';
+        font-size: 1rem;
+        color: #64748B;
     }
     .fc-header-toolbar {
         margin-bottom: 1.5rem !important;
