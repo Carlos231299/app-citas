@@ -3,18 +3,23 @@
 @section('title', 'Reserva Online - Barbería JR')
 
 @section('content')
+<!-- Background Image -->
+<div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('{{ asset('images/login-bg.jpg') }}') no-repeat center center; background-size: cover; z-index: -1;">
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);"></div>
+</div>
+
 <div class="row justify-content-center">
     <div class="col-lg-8">
         
         <!-- Header -->
         <div class="position-absolute top-0 end-0 p-3">
-            <a href="{{ route('login') }}" class="btn btn-outline-dark btn-sm rounded-pill px-3 fw-bold">
+            <a href="{{ route('login') }}" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-bold backdrop-blur">
                 <i class="bi bi-person-fill me-1"></i> Iniciar Sesión
             </a>
         </div>
         <div class="text-center mb-5 mt-4">
-            <h1 class="display-6 fw-bold text-dark">Barbería JR</h1>
-            <p class="text-dark opacity-75 lead">“Un buen corte es como un buen café, te despierta y te hace sentir mejor. ¡Ven y visítanos!”</p>
+            <h1 class="display-6 fw-bold text-white text-shadow-sm">Barbería JR</h1>
+            <p class="text-white opacity-75 lead text-shadow-sm">“Un buen corte es como un buen café, te despierta y te hace sentir mejor. ¡Ven y visítanos!”</p>
         </div>
 
         <!-- Wizard Container -->
