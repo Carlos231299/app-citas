@@ -52,53 +52,7 @@
                                 </div>
                             </div>
 
-<script>
-    // Injected Script for Checklist Logic (scoped to this block to avoid collisions if placed in main script)
-    document.addEventListener('DOMContentLoaded', function() {
-        const passInput = document.getElementById('password');
-        
-        // Requirements Elements
-        const reqLength = document.getElementById('req-length');
-        const reqUpper = document.getElementById('req-upper');
-        const reqLower = document.getElementById('req-lower');
-        const reqNumber = document.getElementById('req-number');
-        const reqSpecial = document.getElementById('req-special');
 
-        function updateRequirement(element, isValid) {
-            const icon = element.querySelector('i');
-            if (isValid) {
-                element.classList.remove('text-white-50');
-                element.classList.add('text-success', 'text-decoration-line-through');
-                icon.classList.remove('bi-circle');
-                icon.classList.add('bi-check-circle-fill');
-            } else {
-                element.classList.add('text-white-50');
-                element.classList.remove('text-success', 'text-decoration-line-through');
-                icon.classList.add('bi-circle');
-                icon.classList.remove('bi-check-circle-fill');
-            }
-        }
-
-        passInput.addEventListener('input', function() {
-            const val = passInput.value;
-            
-            // 1. Length 8
-            updateRequirement(reqLength, val.length >= 8);
-            
-            // 2. Uppercase
-            updateRequirement(reqUpper, /[A-Z]/.test(val));
-
-            // 3. Lowercase
-            updateRequirement(reqLower, /[a-z]/.test(val));
-
-            // 4. Number
-            updateRequirement(reqNumber, /[0-9]/.test(val));
-
-            // 5. Special Char (inc dot)
-            updateRequirement(reqSpecial, /[@$!%*?&.]/.test(val));
-        });
-    });
-</script>
 
                             <div class="mb-4 text-start">
                                 <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem;">Confirmar Contraseña</label>
@@ -133,6 +87,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const togglePassword = document.getElementById('togglePassword');
     const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
     const matchMessage = document.getElementById('passwordMatchMessage');
+    const submitBtn = document.querySelector('button[type="submit"]');
+
+    // Requirements Elements
+    const reqLength = document.getElementById('req-length');
+    const reqUpper = document.getElementById('req-upper');
+    const reqLower = document.getElementById('req-lower');
+    const reqNumber = document.getElementById('req-number');
+    const reqSpecial = document.getElementById('req-special');
+
+    if(submitBtn) submitBtn.disabled = true;
 
     // Toggle Visibility Function
     function toggleVisibility(input, button) {
@@ -143,42 +107,78 @@ document.addEventListener('DOMContentLoaded', function() {
         icon.classList.toggle('bi-eye-slash');
     }
 
-    togglePassword.addEventListener('click', function() {
-        toggleVisibility(password, this);
-    });
+    if(togglePassword) togglePassword.addEventListener('click', function() { toggleVisibility(password, this); });
+    if(toggleConfirmPassword) toggleConfirmPassword.addEventListener('click', function() { toggleVisibility(confirmPassword, this); });
 
-    toggleConfirmPassword.addEventListener('click', function() {
-        toggleVisibility(confirmPassword, this);
-    });
-
-    // Real-time Validation
-    function validateMatch() {
-        const pass = password.value;
-        const confirm = confirmPassword.value;
-
-        if (confirm.length === 0) {
-            matchMessage.classList.add('d-none');
-            confirmPassword.classList.remove('is-valid', 'is-invalid');
-            return;
-        }
-
-        matchMessage.classList.remove('d-none');
-
-        if (pass === confirm) {
-            confirmPassword.classList.remove('is-invalid');
-            confirmPassword.classList.add('is-valid'); // Bootstrap green border
-            matchMessage.textContent = 'Las contraseñas coinciden';
-            matchMessage.className = 'form-text small text-success fw-bold';
+    function updateRequirement(element, isValid) {
+        const icon = element.querySelector('i');
+        if (isValid) {
+            element.classList.remove('text-white-50');
+            element.classList.add('text-success', 'text-decoration-line-through');
+            icon.classList.remove('bi-circle');
+            icon.classList.add('bi-check-circle-fill');
         } else {
-            confirmPassword.classList.remove('is-valid');
-            confirmPassword.classList.add('is-invalid'); // Bootstrap red border
-            matchMessage.textContent = 'Las contraseñas no coinciden.';
-            matchMessage.className = 'form-text small text-danger fw-bold';
+            element.classList.add('text-white-50');
+            element.classList.remove('text-success', 'text-decoration-line-through');
+            icon.classList.add('bi-circle');
+            icon.classList.remove('bi-check-circle-fill');
         }
     }
 
-    password.addEventListener('input', validateMatch);
-    confirmPassword.addEventListener('input', validateMatch);
+    // Consolidated Validation Logic
+    function validateForm() {
+        const val = password.value;
+        const confirm = confirmPassword.value;
+
+        // Check Requirements
+        const checks = [
+            val.length >= 8,
+            /[A-Z]/.test(val),
+            /[a-z]/.test(val),
+            /[0-9]/.test(val),
+            /[@$!%*?&.]/.test(val)
+        ];
+
+        // Update UI
+        updateRequirement(reqLength, checks[0]);
+        updateRequirement(reqUpper, checks[1]);
+        updateRequirement(reqLower, checks[2]);
+        updateRequirement(reqNumber, checks[3]);
+        updateRequirement(reqSpecial, checks[4]);
+
+        const allRequirementsMet = checks.every(Boolean);
+        const passwordsMatch = val === confirm && val !== '';
+
+        if (confirm.length > 0) {
+            matchMessage.classList.remove('d-none');
+            if (passwordsMatch) {
+                confirmPassword.classList.remove('is-invalid');
+                confirmPassword.classList.add('is-valid');
+                matchMessage.textContent = 'Las contraseñas coinciden';
+                matchMessage.className = 'form-text small text-success fw-bold';
+            } else {
+                confirmPassword.classList.remove('is-valid');
+                confirmPassword.classList.add('is-invalid');
+                matchMessage.textContent = 'Las contraseñas no coinciden.';
+                matchMessage.className = 'form-text small text-danger fw-bold';
+            }
+        } else {
+            matchMessage.classList.add('d-none');
+            confirmPassword.classList.remove('is-valid', 'is-invalid');
+        }
+
+        // Enable/Disable Button
+        if (allRequirementsMet && passwordsMatch) {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    }
+
+    password.addEventListener('input', validateForm);
+    confirmPassword.addEventListener('input', validateForm);
 });
 </script>
 @endsection

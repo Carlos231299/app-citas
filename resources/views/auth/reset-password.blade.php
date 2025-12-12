@@ -94,7 +94,50 @@
             toggleConfirmPassword.addEventListener('click', function() { toggleVisibility(confirmPassword, this); });
         }
 
+        const submitBtn = document.querySelector('button[type="submit"]');
+        if(submitBtn) submitBtn.disabled = true;
+
         // Validation Logic
+        function validateForm() {
+            const val = password.value;
+            const confirmVal = confirmPassword.value;
+            
+            const checks = [
+                val.length >= 8,
+                /[A-Z]/.test(val),
+                /[a-z]/.test(val),
+                /[0-9]/.test(val),
+                /[@$!%*?&.]/.test(val)
+            ];
+
+            const allRequirementsMet = checks.every(Boolean);
+            const passwordsMatch = val === confirmVal && val !== '';
+
+            // Update Requirements UI
+            updateRequirement(reqLength, checks[0]);
+            updateRequirement(reqUpper, checks[1]);
+            updateRequirement(reqLower, checks[2]);
+            updateRequirement(reqNumber, checks[3]);
+            updateRequirement(reqSpecial, checks[4]);
+
+            // Enable/Disable Button
+            if (allRequirementsMet && passwordsMatch) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                confirmPassword.classList.remove('is-invalid');
+                confirmPassword.classList.add('is-valid');
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                if (confirmVal !== '' && !passwordsMatch) {
+                   confirmPassword.classList.add('is-invalid');
+                   confirmPassword.classList.remove('is-valid');
+                } else {
+                   confirmPassword.classList.remove('is-invalid');
+                }
+            }
+        }
+
         function updateRequirement(element, isValid) {
             const icon = element.querySelector('i');
             if (isValid) {
@@ -111,14 +154,10 @@
         }
 
         if(password) {
-            password.addEventListener('input', function() {
-                const val = password.value;
-                updateRequirement(reqLength, val.length >= 8);
-                updateRequirement(reqUpper, /[A-Z]/.test(val));
-                updateRequirement(reqLower, /[a-z]/.test(val));
-                updateRequirement(reqNumber, /[0-9]/.test(val));
-                updateRequirement(reqSpecial, /[@$!%*?&.]/.test(val));
-            });
+            password.addEventListener('input', validateForm);
+        }
+        if(confirmPassword) {
+            confirmPassword.addEventListener('input', validateForm);
         }
     });
 </script>

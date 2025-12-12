@@ -13,6 +13,12 @@
                         <h3 class="mb-3 text-white">Recuperar Acceso</h3>
                         <p class="text-secondary small mb-4">Ingresa tu email y te enviaremos un enlace de recuperación.</p>
                         
+                        @if (session('status'))
+                            <div class="alert alert-success small mb-4 text-start">
+                                <i class="bi bi-check-circle me-1"></i> {{ session('status') }}
+                            </div>
+                        @endif
+
                         <form action="{{ route('password.email') }}" method="POST" autocomplete="off">
                             @csrf
         
