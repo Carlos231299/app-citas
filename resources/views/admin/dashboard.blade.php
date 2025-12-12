@@ -165,7 +165,7 @@
             dayMaxEvents: true,
             
             views: {
-                dayGridMonth: { dayMaxEvents: 2 },
+                dayGridMonth: { dayMaxEvents: false }, // Expand all events (No "+1 more")
                 timeGrid: { dayMaxEvents: true },
                 fourDay: {
                     type: 'timeGrid',
@@ -612,8 +612,17 @@
         font-size: 0.85rem;
     }
     .fc-daygrid-event-dot {
-        border-width: 5px !important; /* Larger dot */
+        border-width: 6px !important; /* Larger dot */
         margin-right: 6px;
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.5); /* Definition ring */
+        border-color: inherit; /* Ensure it takes the event color */
+    }
+
+    /* Google Modal Close Button High Z-Index */
+    .google-modal-close {
+        z-index: 9999 !important;
+        width: 40px !important;
+        height: 40px !important;
     }
 
     /* TYPE 3: List View (Agenda) - Fix Blank Issue */
