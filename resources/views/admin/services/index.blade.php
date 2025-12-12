@@ -229,18 +229,35 @@
         const input = document.getElementById(currentInputId);
         const currentVal = input.value.trim();
         
-        if (currentVal) {
-            if (confirm('¿Agregar a los iconos existentes? (Cancelar para reemplazar)')) {
-                input.value = currentVal + ', ' + icon;
-            } else {
-                input.value = icon;
-            }
-        } else {
-            input.value = icon;
-        }
+        const finalize = (newValue) => {
+            input.value = newValue;
+            input.dispatchEvent(new Event('input'));
+            iconModal.hide();
+        };
 
-        input.dispatchEvent(new Event('input'));
-        iconModal.hide();
+        if (currentVal) {
+            Swal.fire({
+                title: 'Selección de Icono',
+                text: `¿Deseas agregar "${icon}" a los existentes o reemplazar la selección actual?`,
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: '<i class="bi bi-plus-lg"></i> Agregar',
+                denyButtonText: '<i class="bi bi-arrow-repeat"></i> Reemplazar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#0d6efd', // Bootstrap Primary
+                denyButtonColor: '#fd7e14',   // Bootstrap Orange
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    finalize(currentVal + ', ' + icon);
+                } else if (result.isDenied) {
+                    finalize(icon);
+                }
+            });
+        } else {
+            finalize(icon);
+        }
     }
 
     function editService(service) {
