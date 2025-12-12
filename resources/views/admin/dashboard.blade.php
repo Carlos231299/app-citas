@@ -380,16 +380,15 @@
                         </div>
                     `,
                     showConfirmButton: false,
-                    showCloseButton: true, // Use Native Button
+                    showCloseButton: false, // Removed X as requested
                     width: window.innerWidth < 768 ? '95%' : '400px',
                     padding: 0,
-                    allowOutsideClick: true,
+                    allowOutsideClick: true, // Close on outside click
                     background: 'transparent',
                     customClass: {
-                        popup: 'google-modal-popup',
-                        closeButton: 'google-native-close' /* Custom Class for styling */
+                        popup: 'google-modal-popup'
                     },
-                    backdrop: `rgba(0,0,0,0.4)`
+                    backdrop: `rgba(0,0,0,0.6)` // Darker backdrop to encourage clicking
                 });
             }
         });
@@ -614,23 +613,7 @@
         border-color: inherit; /* Ensure it takes the event color */
     }
 
-    /* Custom Native Close Button Styling */
-    .google-native-close {
-        color: white !important;
-        position: absolute !important;
-        top: 15px !important;
-        right: 15px !important;
-        box-shadow: none !important;
-        background: transparent !important;
-        font-size: 2rem !important;
-        font-weight: 300 !important;
-        z-index: 99999 !important;
-        outline: none !important;
-    }
-    .google-native-close:hover {
-        color: rgba(255,255,255,0.8) !important;
-        background: transparent !important;
-    }
+
 
     /* TYPE 3: List View (Agenda) - Fix Blank Issue */
     .fc-list-event {
