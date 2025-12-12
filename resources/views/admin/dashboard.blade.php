@@ -306,10 +306,26 @@
                 }
 
                 // Action Buttons (Standard Bootstrap)
+                // Action Buttons (Standard Bootstrap)
                 let actionButtons = '';
                 if (props.type === 'appointment' && props.status === 'scheduled') {
+                    // Visibility Logic: "Complete" button only appears if 20 mins have passed
+                    const now = new Date();
+                    const diffMs = now - event.start;
+                    const diffMinutes = diffMs / (1000 * 60);
+                    
+                    let completeBtn = '';
+                    if (diffMinutes >= 20) {
+                        completeBtn = `
+                            <button onclick="completeAppointment(${event.id}, ${props.price})" class="btn btn-success px-4">
+                                <i class="bi bi-check-circle-fill me-1"></i> Completar
+                            </button>
+                        `;
+                    }
+
                     actionButtons = `
-                        <div class="d-flex justify-content-center gap-2 mt-4">
+                        <div class="d-flex justify-content-center gap-2 mt-4 flex-wrap">
+                            ${completeBtn}
                             <button onclick="editAppointment(${event.id})" class="btn btn-primary px-4">
                                 <i class="bi bi-pencil-fill me-1"></i> Editar
                             </button>
