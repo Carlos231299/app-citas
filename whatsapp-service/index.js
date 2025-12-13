@@ -3,7 +3,7 @@ const express = require('express');
 if (!global.crypto) {
     global.crypto = require('crypto');
 }
-const { default: makeWASocket, DisconnectReason, useMultiFileAuthState } = require('@whiskeysockets/baileys');
+const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
 const pino = require('pino');
 const qrcode = require('qrcode-terminal');
 const cors = require('cors');
@@ -19,13 +19,17 @@ let isReady = false;
 
 async function connectToWhatsApp() {
     const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys_v2');
+    const { version, isLatest } = await fetchLatestBaileysVersion();
+    console.log(`Using WA v${version.join('.')}, isLatest: ${isLatest}`);
 
     sock = makeWASocket({
+        version,
         auth: state,
         printQRInTerminal: true,
         logger: pino({ level: 'debug' }),
-        syncFullHistory: false, // Don't sync full history to speed up and avoid timeouts
-        connectTimeoutMs: 60000, // Increase timeout
+        browser: ['Ubuntu', 'Chrome', '20.0.04'],
+        syncFullHistory: false,
+        connectTimeoutMs: 60000,
     });
 
     sock.ev.on('creds.update', saveCreds);
