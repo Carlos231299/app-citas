@@ -188,7 +188,7 @@
                         <label class="form-label small fw-bold text-muted">TELÉFONO</label>
                         <div class="input-group">
                             <span class="input-group-text bg-white border-end-0"><i class="bi bi-whatsapp"></i></span>
-                            <input type="tel" name="client_phone" class="form-control border-start-0 ps-0" placeholder="Número de contacto" required>
+                            <input type="tel" name="client_phone" class="form-control border-start-0 ps-0" placeholder="+57 300..." required minlength="7" maxlength="20" oninput="this.value = this.value.replace(/[^0-9+]/g, '')">
                         </div>
                     </div>
 

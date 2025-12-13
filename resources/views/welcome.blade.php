@@ -142,8 +142,8 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label text-dark fw-bold small">TELÉFONO / WHATSAPP</label>
-                                <input type="tel" name="client_phone" class="form-control form-control-lg border shadow-sm" required placeholder="3001234567" minlength="10" maxlength="15" autocomplete="off" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                                <small class="text-muted" style="font-size: 0.75rem;">Sin indicativo (Ejem: 3001234567)</small>
+                                <input type="tel" name="client_phone" class="form-control form-control-lg border shadow-sm" required placeholder="+57 300..." minlength="7" maxlength="20" autocomplete="off" oninput="this.value = this.value.replace(/[^0-9+]/g, '')">
+                                <small class="text-muted" style="font-size: 0.75rem;">Incluye tu código de país (Ej: +57...)</small>
                             </div>
                         </div>
 

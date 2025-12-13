@@ -18,11 +18,21 @@ class InfobipWhatsAppService implements WhatsAppServiceInterface
     protected function sendInfobipTemplate($to, $templateName, $language, $templateData)
     {
         try {
-            // Clean phone number
+            // Clean phone number but keep + if present initially
             $cleanPhone = preg_replace('/[^0-9]/', '', $to);
+            
+            // Logic:
+            // 1. If user provided full international format (e.g., 57300...) -> Use it.
+            // 2. If user provided 10 digits (300...) -> Assume Colombia (57).
+            // 3. E.164 requires no '+' in the API payload mostly, Infobip expects CountryCode + Number.
+            
+            // Check if input originally had + to trust it's international? 
+            // Better: If length is 10, default to 57. If > 10, assume it has code.
+            
             if (strlen($cleanPhone) == 10) {
                 $cleanPhone = '57' . $cleanPhone;
             }
+            // If length > 10 (e.g. 57300..., 58400...), use as is.
 
             $response = Http::withHeaders([
                 'Authorization' => 'App ' . $this->apiKey,
