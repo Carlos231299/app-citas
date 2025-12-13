@@ -50,6 +50,12 @@
                                     Olvidé mi contraseña
                                 </a>
                             </div>
+
+                            <div class="mt-4 pt-3 border-top border-secondary border-opacity-25">
+                                <a href="{{ route('welcome') }}" class="btn btn-sm btn-outline-light w-100 opacity-75 hover-opacity-100">
+                                    <i class="bi bi-house-door me-2"></i> Ir a Agendar Cita
+                                </a>
+                            </div>
                         </form>
                     </div>
                 </div>

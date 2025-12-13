@@ -18,9 +18,7 @@
             </a>
         </div>
         <div class="text-center mb-5 mt-4">
-            <a href="{{ url('/') }}">
-                <img src="{{ asset('images/logo.png') }}" alt="Barbería JR Logo" class="img-fluid mb-3" style="max-height: 120px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
-            </a>
+            <img src="{{ asset('images/logo.png') }}" alt="Barbería JR Logo" class="img-fluid mb-3" style="max-height: 120px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
             <h1 class="display-6 fw-bold text-white text-shadow-sm">Barbería JR</h1>
             <p class="text-white opacity-75 lead text-shadow-sm">“Un buen corte es como un buen café, te despierta y te hace sentir mejor. ¡Ven y visítanos!”</p>
         </div>
