@@ -282,7 +282,12 @@
 
         const formData = new FormData(e.target);
 
-        axios.post("{{ route('book') }}", formData)
+        axios.post("{{ route('book') }}", formData, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
             .then(response => {
                 bookingModal.hide();
                 Swal.fire({
@@ -292,28 +297,45 @@
                     timer: 2000,
                     showConfirmButton: false
                 });
-                // Refresh Calendar
                 calendar.refetchEvents();
             })
             .catch(err => {
-                console.error(err);
+                console.error('Booking Error:', err);
                 
-                let errorMsg = 'No se pudo crear la cita. Revisa los datos o la conexión.';
-                if (err.response && err.response.data) {
-                    if (err.response.data.message) {
-                        errorMsg = err.response.data.message;
+                let errorTitle = 'Error ' + (err.response ? err.response.status : '');
+                let errorMsg = 'Ocurrió un error desconocido.';
+
+                if (err.response) {
+                    // Server responded
+                    if (err.response.data) {
+                        if (typeof err.response.data === 'string') {
+                            errorMsg = err.response.data; // HTML or raw string
+                        } else {
+                            // JSON object
+                            if (err.response.data.message) {
+                                errorMsg = err.response.data.message;
+                            }
+                            if (err.response.data.errors) {
+                                const list = Object.values(err.response.data.errors).flat().map(e => `<li>${e}</li>`).join('');
+                                errorMsg += `<ul class="text-start mt-2 fs-6">${list}</ul>`;
+                            }
+                        }
+                    } else {
+                        errorMsg = err.message;
                     }
-                    if (err.response.data.errors) {
-                        // Concatenate validation errors
-                        const errors = Object.values(err.response.data.errors).flat();
-                        errorMsg = errors.join('<br>');
-                    }
+                } else if (err.request) {
+                    // No response received
+                    errorMsg = 'No hubo respuesta del servidor. Verifica tu conexión.';
+                } else {
+                    // Request setup error
+                    errorMsg = err.message;
                 }
 
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error',
-                    html: errorMsg
+                    title: errorTitle,
+                    html: errorMsg,
+                    footer: '<small class="text-muted">Ver consola para detalles técnicos</small>'
                 });
             })
             .finally(() => {
