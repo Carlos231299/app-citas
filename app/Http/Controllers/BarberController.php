@@ -40,8 +40,10 @@ class BarberController extends Controller
         $rules = [
             'name' => 'sometimes|required|string|max:255',
             'whatsapp_number' => 'nullable|string|max:20',
-            'is_active' => 'sometimes|boolean', // Allow direct boolean values
+            'is_active' => 'sometimes|boolean',
             'special_mode' => 'sometimes|boolean',
+            'extra_time_start' => 'nullable|date',
+            'extra_time_end' => 'nullable|date|after_or_equal:extra_time_start',
         ];
 
         $validated = $request->validate($rules);

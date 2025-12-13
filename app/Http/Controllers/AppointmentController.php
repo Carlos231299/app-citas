@@ -282,10 +282,16 @@ class AppointmentController extends Controller
         $end = Carbon::parse($request->end);
 
         // 1. Fetch Regular Appointments
-        $events = Appointment::with(['service', 'barber'])
+        // 1. Fetch Regular Appointments
+        $query = Appointment::with(['service', 'barber'])
             ->whereBetween('scheduled_at', [$start, $end])
-            ->where('status', '!=', 'request') 
-            ->get()
+            ->where('status', '!=', 'request');
+
+        if ($request->filled('barber_id')) {
+            $query->where('barber_id', $request->barber_id);
+        }
+
+        $events = $query->get()
             ->map(function ($appointment) {
                 $duration = 30; // Minutes
                 $end = $appointment->scheduled_at->copy()->addMinutes($duration);

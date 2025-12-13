@@ -33,34 +33,35 @@ class TwilioWhatsAppService implements WhatsAppServiceInterface
         $details = $this->formatPhone($appointment->client_phone);
         $to = $details['to'];
 
-        // 2. Build Message
-        $barberName = $appointment->barber->name ?? 'Barbero';
-        $serviceName = $appointment->service->name ?? 'Servicio';
-        
-        // Detailed message as requested
-        $msg = "📢 *Confirmación de Cita - Barbería JR*\n\n" .
-               "Hola *{$appointment->client_name}* 👋, tu cita ha sido confirmada:\n\n" .
-               "💈 *Barbero:* {$barberName}\n" .
-               "✂️ *Servicio:* {$serviceName}\n" .
-               "📅 *Fecha:* {$appointment->scheduled_at->format('Y-m-d')}\n" .
-               "⏰ *Hora:* {$appointment->scheduled_at->format('H:i')}\n\n" .
-               "📍 Te esperamos. Si deseas cancelar, responde con *CANCELAR*.";
+        // 2. Prepare Variables for Template "HXb5b62575e6e4ff6129ad7c8efe1f983e"
+        // Variable 1: Date
+        // Variable 2: Time
+        $date = $appointment->scheduled_at->format('d/m/Y');
+        $time = $appointment->scheduled_at->format('h:i A');
 
-        return $this->sendMessage($to, $msg);
+        $contentVariables = json_encode([
+            "1" => $date,
+            "2" => $time
+        ]);
+
+        return $this->sendMessageWithTemplate($to, $contentVariables);
     }
 
-    protected function sendMessage($to, $messageBody)
+    protected function sendMessageWithTemplate($to, $contentVariables)
     {
         try {
             $message = $this->twilio->messages->create(
                 $to, 
                 [
                     "from" => $this->from,
-                    "body" => $messageBody
+                    "contentSid" => "HXb5b62575e6e4ff6129ad7c8efe1f983e",
+                    "contentVariables" => $contentVariables,
+                    // "body" => "..." // Fallback body is often not needed if ContentSid is present, 
+                    // or acts as fallback for SMS. For WhatsApp, ContentSid triggers the template.
                 ]
             );
             
-            Log::info("Twilio Sent to $to: " . $message->sid);
+            Log::info("Twilio Template Sent to $to: " . $message->sid);
             return $message->sid;
         } catch (\Exception $e) {
             Log::error("Twilio Failed to $to: " . $e->getMessage());
