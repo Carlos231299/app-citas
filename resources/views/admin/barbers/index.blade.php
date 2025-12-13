@@ -245,24 +245,31 @@
                     <p class="small text-muted mb-3">Selecciona el rango de fechas donde ${name} tendrá horario extendido.</p>
                     <div class="text-start">
                         <label class="form-label small fw-bold">Desde</label>
-                        <input type="date" id="swal_date_start" class="form-control mb-2" value="{{ date('Y-m-d') }}">
+                        <input type="date" id="swal_date_start" class="form-control mb-2" value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d') }}">
                         <label class="form-label small fw-bold">Hasta</label>
-                        <input type="date" id="swal_date_end" class="form-control" value="{{ date('Y-m-d') }}">
+                        <input type="date" id="swal_date_end" class="form-control" value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d') }}">
                     </div>
                 `,
                 showCancelButton: true,
                 confirmButtonText: 'Activar',
                 confirmButtonColor: '#ffc107',
                 cancelButtonText: 'Cancelar',
+                didOpen: () => {
+                    const startInput = document.getElementById('swal_date_start');
+                    const endInput = document.getElementById('swal_date_end');
+                    
+                    startInput.addEventListener('change', function() {
+                        endInput.min = this.value;
+                        if(endInput.value < this.value){
+                            endInput.value = this.value;
+                        }
+                    });
+                },
                 preConfirm: () => {
                     const start = document.getElementById('swal_date_start').value;
                     const end = document.getElementById('swal_date_end').value;
                     if (!start || !end) {
                         Swal.showValidationMessage('Ambas fechas son requeridas');
-                        return false;
-                    }
-                    if (end < start) {
-                        Swal.showValidationMessage('La fecha "Hasta" no puede ser menor a "Desde"');
                         return false;
                     }
                     return { start, end };
