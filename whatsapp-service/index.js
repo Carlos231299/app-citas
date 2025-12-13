@@ -14,13 +14,13 @@ let sock;
 let isReady = false;
 
 async function connectToWhatsApp() {
-    const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
+    const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys_v2');
 
     sock = makeWASocket({
         auth: state,
-        printQRInTerminal: true, // Baileys prints QR natively nicely
-        logger: pino({ level: 'silent' }), // Hide debug logs
-        browser: ['BarberiaJR', 'Chrome', '1.0.0'] // Custom browser name
+        printQRInTerminal: true,
+        logger: pino({ level: 'debug' }), // Enable DEBUG logs
+        browser: ['BarberiaJR', 'Chrome', '1.2.0']
     });
 
     sock.ev.on('creds.update', saveCreds);
@@ -36,14 +36,21 @@ async function connectToWhatsApp() {
         }
 
         if (connection === 'close') {
-            const shouldReconnect = (lastDisconnect.error)?.output?.statusCode !== DisconnectReason.loggedOut;
-            console.log('Connection closed. Reconnecting:', shouldReconnect);
+            const error = lastDisconnect.error;
+            const statusCode = error?.output?.statusCode;
+            const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+
+            console.error('Connection closed due to:', error);
+            console.error('Status Code:', statusCode);
+            console.log('Reconnecting:', shouldReconnect);
+
             isReady = false;
 
             if (shouldReconnect) {
-                connectToWhatsApp();
+                // Delay reconnection slightly to avoid tight loops
+                setTimeout(connectToWhatsApp, 3000);
             } else {
-                console.log('Logged out. Delete auth_info_baileys to scan again.');
+                console.log('Logged out. Delete auth folder to scan again.');
             }
         } else if (connection === 'open') {
             console.log('opened connection');
