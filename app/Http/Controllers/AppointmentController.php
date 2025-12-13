@@ -143,15 +143,27 @@ class AppointmentController extends Controller
         ]);
 
         $whatsappUrl = null;
+        
+        // Sender Number (Infobip) - Used for Opt-in/Voucher
+        $senderNumber = '447860088970'; 
+        
         // Logic for WhatsApp Link or Auto-Send
         if($isRequest) {
-            // Public Request -> Generate Link for user to click
+            // Public Request (To Barber directly usually, or stay consistent?)
+            // If request, maybe to Barber? The user wants "Comprobante".
+            // Let's stick to the Barber for "Custom Requests" as they need negotiation.
             $barber = Barber::find($request->barber_id);
-            $phone = $barber->whatsapp_number ?? '573000000000'; 
-            $msg = "Hola {$barber->name}, soy {$request->client_name}. Quisiera agendar para *{$request->custom_details}* el día {$request->date} a las {$request->time}. Quedo atento a confirmación.";
+            $phone = $barber->whatsapp_number ?? $senderNumber; 
+            $msg = "Hola {$barber->name}, soy {$request->client_name}. Quisiera agendar para *{$request->custom_details}* el día {$request->date} a las {$request->time}. Quedo atento.";
             $whatsappUrl = "https://wa.me/{$phone}?text=" . urlencode($msg);
         } else {
-            // Scheduled (Admin or Direct Public) -> Send Auto Confirmation
+            // Scheduled (Confirmed)
+            // User Strategy: Client sends "Voucher" to Sender -> Sender replies via API.
+            // We generate the link to the Sender Number.
+            $msg = "Hola, soy {$request->client_name}. Acabo de agendar cita de *{$service->name}* para el {$request->date} a las {$request->time}. Este es mi comprobante.";
+            $whatsappUrl = "https://wa.me/{$senderNumber}?text=" . urlencode($msg);
+
+            // Trigger API (Might fail if no opt-in, but loop closes when user sends msg)
             try {
                 $whatsappService->sendConfirmation($appointment);
             } catch (\Exception $e) {

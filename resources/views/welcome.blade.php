@@ -349,21 +349,27 @@
             }
         });
     });
-    @elseif(session('success'))
+    @if(session('success'))
     document.addEventListener('DOMContentLoaded', function() {
+        let waUrl = "{{ session('whatsapp_url') }}";
+        
         Swal.fire({
-            title: '¡Cita Reservada, {{ session("client_name") }}!',
-            text: 'Gracias por confiar en nosotros. En breve te compartiremos la información de tu cita por medio de WhatsApp.',
+            title: '¡Cita Pre-Reservada!',
+            html: "Hola <b>{{ session('client_name') }}</b>, para finalizar tu reserva y recibir la confirmación, por favor envía el <b>Comprobante</b> por WhatsApp ahora mismo.",
             icon: 'success',
-            confirmButtonText: 'Entendido',
-            confirmButtonColor: '#4F46E5', // Indigo
+            showCancelButton: true,
+            confirmButtonText: '<i class="bi bi-whatsapp"></i> Enviar Comprobante',
+            cancelButtonText: 'Cerrar',
+            confirmButtonColor: '#25D366',
+            cancelButtonColor: '#6c757d',
             background: '#ffffff',
             color: '#1e293b',
-            showClass: {
-                popup: 'animate__animated animate__fadeInDown'
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOutUp'
+            didOpen: () => {
+                // Determine if we should force click or just wait
+            }
+        }).then((result) => {
+            if (result.isConfirmed && waUrl) {
+                window.open(waUrl, '_blank');
             }
         });
     });
