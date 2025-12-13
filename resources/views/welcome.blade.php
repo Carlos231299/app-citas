@@ -142,8 +142,19 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label text-dark fw-bold small">TELÉFONO / WHATSAPP</label>
-                                <input type="tel" name="client_phone" class="form-control form-control-lg border shadow-sm" required placeholder="+57 300..." minlength="7" maxlength="20" autocomplete="off" oninput="this.value = this.value.replace(/[^0-9+]/g, '')">
-                                <small class="text-muted" style="font-size: 0.75rem;">Incluye tu código de país (Ej: +57...)</small>
+                                <div class="input-group shadow-sm">
+                                    <select name="phone_prefix" class="form-select border bg-light text-dark fw-bold" style="max-width: 110px;" required>
+                                        <option value="+57" selected>🇨🇴 +57</option>
+                                        <option value="+58">🇻🇪 +58</option>
+                                        <option value="+51">🇵🇪 +51</option>
+                                        <option value="+593">🇪🇨 +593</option>
+                                        <option value="+507">🇵🇦 +507</option>
+                                        <option value="+1">🇺🇸 +1</option>
+                                        <option value="+34">🇪🇸 +34</option>
+                                    </select>
+                                    <input type="tel" name="phone_number" class="form-control form-control-lg border ps-3" required placeholder="3001234567" minlength="7" maxlength="15" autocomplete="off" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                                </div>
+                                <small class="text-muted" style="font-size: 0.75rem;">Selecciona el país e ingresa el número.</small>
                             </div>
                         </div>
 

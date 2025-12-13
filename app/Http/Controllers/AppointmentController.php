@@ -104,7 +104,9 @@ class AppointmentController extends Controller
             'date' => 'required|date',
             'time' => 'required',
             'client_name' => 'required',
-            'client_phone' => 'required|min:10',
+            // 'client_phone' => 'required', // Replaced by prefix+number
+            'phone_prefix' => 'sometimes|required',
+            'phone_number' => 'sometimes|required|min:7',
             'custom_details' => 'nullable|string|max:255'
         ]);
 
@@ -124,12 +126,18 @@ class AppointmentController extends Controller
             $status = $isRequest ? 'request' : 'scheduled';
         }
 
+        if ($request->has(['phone_prefix', 'phone_number'])) {
+            $clientPhone = $request->phone_prefix . $request->phone_number;
+        } else {
+            $clientPhone = $request->client_phone;
+        }
+
         $appointment = Appointment::create([
             'service_id' => $request->service_id,
             'barber_id' => $request->barber_id,
             'scheduled_at' => $scheduledAt,
             'client_name' => $request->client_name,
-            'client_phone' => $request->client_phone,
+            'client_phone' => $clientPhone,
             'custom_details' => $request->custom_details,
             'status' => $status
         ]);

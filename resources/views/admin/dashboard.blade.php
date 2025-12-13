@@ -188,7 +188,14 @@
                         <label class="form-label small fw-bold text-muted">TELÉFONO</label>
                         <div class="input-group">
                             <span class="input-group-text bg-white border-end-0"><i class="bi bi-whatsapp"></i></span>
-                            <input type="tel" name="client_phone" class="form-control border-start-0 ps-0" placeholder="+57 300..." required minlength="7" maxlength="20" oninput="this.value = this.value.replace(/[^0-9+]/g, '')">
+                            <select name="phone_prefix" class="form-select border-start-0 border-end-0 bg-light" style="max-width: 100px;" required>
+                                <option value="+57" selected>+57</option>
+                                <option value="+58">VE (+58)</option>
+                                <option value="+51">PE (+51)</option>
+                                <option value="+593">EC (+593)</option>
+                                <option value="+1">US (+1)</option>
+                            </select>
+                            <input type="tel" name="phone_number" class="form-control border-start-0 ps-2" placeholder="3001234567" required minlength="7" maxlength="15" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
                     </div>
 
