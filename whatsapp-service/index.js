@@ -1,5 +1,6 @@
 const express = require('express');
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { default: makeWASocket, DisconnectReason, useMultiFileAuthState } = require('@whiskeysockets/baileys');
+const pino = require('pino');
 const qrcode = require('qrcode-terminal');
 const cors = require('cors');
 
@@ -9,54 +10,50 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
-// Initialize WhatsApp Client with LocalAuth for persistence
-const client = new Client({
-    authStrategy: new LocalAuth({
-        clientId: "client-one"
-    }),
-    puppeteer: {
-        headless: true,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--single-process',
-            '--disable-gpu'
-        ]
-    },
-    webVersionCache: {
-        type: 'remote',
-        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
-    }
-});
-
+let sock;
 let isReady = false;
 
-// Generate QR Code
-client.on('qr', (qr) => {
-    console.log('QR RECEIVED', qr);
-    qrcode.generate(qr, { small: true });
-});
+async function connectToWhatsApp() {
+    const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
 
-// Client Ready
-client.on('ready', () => {
-    console.log('Client is ready!');
-    isReady = true;
-});
+    sock = makeWASocket({
+        auth: state,
+        printQRInTerminal: true, // Baileys prints QR natively nicely
+        logger: pino({ level: 'silent' }), // Hide debug logs
+        browser: ['BarberiaJR', 'Chrome', '1.0.0'] // Custom browser name
+    });
 
-// Client Authenticated
-client.on('authenticated', () => {
-    console.log('AUTHENTICATED');
-});
+    sock.ev.on('creds.update', saveCreds);
 
-// Client Disconnected
-client.on('disconnected', (reason) => {
-    console.log('Client was logged out', reason);
-    isReady = false;
-});
+    sock.ev.on('connection.update', (update) => {
+        const { connection, lastDisconnect, qr } = update;
+
+        if (qr) {
+            console.log('QR RECEIVED');
+            // We can also print it manually if needed, but printQRInTerminal:true does it.
+            // But for logging to file to show user, we might want to ensure it's captured.
+            // Baileys 'printQRInTerminal' uses basic console.log
+        }
+
+        if (connection === 'close') {
+            const shouldReconnect = (lastDisconnect.error)?.output?.statusCode !== DisconnectReason.loggedOut;
+            console.log('Connection closed. Reconnecting:', shouldReconnect);
+            isReady = false;
+
+            if (shouldReconnect) {
+                connectToWhatsApp();
+            } else {
+                console.log('Logged out. Delete auth_info_baileys to scan again.');
+            }
+        } else if (connection === 'open') {
+            console.log('opened connection');
+            isReady = true;
+        }
+    });
+}
+
+// Start connection
+connectToWhatsApp();
 
 // API Endpoint to Send Message
 app.post('/send', async (req, res) => {
@@ -71,19 +68,18 @@ app.post('/send', async (req, res) => {
     }
 
     try {
-        // Format phone number: remove non-digits, ensure country code (default 57 for Colombia if missing), append @c.us
+        // Format phone: 573001234567@s.whatsapp.net
         let cleanPhone = phone.replace(/[^0-9]/g, '');
-
         if (cleanPhone.length === 10) {
             cleanPhone = '57' + cleanPhone;
         }
 
-        const chatId = cleanPhone + "@c.us";
+        const jid = cleanPhone + "@s.whatsapp.net";
 
-        const response = await client.sendMessage(chatId, message);
+        const sentMsg = await sock.sendMessage(jid, { text: message });
         console.log(`Message sent to ${cleanPhone}`);
 
-        res.json({ status: 'success', response });
+        res.json({ status: 'success', response: sentMsg });
     } catch (error) {
         console.error('Error sending message:', error);
         res.status(500).json({ status: 'error', message: error.toString() });
@@ -93,16 +89,10 @@ app.post('/send', async (req, res) => {
 // Status Endpoint
 app.get('/status', (req, res) => {
     res.json({
-        ready: isReady,
-        info: client.info
+        ready: isReady
     });
 });
 
-// Start Server
 app.listen(port, () => {
-    console.log(`WhatsApp Service listening on port ${port}`);
-
-    // Start WhatsApp Client
-    console.log('Initializing WhatsApp Client...');
-    client.initialize();
+    console.log(`WhatsApp Service (Baileys) listening on port ${port}`);
 });
