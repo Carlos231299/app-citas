@@ -81,7 +81,12 @@
         <div class="card-body p-0 p-md-3 h-100 position-relative">
             <!-- Custom View Selector -->
             <div id="custom-view-selector" class="d-none">
-                <div class="dropdown">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary btn-sm rounded-pill px-3 fw-bold d-flex align-items-center gap-2 shadow-sm" onclick="openBookingModal()">
+                        <i class="bi bi-plus-lg"></i>
+                        <span class="d-none d-sm-inline">Apartar Cita</span>
+                    </button>
+                    <div class="dropdown">
                     <button class="btn btn-outline-secondary dropdown-toggle btn-sm fw-bold border-0 bg-transparent text-dark d-flex align-items-center gap-2" type="button" id="calendarViewBtn" data-bs-toggle="dropdown" aria-expanded="false" style="color: #3C4043 !important;">
                         <span>Mes</span>
                     </button>
@@ -113,6 +118,7 @@
                         </li>
                     </ul>
                 </div>
+                </div>
             </div>
             
             <div id="calendar" class="h-100"></div>
@@ -120,7 +126,191 @@
     </div>
     <!-- Rendered: {{ now() }} -->
 </div>
+
+<!-- Admin Booking Modal -->
+<div class="modal fade" id="adminBookingModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-primary">
+                    <i class="bi bi-calendar-plus me-2"></i>Apartar Cita
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-4">
+                <form id="adminBookingForm" onsubmit="submitAdminBooking(event)">
+                    @csrf
+                    <!-- Service & Barber -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">SERVICIO</label>
+                            <select name="service_id" id="modal_service_id" class="form-select border-2" required>
+                                <option value="" selected disabled>Seleccionar...</option>
+                                @foreach($services as $service)
+                                    <option value="{{ $service->id }}" data-price="{{ $service->price }}">{{ $service->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">BARBERO</label>
+                            <select name="barber_id" id="modal_barber_id" class="form-select border-2" required onchange="onModalBarberChange()">
+                                <option value="" selected disabled>Seleccionar...</option>
+                                @foreach($barbers as $barber)
+                                    <option value="{{ $barber->id }}">{{ $barber->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Date & Time -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">FECHA</label>
+                            <input type="date" name="date" id="modal_date" class="form-control border-2" required min="{{ date('Y-m-d') }}" onchange="onModalDateChange()">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">HORA</label>
+                            <select name="time" id="modal_time" class="form-select border-2" required disabled>
+                                <option value="" selected disabled>Elige fecha...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Client Info -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">CLIENTE</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-person"></i></span>
+                            <input type="text" name="client_name" class="form-control border-start-0 ps-0" placeholder="Nombre completo" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">TELÉFONO</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-whatsapp"></i></span>
+                            <input type="tel" name="client_phone" class="form-control border-start-0 ps-0" placeholder="Número de contacto" required>
+                        </div>
+                    </div>
+
+                    <!-- Custom Details -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted">DETALLES (OPCIONAL)</label>
+                        <input type="text" name="custom_details" class="form-control" placeholder="Ej: Corte específico, notas...">
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" id="btnBookAdmin" class="btn btn-primary btn-lg fw-bold rounded-3">
+                            Confirmar Cita
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
+
+@push('scripts')
+<script>
+    // ... Existing scripts ...
+
+    // Admin Booking Logic
+    const bookingModal = new bootstrap.Modal(document.getElementById('adminBookingModal'));
+
+    function openBookingModal() {
+        document.getElementById('adminBookingForm').reset();
+        document.getElementById('modal_time').innerHTML = '<option value="" selected disabled>Elige fecha...</option>';
+        document.getElementById('modal_time').disabled = true;
+        bookingModal.show();
+    }
+
+    function onModalBarberChange() {
+        const dateInput = document.getElementById('modal_date');
+        if(dateInput.value) checkModalAvailability();
+    }
+
+    function onModalDateChange() {
+        checkModalAvailability();
+    }
+
+    function checkModalAvailability() {
+        const barberId = document.getElementById('modal_barber_id').value;
+        const date = document.getElementById('modal_date').value;
+        const timeSelect = document.getElementById('modal_time');
+
+        if (!barberId || !date) return;
+
+        timeSelect.disabled = true;
+        timeSelect.innerHTML = '<option>Cargando...</option>';
+
+        axios.get(`/api/slots?barber_id=${barberId}&date=${date}`)
+            .then(response => {
+                const slots = response.data;
+                timeSelect.innerHTML = '<option value="" selected disabled>Seleccionar hora...</option>';
+                
+                if (!Array.isArray(slots) || slots.length === 0) {
+                    timeSelect.innerHTML = '<option disabled>Estás lleno este día</option>';
+                    return;
+                }
+
+                slots.forEach(time => {
+                    // Convert "4:30 PM" format back if needed or use as string
+                    // API returns "4:30 PM" (g:i A). Form expects H:i usually? 
+                    // Wait, Controller store expects combined date+time. 
+                    // Let's check how store works: Carbon::parse($request->date . ' ' . $request->time);
+                    // "2023-10-27 4:30 PM" works fine in Carbon.
+                    const option = document.createElement('option');
+                    option.value = time;
+                    option.text = time;
+                    timeSelect.appendChild(option);
+                });
+                timeSelect.disabled = false;
+            })
+            .catch(err => {
+                console.error(err);
+                timeSelect.innerHTML = '<option disabled>Error al cargar</option>';
+            });
+    }
+
+    function submitAdminBooking(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnBookAdmin');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+
+        const formData = new FormData(e.target);
+
+        axios.post("{{ route('book') }}", formData)
+            .then(response => {
+                bookingModal.hide();
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Cita Creada!',
+                    text: 'La cita se ha agendado correctamente en el calendario.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                // Refresh Calendar
+                calendar.refetchEvents();
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo crear la cita. Revisa los datos o la conexión.'
+                });
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+    }
+</script>
+@endpush
+
 
 @push('scripts')
 <script>

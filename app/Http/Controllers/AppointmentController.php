@@ -143,6 +143,15 @@ class AppointmentController extends Controller
             }
         }
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Cita creada exitosamente',
+                'whatsapp_url' => $whatsappUrl,
+                'is_request' => $isRequest
+            ]);
+        }
+
         return redirect()->back()->with([
             'success' => true, 
             'client_name' => $request->client_name,
