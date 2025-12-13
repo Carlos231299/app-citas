@@ -4,78 +4,72 @@ namespace App\Services;
 
 class WhatsAppService
 {
-    protected $baseUrl = 'https://wa.me/';
+    protected $apiKey = 'cada509515b08ade588b923f53bf1f6e-5283bfeb-ef7e-467b-b3b0-700b4626054a';
+    protected $baseUrl = 'https://vy6lye.api.infobip.com';
+    protected $sender = '447860088970';
 
     /**
-     * Generate a link for the client to confirm/view appointment details
+     * Send a template message via Infobip API
      */
-    public function generateClientLink($phone, $name, $service, $date, $time)
-    {
-        $message = "Hola *$name*, tu cita para *$service* está confirmada para el *$date* a las *$time*. \n\n¡Gracias por preferir Barbería JR!";
-        return $this->buildLink($phone, $message);
-    }
-
-    /**
-     * Generate a link to notify the barber of a new booking
-     */
-    public function generateBarberLink($phone, $clientName, $service, $date, $time)
-    {
-        $message = "📅 *Nueva Cita* \nCliente: *$clientName* \nServicio: *$service* \nFecha: *$date* \nHora: *$time*";
-        return $this->buildLink($phone, $message);
-    }
-
-    protected function buildLink($phone, $message)
-    {
-        // Remove non-numeric characters from phone
-        $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
-        
-        // Ensure country code (assuming 57 for Colombia based on user location context, or generic)
-        if (strlen($cleanPhone) == 10) {
-            $cleanPhone = '57' . $cleanPhone;
-        }
-
-        return $this->baseUrl . $cleanPhone . '?text=' . urlencode($message);
-    }
-
-    /**
-     * Send a real WhatsApp message via local Node.js service
-     */
-    public function sendMessage($phone, $message)
+    public function sendInfobipTemplate($to, $templateName, $language, $templateData)
     {
         try {
-            // Call the local Node.js service
-            $response = \Illuminate\Support\Facades\Http::post('http://localhost:3000/send', [
-                'phone' => $phone,
-                'message' => $message
+            // Clean phone number
+            $cleanPhone = preg_replace('/[^0-9]/', '', $to);
+            if (strlen($cleanPhone) == 10) {
+                // Ensure usage of the user's test number strictly or append country code
+                // For the user request, they specifically asked to test "573042189080"
+                // Ideally we should adhere to E.164.
+                // If it's 10 digits (Colombia), add 57
+                $cleanPhone = '57' . $cleanPhone;
+            }
+
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'Authorization' => 'App ' . $this->apiKey,
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
+            ])->post($this->baseUrl . '/whatsapp/1/message/template', [
+                'messages' => [
+                    [
+                        'from' => $this->sender,
+                        'to' => $cleanPhone,
+                        'content' => [
+                            'templateName' => $templateName,
+                            'templateData' => $templateData,
+                            'language' => $language
+                        ]
+                    ]
+                ]
             ]);
 
             if ($response->successful()) {
-                \Illuminate\Support\Facades\Log::info("WA Sent to $phone");
-                return true;
+                \Illuminate\Support\Facades\Log::info("Infobip Sent to $cleanPhone: " . $response->body());
+                return $response->json();
             } else {
-                \Illuminate\Support\Facades\Log::error("WA Failed: " . $response->body());
+                \Illuminate\Support\Facades\Log::error("Infobip Failed: " . $response->body());
                 return false;
             }
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("WA Connection Error: " . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error("Infobip Error: " . $e->getMessage());
             return false;
         }
     }
 
     /**
      * Send Confirmation Message
+     * For now, we use the TEST template as requested to verify connectivity.
      */
     public function sendConfirmation($appointment)
     {
-        $phone = $appointment->client_phone;
-        $date = $appointment->scheduled_at->format('Y-m-d');
-        $time = $appointment->scheduled_at->format('h:i A');
-        $name = $appointment->client_name;
-        $service = $appointment->service->name;
-
-        $msg = "Hola *$name*! 👋\n\nTu cita en *Barbería JR* ha sido confirmada.\n\n✂️ Servicio: *$service*\n📅 Fecha: *$date*\n⏰ Hora: *$time*\n\n¡Te esperamos!";
-
-        // Send via Node Service
-        return $this->sendMessage($phone, $msg);
+        // For the specific test user request:
+        // Template: test_whatsapp_template_en
+        // Placeholders: ["Soporte"]
+        
+        return $this->sendInfobipTemplate(
+            $appointment->client_phone,
+            'test_whatsapp_template_en',
+            'en',
+            ['body' => ['placeholders' => ['Soporte']]]
+        );
     }
 }
