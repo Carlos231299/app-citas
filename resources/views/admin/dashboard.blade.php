@@ -297,10 +297,23 @@
             })
             .catch(err => {
                 console.error(err);
+                
+                let errorMsg = 'No se pudo crear la cita. Revisa los datos o la conexión.';
+                if (err.response && err.response.data) {
+                    if (err.response.data.message) {
+                        errorMsg = err.response.data.message;
+                    }
+                    if (err.response.data.errors) {
+                        // Concatenate validation errors
+                        const errors = Object.values(err.response.data.errors).flat();
+                        errorMsg = errors.join('<br>');
+                    }
+                }
+
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'No se pudo crear la cita. Revisa los datos o la conexión.'
+                    html: errorMsg
                 });
             })
             .finally(() => {
