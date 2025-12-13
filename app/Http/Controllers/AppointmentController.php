@@ -115,7 +115,14 @@ class AppointmentController extends Controller
         $serviceName = strtolower(trim($service->name));
         
         $isRequest = !empty($request->custom_details) || in_array($serviceName, ['otro', 'otro servicio']);
-        $status = $isRequest ? 'request' : 'scheduled';
+        
+        // If Admin is booking, always 'scheduled' (Confirmed)
+        if (auth()->check()) {
+            $status = 'scheduled';
+            $isRequest = false; // Admin bookings are never requests
+        } else {
+            $status = $isRequest ? 'request' : 'scheduled';
+        }
 
         $appointment = Appointment::create([
             'service_id' => $request->service_id,
@@ -128,17 +135,18 @@ class AppointmentController extends Controller
         ]);
 
         $whatsappUrl = null;
+        // Logic for WhatsApp Link or Auto-Send
         if($isRequest) {
+            // Public Request -> Generate Link for user to click
             $barber = Barber::find($request->barber_id);
             $phone = $barber->whatsapp_number ?? '573000000000'; 
             $msg = "Hola {$barber->name}, soy {$request->client_name}. Quisiera agendar para *{$request->custom_details}* el día {$request->date} a las {$request->time}. Quedo atento a confirmación.";
             $whatsappUrl = "https://wa.me/{$phone}?text=" . urlencode($msg);
         } else {
-            // Automated Confirmation for Scheduled Appointments
+            // Scheduled (Admin or Direct Public) -> Send Auto Confirmation
             try {
                 $whatsappService->sendConfirmation($appointment);
             } catch (\Exception $e) {
-                // Log error but don't fail the request
                 \Illuminate\Support\Facades\Log::error('WA Notification Error: ' . $e->getMessage());
             }
         }
