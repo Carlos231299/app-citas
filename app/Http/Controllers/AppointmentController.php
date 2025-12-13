@@ -104,7 +104,7 @@ class AppointmentController extends Controller
             'date' => 'required|date',
             'time' => 'required',
             'client_name' => 'required',
-            'client_phone' => 'required',
+            'client_phone' => 'required|min:10',
             'custom_details' => 'nullable|string|max:255'
         ]);
 
