@@ -297,7 +297,7 @@
                     timer: 2000,
                     showConfirmButton: false
                 });
-                calendar.refetchEvents();
+                calendarInstance.refetchEvents();
             })
             .catch(err => {
                 console.error('Booking Error:', err);
