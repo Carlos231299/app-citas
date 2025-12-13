@@ -36,4 +36,46 @@ class WhatsAppService
 
         return $this->baseUrl . $cleanPhone . '?text=' . urlencode($message);
     }
+
+    /**
+     * Send a real WhatsApp message via local Node.js service
+     */
+    public function sendMessage($phone, $message)
+    {
+        try {
+            // Call the local Node.js service
+            $response = \Illuminate\Support\Facades\Http::post('http://localhost:3000/send', [
+                'phone' => $phone,
+                'message' => $message
+            ]);
+
+            if ($response->successful()) {
+                \Illuminate\Support\Facades\Log::info("WA Sent to $phone");
+                return true;
+            } else {
+                \Illuminate\Support\Facades\Log::error("WA Failed: " . $response->body());
+                return false;
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("WA Connection Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Send Confirmation Message
+     */
+    public function sendConfirmation($appointment)
+    {
+        $phone = $appointment->client_phone;
+        $date = $appointment->scheduled_at->format('Y-m-d');
+        $time = $appointment->scheduled_at->format('h:i A');
+        $name = $appointment->client_name;
+        $service = $appointment->service->name;
+
+        $msg = "Hola *$name*! 👋\n\nTu cita en *Barbería JR* ha sido confirmada.\n\n✂️ Servicio: *$service*\n📅 Fecha: *$date*\n⏰ Hora: *$time*\n\n¡Te esperamos!";
+
+        // Send via Node Service
+        return $this->sendMessage($phone, $msg);
+    }
 }
