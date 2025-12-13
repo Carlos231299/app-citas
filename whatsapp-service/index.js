@@ -1,4 +1,8 @@
 const express = require('express');
+// Polyfill for Node 18 compatibility with Baileys
+if (!global.crypto) {
+    global.crypto = require('crypto');
+}
 const { default: makeWASocket, DisconnectReason, useMultiFileAuthState } = require('@whiskeysockets/baileys');
 const pino = require('pino');
 const qrcode = require('qrcode-terminal');
