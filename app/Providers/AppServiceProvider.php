@@ -13,7 +13,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(
             \App\Services\WhatsApp\WhatsAppServiceInterface::class,
-            \App\Services\WhatsApp\MockWhatsAppService::class
+            \App\Services\WhatsApp\InfobipWhatsAppService::class
         );
     }
 
