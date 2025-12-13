@@ -15,17 +15,6 @@ use App\Http\Controllers\ReportController;
 Route::get('/', [AppointmentController::class, 'publicIndex'])->name('welcome');
 Route::post('/book', [AppointmentController::class, 'store'])->name('book');
 
-Route::get('/test-whatsapp', function () {
-    $service = new \App\Services\WhatsAppService();
-    $result = $service->sendInfobipTemplate(
-        '573042189080',
-        'test_whatsapp_template_en',
-        'en',
-        ['body' => ['placeholders' => ['Soporte']]]
-    );
-    return response()->json($result);
-});
-
 // Authentication Routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

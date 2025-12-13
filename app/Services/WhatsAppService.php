@@ -63,13 +63,15 @@ class WhatsAppService
     {
         // For the specific test user request:
         // Template: test_whatsapp_template_en
-        // Placeholders: ["Soporte"]
+        // Placeholders: ["Soporte"] -> Mapped to Client Name for personalization
         
+        $name = explode(' ', $appointment->client_name)[0]; // First name only
+
         return $this->sendInfobipTemplate(
             $appointment->client_phone,
             'test_whatsapp_template_en',
             'en',
-            ['body' => ['placeholders' => ['Soporte']]]
+            ['body' => ['placeholders' => [$name]]]
         );
     }
 }
