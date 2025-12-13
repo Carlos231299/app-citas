@@ -144,8 +144,8 @@ class AppointmentController extends Controller
 
         $whatsappUrl = null;
         
-        // Sender Number (Infobip) - Used for Opt-in/Voucher
-        $senderNumber = '447860088970'; 
+        // Sender Number (Twilio Sandbox) - Used for Opt-in/Voucher
+        $senderNumber = '14155238886'; 
         
         // Logic for WhatsApp Link or Auto-Send
         if($isRequest) {
