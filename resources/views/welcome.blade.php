@@ -331,7 +331,7 @@
         document.getElementById('step3-tab').classList.add('text-primary'); 
     }
 
-    @if(session('whatsapp_url'))
+    @if(session('is_request'))
     document.addEventListener('DOMContentLoaded', function() {
         Swal.fire({
             title: '¡Solicitud Creada!',
@@ -349,7 +349,7 @@
             }
         });
     });
-    @if(session('success'))
+    @elseif(session('success'))
     document.addEventListener('DOMContentLoaded', function() {
         let waUrl = "{{ session('whatsapp_url') }}";
         
@@ -363,10 +363,7 @@
             confirmButtonColor: '#25D366',
             cancelButtonColor: '#6c757d',
             background: '#ffffff',
-            color: '#1e293b',
-            didOpen: () => {
-                // Determine if we should force click or just wait
-            }
+            color: '#1e293b'
         }).then((result) => {
             if (result.isConfirmed && waUrl) {
                 window.open(waUrl, '_blank');
