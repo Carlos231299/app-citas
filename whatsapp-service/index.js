@@ -19,8 +19,9 @@ async function connectToWhatsApp() {
     sock = makeWASocket({
         auth: state,
         printQRInTerminal: true,
-        logger: pino({ level: 'debug' }), // Enable DEBUG logs
-        browser: ['BarberiaJR', 'Chrome', '1.2.0']
+        logger: pino({ level: 'debug' }),
+        syncFullHistory: false, // Don't sync full history to speed up and avoid timeouts
+        connectTimeoutMs: 60000, // Increase timeout
     });
 
     sock.ev.on('creds.update', saveCreds);
