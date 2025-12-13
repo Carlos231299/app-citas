@@ -25,7 +25,7 @@ async function connectToWhatsApp() {
     sock = makeWASocket({
         version,
         auth: state,
-        printQRInTerminal: true,
+        printQRInTerminal: false, // QR disabled for pairing code
         logger: pino({ level: 'debug' }),
         browser: ['Ubuntu', 'Chrome', '20.0.04'],
         syncFullHistory: false,
@@ -33,6 +33,18 @@ async function connectToWhatsApp() {
     });
 
     sock.ev.on('creds.update', saveCreds);
+
+    if (!sock.authState.creds.me) {
+        console.log('Requesting Pairing Code...');
+        setTimeout(async () => {
+            try {
+                const code = await sock.requestPairingCode('573042189080');
+                console.log('PAIRING CODE:', code);
+            } catch (err) {
+                console.error('Failed to request pairing code:', err);
+            }
+        }, 5000); // Wait 5s for socket init
+    }
 
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update;
