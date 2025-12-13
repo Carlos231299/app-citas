@@ -18,164 +18,141 @@
             </a>
         </div>
         <div class="text-center mb-5 mt-4">
-            <img src="{{ asset('images/logo.png') }}" alt="Barbería JR Logo" class="img-fluid mb-3" style="max-height: 120px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+            <a href="{{ url('/') }}">
+                <img src="{{ asset('images/logo.png') }}" alt="Barbería JR Logo" class="img-fluid mb-3" style="max-height: 120px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+            </a>
             <h1 class="display-6 fw-bold text-white text-shadow-sm">Barbería JR</h1>
             <p class="text-white opacity-75 lead text-shadow-sm">“Un buen corte es como un buen café, te despierta y te hace sentir mejor. ¡Ven y visítanos!”</p>
         </div>
 
-        <!-- Wizard Container -->
-        <div class="card border-0 shadow-lg rounded-4 overflow-hidden backdrop-blur-light">
+        <!-- Wizard Container (Reverted to Tabbed Style) -->
+        <div class="card border border-2 shadow-sm" style="border-radius: 12px; overflow: hidden; border-color: #E2E8F0;">
+            <div class="card-header bg-white border-bottom py-3">
+                <ul class="nav nav-pills nav-fill" id="pills-tab" role="tablist">
+                    <li class="nav-item">
+                        <span class="nav-link active fw-bold text-uppercase" id="step1-tab" style="letter-spacing: 0.5px;"><i class="bi bi-scissors me-2"></i>Servicios</span>
+                    </li>
+                    <li class="nav-item">
+                        <span class="nav-link text-muted text-uppercase" id="step2-tab" style="letter-spacing: 0.5px;"><i class="bi bi-calendar-event me-2"></i>Agenda</span>
+                    </li>
+                    <li class="nav-item">
+                        <span class="nav-link text-muted text-uppercase" id="step3-tab" style="letter-spacing: 0.5px;"><i class="bi bi-check-circle me-2"></i>Listo</span>
+                    </li>
+                </ul>
+            </div>
+
             <div class="card-body p-0">
-                <form action="{{ route('book') }}" method="POST" id="bookingForm" class="h-100">
-                    @csrf
-                    
-                    <div class="row g-0 h-100">
-                        <!-- Left Panel: Steps -->
-                        <div class="col-md-4 bg-light bg-opacity-75 p-4 border-end border-light">
-                            <h5 class="fw-bold text-dark mb-4">Reserva tu Cita</h5>
+                <!-- Step 1: Services -->
+                <div id="step-services" class="p-4 p-md-5 bg-white">
+                    <h5 class="mb-4 text-dark fw-bold border-bottom pb-2">Selecciona un servicio</h5>
+                    <div class="list-group list-group-flush border rounded-3">
+                        @foreach($services as $service)
+                        <button type="button" class="list-group-item list-group-item-action p-3 d-flex align-items-center mb-2 rounded-3 shadow-sm border-0 service-item" 
+                            onclick="selectService({{ $service->id }}, '{{ $service->name }}', {{ $service->price ?? 0 }}, this, {{ $service->is_custom ? 'true' : 'false' }})"
+                            id="service-btn-{{ $service->id }}">
                             
-                            <!-- Steps Indicator -->
-                            <div class="position-relative ps-3 border-start border-2 border-secondary border-opacity-25 pb-5">
-                                <!-- Step 1 -->
-                                <div class="step-item mb-4 position-relative" data-step="1">
-                                    <div class="position-absolute top-0 start-0 translate-middle rounded-circle bg-dark text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; left: -1px !important;">1</div>
-                                    <div class="ms-4">
-                                        <h6 class="fw-bold mb-1 text-dark">Servicio</h6>
-                                        <small class="text-muted d-block opacity-75" id="summary_service">Elige tratamiento</small>
+                            <div class="d-flex gap-1 me-3">
+                                @foreach(explode(',', $service->icon) as $icon)
+                                    @if(trim($icon) !== '')
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-primary" style="width: 45px; height: 45px;">
+                                        <i class="bi bi-{{ trim($icon) }} fs-5"></i>
                                     </div>
-                                </div>
-
-                                <!-- Step 2 -->
-                                <div class="step-item mb-4 position-relative opacity-50" data-step="2">
-                                    <div class="position-absolute top-0 start-0 translate-middle rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; left: -1px !important;">2</div>
-                                    <div class="ms-4">
-                                        <h6 class="fw-bold mb-1 text-dark">Profesional</h6>
-                                        <small class="text-muted d-block opacity-75" id="summary_barber">Selecciona barbero</small>
-                                    </div>
-                                </div>
-
-                                <!-- Step 3 -->
-                                <div class="step-item mb-4 position-relative opacity-50" data-step="3">
-                                    <div class="position-absolute top-0 start-0 translate-middle rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; left: -1px !important;">3</div>
-                                    <div class="ms-4">
-                                        <h6 class="fw-bold mb-1 text-dark">Fecha y Hora</h6>
-                                        <small class="text-muted d-block opacity-75" id="summary_datetime">Disponibilidad</small>
-                                    </div>
-                                </div>
-
-                                <!-- Step 4 -->
-                                <div class="step-item position-relative opacity-50" data-step="4">
-                                    <div class="position-absolute top-0 start-0 translate-middle rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; left: -1px !important;">4</div>
-                                    <div class="ms-4">
-                                        <h6 class="fw-bold mb-1 text-dark">Confirmación</h6>
-                                        <small class="text-muted d-block opacity-75">Tus datos</small>
-                                    </div>
-                                </div>
+                                    @endif
+                                @endforeach
                             </div>
-                        </div>
-
-                        <!-- Right Panel: Form Content -->
-                        <div class="col-md-8 p-4 bg-white">
-                            <!-- Step 1: Services -->
-                            <div class="form-step active" id="step-1">
-                                <h5 class="mb-3 fw-bold text-dark">Selecciona un Servicio</h5>
-                                <div class="row g-2">
-                                    @foreach($services as $service)
-                                    <div class="col-6">
-                                        <input type="radio" class="btn-check" name="service_id" id="service_{{ $service->id }}" value="{{ $service->id }}" data-name="{{ $service->name }}" data-price="{{ $service->price }}" required onchange="nextStep(2)">
-                                        <label class="btn btn-outline-light text-dark text-start w-100 p-3 h-100 border shadow-sm hover-shadow transition-all" for="service_{{ $service->id }}">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <i class="bi bi-scissors fs-4 text-dark opacity-100"></i>
-                                                <span class="badge bg-dark rounded-pill">${{ number_format($service->price, 0) }}</span>
-                                            </div>
-                                            <span class="fw-bold d-block mb-1 text-uppercase small">{{ $service->name }}</span>
-                                            <small class="text-muted" style="font-size: 0.75rem;">{{ $service->duration }} min</small>
-                                        </label>
-                                    </div>
-                                    @endforeach
-                                </div>
+                            
+                            <div class="flex-grow-1 text-start">
+                                <h6 class="mb-0 fw-bold text-dark fs-5">{{ $service->name }}</h6>
+                                @if($service->is_custom || in_array(strtolower(trim($service->name)), ['otro', 'otro servicio']))
+                                    <small class="text-primary fw-semibold fst-italic">Se acordará detalle &rarr;</small>
+                                @endif
                             </div>
-
-                            <!-- Step 2: Barbers + DateTime -->
-                            <div class="form-step d-none" id="step-2">
-                                <h5 class="mb-3 fw-bold text-dark">Profesional y Horario</h5>
-                                
-                                <div class="row g-3">
-                                    <!-- Barber -->
-                                    <div class="col-12">
-                                        <label class="form-label text-dark fw-bold small">PROFESIONAL</label>
-                                        <select name="barber_id" id="barber_id" class="form-select form-select-lg border shadow-sm bg-white text-dark" required onchange="checkAvailability()">
-                                            <option value="" selected disabled>Elige barbero...</option>
-                                            @foreach($barbers as $barber)
-                                                <option value="{{ $barber->id }}">{{ $barber->name }}</option>
-                                            @endforeach
-                                            @if($barbers->count() <= 1)
-                                                <option disabled>Más barberos próximamente...</option>
-                                            @endif
-                                        </select>
-                                    </div>
-
-                                    <!-- Date -->
-                                    <div class="col-md-6">
-                                        <label class="form-label text-dark fw-bold small">FECHA</label>
-                                        @php
-                                            $minDate = now()->format('H') >= 18 ? now()->addDay()->format('Y-m-d') : now()->format('Y-m-d');
-                                        @endphp
-                                        <div onclick="checkBarberSelected()">
-                                            <input type="date" name="date" id="date" class="form-control form-control-lg border shadow-sm bg-white text-dark" required min="{{ $minDate }}" onchange="checkAvailability()" disabled title="Selecciona un barbero primero" style="pointer-events: none;"> 
-                                        </div>
-                                    </div>
-
-                                    <!-- Slots -->
-                                    <div class="col-12">
-                                        <label class="form-label text-dark fw-bold small">HORARIOS DISPONIBLES</label>
-                                        <div id="slots-container" class="d-flex flex-wrap gap-2 p-3 border rounded-3 bg-white shadow-sm" style="min-height: 80px;">
-                                            <span class="text-muted small align-self-center">Selecciona profesional y fecha para ver horarios...</span>
-                                        </div>
-                                        <input type="hidden" name="time" id="time" required>
-                                    </div>
-                                    
-                                    <div class="col-12 mt-4 text-end">
-                                        <button type="button" class="btn btn-dark rounded-pill px-4 fw-bold" onclick="nextStep(3)" id="btnToStep3" disabled>Siguiente <i class="bi bi-arrow-right ms-1"></i></button>
-                                    </div>
-                                </div>
+                            <div class="text-end">
+                                @if($service->price > 0)
+                                    <span class="fw-bold text-dark fs-5">${{ number_format($service->price, 0, ',', '.') }}</span>
+                                @else
+                                    <span class="badge bg-secondary text-white border">Acordar con Barbero</span>
+                                @endif
                             </div>
-
-                            <!-- Step 3: Client Info -->
-                            <div class="form-step d-none" id="step-3">
-                                <h5 class="mb-3 fw-bold text-dark">Tus Datos</h5>
-                                
-                                <div class="mb-3">
-                                    <label class="form-label text-dark fw-bold small">NOMBRE COMPLETO</label>
-                                    <div class="input-group input-group-lg shadow-sm">
-                                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-person"></i></span>
-                                        <input type="text" name="client_name" class="form-control border-start-0 ps-0 text-dark" required placeholder="Ej. Juan Pérez">
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label text-dark fw-bold small">TELÉFONO (WHATSAPP)</label>
-                                    <div class="input-group input-group-lg shadow-sm">
-                                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-whatsapp"></i></span>
-                                        <input type="tel" name="client_phone" class="form-control border-start-0 ps-0 text-dark" required placeholder="Ej. 3001234567" oninput="this.value = this.value.replace(/[^0-9+]/g, '')">
-                                    </div>
-                                </div>
-
-                                <div class="mb-4">
-                                    <label class="form-label text-dark fw-bold small">DETALLES ADICIONALES (OPCIONAL)</label>
-                                    <textarea name="custom_details" class="form-control border shadow-sm text-dark" rows="2" placeholder="Ej. Corte bajo, solo barba..."></textarea>
-                                </div>
-
-                                <div class="d-grid mt-4">
-                                    <button type="submit" class="btn btn-dark btn-lg rounded-pill fw-bold shadow-sm" id="btnSubmit">
-                                        CONFIRMAR RESERVA <i class="bi bi-check-lg ms-2"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                        </div>
+                        </button>
+                        @endforeach
                     </div>
-                </form>
+                </div>
+
+                <!-- Step 2: Details Form (Hidden initially) -->
+                <div id="step-details" class="d-none p-4 p-md-5 bg-white">
+                    <div class="mb-5 p-3 bg-light border border-primary border-opacity-25 rounded-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-uppercase text-muted fw-bold" style="font-size: 0.75rem; letter-spacing: 1px;">Servicio Seleccionado</small>
+                            <div class="fw-bold text-dark fs-5" id="summary-service-name">...</div>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm fw-bold px-3 rounded-pill" onclick="backToServices()">Cambiar</button>
+                    </div>
+
+                    <form action="{{ route('book') }}" method="POST" id="bookingForm">
+                        @csrf
+                        <input type="hidden" name="service_id" id="service_id">
+                        
+                        <!-- Custom Details Field (Initially Hidden) -->
+                        <div id="custom-details-container" class="mb-4 d-none">
+                            <label class="form-label text-dark fw-bold small">¿QUÉ TE GUSTARÍA HACERTE?</label>
+                            <input type="text" name="custom_details" id="custom_details" class="form-control form-control-lg border-2 border-primary" placeholder="Ej: Trenzas, Tintura, Rayitos...">
+                            <div class="form-text text-muted">El precio final será confirmado por el barbero en el local.</div>
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Barber -->
+                            <div class="col-md-6">
+                                <label class="form-label text-dark fw-bold small">PROFESIONAL</label>
+                                <select name="barber_id" id="barber_id" class="form-select form-select-lg border shadow-sm bg-white text-dark" required onchange="onBarberChange()">
+                                    <option value="" selected disabled>Elige barbero...</option>
+                                    @foreach($barbers as $barber)
+                                        <option value="{{ $barber->id }}">{{ $barber->name }}</option>
+                                    @endforeach
+                                    @if($barbers->count() <= 1)
+                                        <option disabled>Más barberos próximamente...</option>
+                                    @endif
+                                </select>
+                            </div>
+
+                            <!-- Date -->
+                            <div class="col-md-6">
+                                <label class="form-label text-dark fw-bold small">FECHA</label>
+                                @php
+                                    $minDate = now()->format('H') >= 18 ? now()->addDay()->format('Y-m-d') : now()->format('Y-m-d');
+                                @endphp
+                                <div onclick="checkBarberSelected()">
+                                    <input type="date" name="date" id="date" class="form-control form-control-lg border shadow-sm bg-white text-dark" required min="{{ $minDate }}" onchange="checkAvailability()" disabled title="Selecciona un barbero primero" style="pointer-events: none;"> 
+                                </div>
+                            </div>
+
+                            <!-- Slots -->
+                            <div class="col-12">
+                                <label class="form-label text-dark fw-bold small">HORARIOS DISPONIBLES</label>
+                                <div id="slots-container" class="d-flex flex-wrap gap-2 p-3 border rounded-3 bg-white shadow-sm" style="min-height: 80px;">
+                                    <span class="text-muted small align-self-center">Selecciona profesional y fecha para ver horarios...</span>
+                                </div>
+                                <input type="hidden" name="time" id="time" required>
+                            </div>
+
+                            <hr class="text-secondary opacity-10 my-4">
+
+                            <!-- Client Info -->
+                            <div class="col-md-6">
+                                <label class="form-label text-dark fw-bold small">TU NOMBRE</label>
+                                <input type="text" name="client_name" class="form-control form-control-lg border shadow-sm" required placeholder="Nombre completo" autocomplete="off">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-dark fw-bold small">TELÉFONO / WHATSAPP</label>
+                                <input type="tel" name="client_phone" class="form-control form-control-lg border shadow-sm" required placeholder="300..." autocomplete="off" oninput="this.value = this.value.replace(/[^0-9+]/g, '')">
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-5">
+                            <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold shadow">Confirmar Reserva</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
         
