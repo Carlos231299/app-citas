@@ -101,19 +101,19 @@
                         <li>
                             <div class="dropdown-item d-flex gap-2 align-items-center rounded-2 py-2" onclick="toggleOption(event, 'weekends')">
                                 <i class="bi bi-check-lg text-primary" id="check-weekends"></i>
-                                <span>Mostrar fines de semana</span>
+                                <span>Mostrar Fines de Semana</span>
                             </div>
                         </li>
                         <li>
                             <div class="dropdown-item d-flex gap-2 align-items-center rounded-2 py-2" onclick="toggleOption(event, 'rejected')">
                                 <i class="bi bi-check-lg text-primary" id="check-rejected"></i>
-                                <span>Mostrar eventos rechazados</span>
+                                <span>Mostrar Citas Canceladas </span>
                             </div>
                         </li>
                         <li>
                             <div class="dropdown-item d-flex gap-2 align-items-center rounded-2 py-2" onclick="toggleOption(event, 'completed')">
                                 <i class="bi bi-check-lg text-primary" id="check-completed"></i>
-                                <span>Mostrar tareas completadas</span>
+                                <span>Mostrar Citas Completadas</span>
                             </div>
                         </li>
                     </ul>
@@ -282,12 +282,7 @@
 
         const formData = new FormData(e.target);
 
-        axios.post("{{ route('book') }}", formData, {
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
+        axios.post("{{ route('book') }}", formData)
             .then(response => {
                 bookingModal.hide();
                 Swal.fire({
@@ -297,45 +292,15 @@
                     timer: 2000,
                     showConfirmButton: false
                 });
-                calendarInstance.refetchEvents();
+                // Refresh Calendar
+                calendar.refetchEvents();
             })
             .catch(err => {
-                console.error('Booking Error:', err);
-                
-                let errorTitle = 'Error ' + (err.response ? err.response.status : '');
-                let errorMsg = 'Ocurrió un error desconocido.';
-
-                if (err.response) {
-                    // Server responded
-                    if (err.response.data) {
-                        if (typeof err.response.data === 'string') {
-                            errorMsg = err.response.data; // HTML or raw string
-                        } else {
-                            // JSON object
-                            if (err.response.data.message) {
-                                errorMsg = err.response.data.message;
-                            }
-                            if (err.response.data.errors) {
-                                const list = Object.values(err.response.data.errors).flat().map(e => `<li>${e}</li>`).join('');
-                                errorMsg += `<ul class="text-start mt-2 fs-6">${list}</ul>`;
-                            }
-                        }
-                    } else {
-                        errorMsg = err.message;
-                    }
-                } else if (err.request) {
-                    // No response received
-                    errorMsg = 'No hubo respuesta del servidor. Verifica tu conexión.';
-                } else {
-                    // Request setup error
-                    errorMsg = err.message;
-                }
-
+                console.error(err);
                 Swal.fire({
                     icon: 'error',
-                    title: errorTitle,
-                    html: errorMsg,
-                    footer: '<small class="text-muted">Ver consola para detalles técnicos</small>'
+                    title: 'Error',
+                    text: 'No se pudo crear la cita. Revisa los datos o la conexión.'
                 });
             })
             .finally(() => {
