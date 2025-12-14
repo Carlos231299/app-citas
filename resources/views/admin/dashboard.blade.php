@@ -81,7 +81,15 @@
         <div class="card-body p-0 p-md-3 h-100 position-relative">
             <!-- Custom View Selector -->
             <div id="custom-view-selector" class="d-none">
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 flex-wrap justify-content-end">
+                     <!-- Barber Filter (New) -->
+                    <select id="barberFilter" class="form-select form-select-sm shadow-sm border-0 bg-white" style="width: 180px; color: #3C4043; font-weight: 500;" onchange="refreshCalendar()">
+                        <option value="">Todos los Barberos</option>
+                        @foreach(\App\Models\Barber::where('is_active', true)->get() as $barber)
+                            <option value="{{ $barber->id }}">{{ $barber->name }}</option>
+                        @endforeach
+                    </select>
+
                     <button class="btn btn-primary btn-sm rounded-pill px-3 fw-bold d-flex align-items-center gap-2 shadow-sm" onclick="openBookingModal()">
                         <i class="bi bi-plus-lg"></i>
                         <span class="d-none d-sm-inline">Apartar Cita</span>
@@ -396,7 +404,14 @@
                 meridiem: 'short',
                 hour12: true
             },
-            events: '/api/calendar/events',
+            events: {
+                url: '/api/calendar/events',
+                extraParams: function() {
+                    return {
+                        barber_id: document.getElementById('barberFilter') ? document.getElementById('barberFilter').value : ''
+                    };
+                }
+            },
             
             // Logic for Hiding Events based on Filters
             eventClassNames: function(arg) {
@@ -629,6 +644,13 @@
 
         updateCheckboxes();
     }
+
+    // Refresh Calendar (Global)
+    window.refreshCalendar = function() {
+        if(calendarInstance) {
+            calendarInstance.refetchEvents();
+        }
+    };
 
     // Edit Appointment Logic (Enhanced)
     window.editAppointment = function(id) {
