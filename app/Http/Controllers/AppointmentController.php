@@ -41,8 +41,27 @@ class AppointmentController extends Controller
 
         $isSpecial = $barber->special_mode ?? false;
 
-        $start = 4; // Earliest possible (Special)
-        $end = 22;  // Latest possible (Special)
+        // Check Extra Time Date Range Logic
+        if ($isSpecial) {
+             $startStr = $barber->extra_time_start;
+             $endStr = $barber->extra_time_end;
+ 
+             if ($startStr && $endStr) {
+                 $extraStart = Carbon::parse($startStr)->startOfDay();
+                 $extraEnd = Carbon::parse($endStr)->endOfDay();
+                 
+                 // If current date is NOT within range, disable special mode for this request
+                 if (!$date->between($extraStart, $extraEnd)) {
+                      $isSpecial = false; 
+                 }
+             } else {
+                  // Strict: If dates missing but mode ON, disable to prevent leak.
+                  $isSpecial = false;
+             }
+        }
+
+        $start = 7; 
+        $end = 22;
 
         $slots = [];
         // ... (query existing bookings) ...
