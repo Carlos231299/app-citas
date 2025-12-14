@@ -33,15 +33,20 @@ class TwilioWhatsAppService implements WhatsAppServiceInterface
         $details = $this->formatPhone($appointment->client_phone);
         $to = $details['to'];
 
-        // 2. Prepare Variables for Template "HXb5b62575e6e4ff6129ad7c8efe1f983e"
-        // Variable 1: Date
-        // Variable 2: Time
-        $date = $appointment->scheduled_at->format('d/m/Y');
-        $time = $appointment->scheduled_at->format('h:i A');
-
+        // 2. Prepare Variables for Template
+        // The user must configure the Twilio Template (ContentSid) to accept 5 variables:
+        // {{1}} = Client Name
+        // {{2}} = Barber Name
+        // {{3}} = Service Name
+        // {{4}} = Date (Y-m-d)
+        // {{5}} = Time (H:i)
+        
         $contentVariables = json_encode([
-            "1" => $date,
-            "2" => $time
+            "1" => $appointment->client_name,
+            "2" => $appointment->barber->name,
+            "3" => $appointment->service->name,
+            "4" => $appointment->scheduled_at->format('Y-m-d'),
+            "5" => $appointment->scheduled_at->format('H:i'),
         ]);
 
         return $this->sendMessageWithTemplate($to, $contentVariables);
