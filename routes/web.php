@@ -29,6 +29,11 @@ Route::middleware('guest')->group(function () {
     
     Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+    
+    // 2FA Verification
+    Route::get('2fa', [App\Http\Controllers\TwoFactorController::class, 'index'])->name('2fa.index');
+    Route::post('2fa', [App\Http\Controllers\TwoFactorController::class, 'verify'])->name('2fa.verify');
+    Route::post('2fa/resend', [App\Http\Controllers\TwoFactorController::class, 'resend'])->name('2fa.resend');
 });
 
 // Admin Protected

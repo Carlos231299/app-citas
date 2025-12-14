@@ -24,10 +24,25 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            $request->session()->flash('welcome_user', Auth::user()->name);
-            return redirect()->intended('dashboard');
+        if (Auth::validate($credentials)) {
+            $user = \App\Models\User::where('email', $request->email)->first();
+            
+            // 2FA Logic
+            $code = rand(100000, 999999);
+            $user->two_factor_code = $code;
+            $user->two_factor_expires_at = now()->addMinutes(10);
+            $user->save();
+
+            try {
+                Mail::to($user->email)->send(new \App\Mail\VerificationCode($code));
+            } catch (\Exception $e) {
+                // Log but continue (dev environment might fail mail)
+            }
+
+            // Store ID for Step 2
+            $request->session()->put('2fa:user_id', $user->id);
+
+            return redirect()->route('2fa.index');
         }
 
         return back()->withErrors([

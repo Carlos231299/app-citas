@@ -60,7 +60,7 @@ class AppointmentController extends Controller
              }
         }
 
-        $start = 7; 
+        $start = 4; // Allow checking from 4 AM
         $end = 22;
 
         $slots = [];
@@ -78,13 +78,12 @@ class AppointmentController extends Controller
                 // Logic Filter
                 $isRegular = ($hour >= 8 && $hour < 12) || ($hour >= 13 && $hour < 18);
                 
-                // Special Early: 4:00 - 7:30 (So hour 4, 5, 6. Hour 7: 00, 30. Hour 7 < 8 is true. Logic: hour < 8)
-                // Special Late: 6:30 PM - 10:00 PM. (18:30 starts).
-                // Hour 18: If minute 30 -> Special.
-                // Hour 19, 20, 21 -> Special.
+                // Special Early: 4:00 AM - 7:30 AM (Last slot 7:00, ends 7:30)
+                $isEarlySpecial = ($hour >= 4 && $hour < 7) || ($hour == 7 && $minute == '00');
                 
-                $isEarlySpecial = ($hour >= 4 && $hour < 8); // 4, 5, 6, 7
-                $isLateSpecial = ($hour > 18) || ($hour == 18 && $minute == '30'); // 18:30, 19+, 20+, 21+
+                // Special Late: 6:30 PM - 10:00 PM (Last slot 21:30, ends 22:00)
+                // 18:30 (Yes), 19, 20, 21:00, 21:30 (Yes).
+                $isLateSpecial = ($hour > 18) || ($hour == 18 && $minute == '30');
 
                 // Determine validity
                 $isValid = false;
@@ -219,9 +218,20 @@ class AppointmentController extends Controller
         // Stats for Today
         $today = Carbon::today();
         
-        $todaysAppointments = Appointment::whereDate('scheduled_at', $today)
-            ->where('status', '!=', 'request')
-            ->get();
+        $query = Appointment::whereDate('scheduled_at', $today)
+            ->where('status', '!=', 'request');
+
+        if (auth()->user()->role !== 'admin') {
+            $barberId = auth()->user()->barber?->id;
+            if ($barberId) {
+                $query->where('barber_id', $barberId);
+            } else {
+                 // Fallback if not linked
+                $query->where('id', 0);
+            }
+        }
+
+        $todaysAppointments = $query->get();
 
         $stats = [
             'total_today' => $todaysAppointments->count(),
@@ -308,6 +318,16 @@ class AppointmentController extends Controller
 
         if ($request->filled('barber_id')) {
             $query->where('barber_id', $request->barber_id);
+        }
+
+        // PERMISSION CHECK: Non-admins can ONLY see their own appointments
+        if (auth()->user()->role !== 'admin') {
+            $barberId = auth()->user()->barber?->id;
+             if ($barberId) {
+                $query->where('barber_id', $barberId);
+            } else {
+                 $query->where('id', 0); // See nothing
+            }
         }
 
         $events = $query->get()

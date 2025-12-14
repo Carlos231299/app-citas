@@ -82,14 +82,28 @@
             <form action="{{ route('barbers.store') }}" method="POST" autocomplete="off">
                 @csrf
                 <div class="modal-body">
+                    <!-- Barber Details -->
+                    <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">Perfil del Barbero</h6>
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">NOMBRE COMPLETO</label>
                         <input type="text" name="name" class="form-control" required placeholder="Ej: Juan Pérez" autocomplete="off">
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label class="form-label text-secondary small fw-bold">WHATSAPP</label>
                         <input type="tel" name="whatsapp_number" class="form-control" placeholder="Ej: 300..." autocomplete="off"
                                oninput="this.value = this.value.replace(/[^0-9+]/g, '')" pattern="[0-9+]*">
+                    </div>
+
+                    <!-- User Account -->
+                    <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">Cuenta de Usuario</h6>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">CORREO ELECTRÓNICO (LOGIN)</label>
+                        <input type="email" name="email" class="form-control" required placeholder="usuario@barberia.com" autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">CONTRASEÑA TEMPORAL</label>
+                        <input type="text" name="password" class="form-control" required placeholder="Mínimo 8 caracteres" minlength="8" autocomplete="off">
+                        <div class="form-text">El barbero usará este correo y contraseña para entrar.</div>
                     </div>
                 </div>
                 <div class="modal-footer border-top-0">

@@ -12,11 +12,7 @@
     <div class="col-lg-8">
         
         <!-- Header -->
-        <div class="position-absolute top-0 end-0 p-3">
-            <a href="{{ route('login') }}" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-bold backdrop-blur">
-                <i class="bi bi-person-fill me-1"></i> Iniciar Sesión
-            </a>
-        </div>
+
         <div class="text-center mb-5 mt-4">
             <img src="{{ asset('images/logo.png') }}" alt="Barbería JR Logo" class="img-fluid mb-3" style="max-height: 120px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
             <h1 class="display-6 fw-bold text-white text-shadow-sm">Barbería JR</h1>

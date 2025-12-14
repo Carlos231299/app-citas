@@ -22,14 +22,29 @@ class BarberController extends Controller
             abort(403);
         }
         $data = $request->validate([
-            'name' => 'required',
-            'whatsapp_number' => 'nullable',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8',
+            'whatsapp_number' => 'nullable|string|max:20',
         ]);
         
-        $data['is_active'] = true; // Default to active
+        // 1. Create User (Standard Role)
+        $user = \App\Models\User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => \Illuminate\Support\Facades\Hash::make($data['password']),
+            'role' => 'standard',
+        ]);
 
-        Barber::create($data);
-        return redirect()->back()->with('success', 'Barbero agregado exitosamente.');
+        // 2. Create Barber
+        \App\Models\Barber::create([
+            'name' => $data['name'],
+            'whatsapp_number' => $data['whatsapp_number'] ?? null,
+            'is_active' => true,
+            'user_id' => $user->id,
+        ]);
+
+        return redirect()->back()->with('success', 'Barbero (y Usuario) agregado exitosamente.');
     }
 
     public function update(Request $request, Barber $barber)
@@ -82,6 +97,10 @@ class BarberController extends Controller
             abort(403);
         }
         // Toggle active instead of hard delete typically, but user asked for delete in summary implication
+        // If tied to a user, we should delete the user too to revoke access
+        if ($barber->user_id) {
+            \App\Models\User::where('id', $barber->user_id)->delete();
+        }
         $barber->delete();
         return redirect()->back()->with('success', "{$barber->name} eliminado correctamente.");
     }
