@@ -1,58 +1,59 @@
 @extends('layouts.guest')
 
-@section('title', 'Verificación de Dos Factores')
+@section('title', 'Verificación - Barbería JR')
 
 @section('content')
-<div class="card border-0 shadow-lg rounded-4 overflow-hidden" style="max-width: 450px; width: 100%;">
-    <div class="card-header bg-primary text-white text-center py-4 border-0">
-        <h4 class="mb-0 fw-bold"><i class="bi bi-shield-lock-fill me-2"></i>Seguridad</h4>
-        <p class="mb-0 opacity-75 small">Autenticación de Dos Factores</p>
-    </div>
-    <div class="card-body p-4 p-md-5 bg-white">
-        <p class="text-center text-muted mb-4">
-            Hemos enviado un código de verificación de 6 dígitos a tu correo electrónico <strong>{{ $email }}</strong>.
-        </p>
+<div class="d-flex align-items-center min-vh-100" style="background: url('{{ asset('images/login-bg.jpg') }}') no-repeat center center; background-size: cover;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+                <div class="card bg-black bg-opacity-75 border-gold shadow-lg animate-fade-in" style="backdrop-filter: blur(8px); border: 1px solid #c5a964;">
+                    <div class="card-header border-0 bg-transparent text-center pt-4 pb-0">
+                        <i class="bi bi-shield-lock text-gold display-4"></i>
+                        <h4 class="mt-3 text-white" style="font-weight: 300; letter-spacing: 2px;">SEGURIDAD</h4>
+                    </div>
+                    
+                    <div class="card-body p-4 text-center">
+                        <p class="text-white-50 small mb-4">
+                            Enviamos un código de 6 dígitos a <br>
+                            <span class="text-gold fw-bold">{{ $email }}</span>
+                        </p>
 
-        @if ($errors->any())
-            <div class="alert alert-danger border-0 rounded-3 shadow-sm mb-4">
-                <ul class="mb-0 list-unstyled small">
-                    @foreach ($errors->all() as $error)
-                        <li><i class="bi bi-exclamation-circle-fill me-1"></i> {{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+                        <form method="POST" action="{{ route('2fa.verify') }}" autocomplete="off">
+                            @csrf
+                            
+                            <div class="mb-4">
+                                <label class="form-label text-gold small text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 1px;">Código de Verificación</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="bi bi-key"></i></span>
+                                    <input id="code" type="text" 
+                                        class="form-control bg-transparent border-secondary text-white text-center fw-bold fs-4 tracking-widest" 
+                                        name="code" required autofocus autocomplete="one-time-code" inputmode="numeric" 
+                                        placeholder="######" maxlength="6" style="letter-spacing: 8px;">
+                                </div>
+                            </div>
 
-        <form method="POST" action="{{ route('2fa.verify') }}">
-            @csrf
+                            <button type="submit" class="btn btn-gold w-100 py-3 fw-bold text-uppercase mb-3 shadow-gold-hover">
+                                Verificar <i class="bi bi-arrow-right-short ms-1"></i>
+                            </button>
+                        </form>
+                        
+                        <div class="mt-3">
+                            <form method="POST" action="{{ route('2fa.resend') }}">
+                                @csrf
+                                <button type="submit" class="btn btn-link text-white-50 text-decoration-none small hover-gold p-0">
+                                    ¿No llegó el código? <span class="text-gold">Reenviar</span>
+                                </button>
+                            </form>
+                        </div>
 
-            <div class="mb-4">
-                <label for="code" class="form-label text-secondary small fw-bold">CÓDIGO DE VERIFICACIÓN</label>
-                <div class="input-group input-group-lg">
-                    <span class="input-group-text bg-light border-end-0 text-primary"><i class="bi bi-123"></i></span>
-                    <input id="code" type="text" 
-                        class="form-control border-start-0 bg-light fw-bold text-center spacing-2" 
-                        name="code" required autofocus autocomplete="one-time-code" inputmode="numeric" 
-                        placeholder="######" maxlength="6" style="letter-spacing: 5px; font-size: 1.5rem;">
+                        <div class="mt-4 pt-3 border-top border-secondary border-opacity-25">
+                            <a href="{{ route('login') }}" class="btn btn-sm btn-outline-light w-100 opacity-75 hover-opacity-100">
+                                <i class="bi bi-box-arrow-left me-2"></i> Cancelar / Volver
+                            </a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="d-grid mb-4">
-                <button type="submit" class="btn btn-primary btn-lg shadow fw-bold rounded-pill">
-                    Verificar <i class="bi bi-arrow-right-short ms-1"></i>
-                </button>
-            </div>
-        </form>
-        
-        <div class="text-center">
-            <form method="POST" action="{{ route('2fa.resend') }}">
-                @csrf
-                <button type="submit" class="btn btn-link text-decoration-none text-muted small p-0">
-                    ¿No recibiste el código? <span class="text-primary fw-bold">Reenviar</span>
-                </button>
-            </form>
-            <div class="mt-3">
-                 <a href="{{ route('login') }}" class="text-secondary small text-decoration-none">&larr; Volver al inicio de sesión</a>
             </div>
         </div>
     </div>
