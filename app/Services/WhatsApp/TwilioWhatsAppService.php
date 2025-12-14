@@ -59,7 +59,7 @@ class TwilioWhatsAppService implements WhatsAppServiceInterface
                 $to, 
                 [
                     "from" => $this->from,
-                    "contentSid" => "HXb5b62575e6e4ff6129ad7c8efe1f983e",
+                    "contentSid" => "HX1e53948b69d3c8ed0d34f4c8208ae769",
                     "contentVariables" => $contentVariables,
                     // "body" => "..." // Fallback body is often not needed if ContentSid is present, 
                     // or acts as fallback for SMS. For WhatsApp, ContentSid triggers the template.
