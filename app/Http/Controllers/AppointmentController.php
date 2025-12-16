@@ -288,6 +288,8 @@ class AppointmentController extends Controller
         // Stats for Today
         $today = Carbon::today();
         
+        \Illuminate\Support\Facades\Log::info('Dashboard Access: User ' . auth()->id() . ' Role: ' . auth()->user()->role);
+
         $query = Appointment::whereDate('scheduled_at', $today)
             ->where('status', '!=', 'request');
 
