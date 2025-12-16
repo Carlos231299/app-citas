@@ -259,7 +259,12 @@ class AppointmentController extends Controller
 
             // Trigger API (Best effort)
             try {
-                $whatsappService->sendConfirmation($appointment);
+                // Ensure we use the correct service variable or Http call
+                $apiUrl = env('WHATSAPP_API_URL') . '/send-message';
+                \Illuminate\Support\Facades\Http::post($apiUrl, [
+                    'number' => $request->phone_prefix . $request->phone_number, // or client_phone
+                    'message' => "Hola {$request->client_name}, tu cita ha sido confirmada para el {$request->date} a las {$request->time}."
+                ]);
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::error('WA Notification Error: ' . $e->getMessage());
             }
