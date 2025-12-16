@@ -80,20 +80,33 @@
                     <h3 class="fw-bold text-dark mb-3">{{ $barbers->where('is_active', true)->count() }}</h3>
 
                     <!-- Avatar List -->
-                    <div class="d-flex gap-1 overflow-hidden" style="height: 32px;">
+                    <div class="d-flex gap-1 overflow-visible" style="min-height: 45px;">
                         @foreach($barbers as $barber)
                             @php
                                 $isActive = $barber->is_active;
                                 $isSpecial = $barber->special_mode;
-                                $avatar = $barber->user->avatar ? asset('storage/' . $barber->user->avatar) : null;
+                                $rawAvatar = $barber->user->avatar;
+                                $isImage = $rawAvatar && (
+                                    str_starts_with($rawAvatar, 'users/') || 
+                                    str_ends_with(strtolower($rawAvatar), '.jpg') || 
+                                    str_ends_with(strtolower($rawAvatar), '.jpeg') || 
+                                    str_ends_with(strtolower($rawAvatar), '.png') || 
+                                    str_ends_with(strtolower($rawAvatar), '.webp')
+                                );
                                 $initials = substr($barber->name, 0, 1);
                             @endphp
 
                             <div class="position-relative" data-bs-toggle="tooltip" title="{{ $barber->name }} {{ $isActive ? '(Activo)' : ($isSpecial ? '(Horario Extra)' : '(Inactivo)') }}">
-                                @if($avatar)
-                                    <img src="{{ $avatar }}" alt="{{ $barber->name }}" class="rounded-circle border border-2 {{ $isActive ? 'border-success' : 'border-secondary' }}" style="width: 40px; height: 40px; object-fit: cover;">
+                                @if($rawAvatar && $isImage)
+                                    <img src="{{ asset('storage/' . $rawAvatar) }}" alt="{{ $barber->name }}" class="rounded-circle border border-2 {{ $isActive ? 'border-success' : 'border-secondary' }}" style="width: 45px; height: 45px; object-fit: cover;">
+                                @elseif($rawAvatar)
+                                    <!-- Emoji Avatar (User Style) -->
+                                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary fw-bold border border-primary-subtle transition-all hover-scale" style="width: 45px; height: 45px; font-size: 1.5rem;">
+                                        {{ $rawAvatar }}
+                                    </div>
                                 @else
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center border border-2 {{ $isActive ? 'border-success bg-success text-white' : 'border-secondary bg-secondary text-white' }}" style="width: 40px; height: 40px; font-weight: bold;">
+                                    <!-- Initials Fallback -->
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center border border-2 {{ $isActive ? 'border-success bg-success text-white' : 'border-secondary bg-secondary text-white' }}" style="width: 45px; height: 45px; font-weight: bold;">
                                         {{ $initials }}
                                     </div>
                                 @endif
