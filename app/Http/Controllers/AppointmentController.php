@@ -257,6 +257,8 @@ class AppointmentController extends Controller
             
             $whatsappUrl = "https://wa.me/{$senderNumber}?text=" . urlencode($msg);
 
+            // Trigger API (Best effort)
+            try {
                 // Ensure we use the correct service variable or Http call
                 $apiUrl = env('WHATSAPP_API_URL') . '/appointment';
                 \Illuminate\Support\Facades\Http::post($apiUrl, [
