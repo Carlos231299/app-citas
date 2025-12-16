@@ -257,13 +257,14 @@ class AppointmentController extends Controller
             
             $whatsappUrl = "https://wa.me/{$senderNumber}?text=" . urlencode($msg);
 
-            // Trigger API (Best effort)
-            try {
                 // Ensure we use the correct service variable or Http call
-                $apiUrl = env('WHATSAPP_API_URL') . '/send-message';
+                $apiUrl = env('WHATSAPP_API_URL') . '/appointment';
                 \Illuminate\Support\Facades\Http::post($apiUrl, [
-                    'number' => $request->phone_prefix . $request->phone_number, // or client_phone
-                    'message' => "Hola {$request->client_name}, tu cita ha sido confirmada para el {$request->date} a las {$request->time}."
+                    'phone' => $request->phone_prefix . $request->phone_number,
+                    'name' => $request->client_name,
+                    'date' => $request->date,
+                    'time' => $request->time,
+                    'place' => 'Barbería JR (Calle 5 #4-20)' // Hardcoded or generic location
                 ]);
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::error('WA Notification Error: ' . $e->getMessage());
