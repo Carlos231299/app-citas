@@ -455,13 +455,12 @@
                   } else {
                       let waUrl = data.whatsapp_url;
                       Swal.fire({
-                          title: '¡Cita Pre-Reservada!',
-                          html: "Hola <b>" + formData.get('client_name') + "</b>, para finalizar tu reserva y recibir la confirmación, por favor envía el <b>Comprobante</b> por WhatsApp ahora mismo.",
+                          title: '¡Cita Confirmada!',
+                          html: "Hola <b>" + formData.get('client_name') + "</b>, tu cita ha sido agendada exitosamente.<br><br>Te contactaremos por WhatsApp con los detalles.",
                           icon: 'success',
-                          showCancelButton: true,
-                          confirmButtonText: '<i class="bi bi-whatsapp"></i> Enviar Comprobante',
-                          cancelButtonText: 'Cerrar',
-                          confirmButtonColor: '#25D366'
+                          showCancelButton: false,
+                          confirmButtonText: '<i class="bi bi-calendar-check"></i> Aceptar',
+                          confirmButtonColor: '#10B981'
                       }).then((result) => {
                           if (result.isConfirmed && waUrl) {
                               window.open(waUrl, '_blank');
