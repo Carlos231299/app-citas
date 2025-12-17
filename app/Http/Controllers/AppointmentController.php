@@ -204,14 +204,17 @@ class AppointmentController extends Controller
         $service = Service::find($request->service_id);
         $serviceName = strtolower(trim($service->name));
         
-        $isRequest = !empty($request->custom_details) || in_array($serviceName, ['otro', 'otro servicio']);
+        // $isRequest = !empty($request->custom_details) || in_array($serviceName, ['otro', 'otro servicio']);
+        
+        // MOD: Siempre confirmar cita (No Pre-Reservas)
+        $isRequest = false; 
         
         // If Admin is booking, always 'scheduled' (Confirmed)
         if (auth()->check()) {
             $status = 'scheduled';
-            $isRequest = false; // Admin bookings are never requests
         } else {
-            $status = $isRequest ? 'request' : 'scheduled';
+            //$status = $isRequest ? 'request' : 'scheduled';
+            $status = 'scheduled';
         }
 
         if ($request->has(['phone_prefix', 'phone_number'])) {
@@ -257,13 +260,14 @@ class AppointmentController extends Controller
             
             $whatsappUrl = "https://wa.me/{$senderNumber}?text=" . urlencode($msg);
 
-            // Trigger API (Best effort)
+            // WhatsApp Notification (Enabled)
             try {
-                // Ensure we use the correct service variable or Http call
-                $apiUrl = env('WHATSAPP_API_URL') . '/send-message';
-                \Illuminate\Support\Facades\Http::post($apiUrl, [
-                    'number' => $request->phone_prefix . $request->phone_number, 
-                    'message' => "Hola {$request->client_name}, tu cita ha sido confirmada para el {$request->date} a las {$request->time}."
+                \Illuminate\Support\Facades\Http::post('http://localhost:3000/appointment', [
+                    'phone' => $request->phone_prefix . $request->phone_number,
+                    'name' => $request->client_name,
+                    'date' => $request->date,
+                    'time' => $request->time,
+                    'place' => 'Barbería JR'
                 ]);
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::error('WA Notification Error: ' . $e->getMessage());
