@@ -1,6 +1,7 @@
 import express from "express";
 import pkg from "whatsapp-web.js";
 import * as qrcode from "qrcode-terminal";
+import axios from "axios";
 
 const { Client, LocalAuth } = pkg;
 
@@ -95,14 +96,114 @@ client.on("disconnected", (reason) => {
 ========================= */
 
 client.on("message", async (message) => {
+    // Basic Logging
+    // console.log("Received:", message.body, "From:", message.from);
+
     const chatId = message.from;
-    const text = normalize(message.body);
+    const body = message.body.trim();
+    const lowerBody = body.toLowerCase();
 
-    // ⛔ ignorar mensajes fuera de contexto
-    if (chatState.get(chatId) !== "WAITING_CONFIRMATION") return;
+    // 1. PRIORITY: Check if User is in Cancellation State (Waiting for Reason)
+    // This MUST be first to capture any input as a reason.
+    if (cancellationStates.has(chatId)) {
+        const state = cancellationStates.get(chatId)!;
 
-    // ✅ CONFIRMAR
-    if (CONFIRM.some((w) => text === w || text.includes(w))) {
+        // Clear the timeout as the user has responded
+        clearTimeout(state.timeoutId);
+
+        // Timeout check (Edge case if timeout just fired)
+        if (Date.now() - state.timestamp > 10 * 60 * 1000) {
+            cancellationStates.delete(chatId);
+            await client.sendMessage(chatId, "⏳ Se ha agotado el tiempo para la cancelación. Por favor inicia el proceso nuevamente si lo deseas.");
+            return;
+        }
+
+        // Process Reason
+        console.log(`Processing Cancellation Reason from ${chatId}: ${body}`);
+
+        try {
+            // FIXME: Hardcoding EC2 URL for now based on context 
+            const serverUrl = 'http://ec2-50-18-72-244.us-west-1.compute.amazonaws.com/api/bot/cancel';
+
+            const response = await axios.post(serverUrl, {
+                phone: chatId.replace('@c.us', ''),
+                reason: body
+            });
+
+            const data = response.data;
+
+            if (data.success) {
+                await client.sendMessage(chatId, "✅ Tu cita ha sido cancelada correctamente.");
+            } else {
+                await client.sendMessage(chatId, "❌ No encontramos una cita próxima para cancelar o ya ocurrió un error.");
+            }
+        } catch (error) {
+            console.error('API Error:', error);
+            await client.sendMessage(chatId, "❌ Error de conexión al procesar tu solicitud.");
+        }
+
+        // Clear State
+        cancellationStates.delete(chatId);
+        return; // CRITICAL: Exit function to prevent default handler
+    }
+
+    // 2. Cancellation Trigger
+    // Triggers: "2", "no", "cancelar", "cancel"
+    const cancelKeywords = ["2", "no", "cancelar", "cancel"];
+    if (cancelKeywords.includes(lowerBody)) {
+        console.log(`User ${chatId} started cancellation flow`);
+
+        // Timeout Logic: Check in 60 seconds if state still exists
+        const timeoutId = setTimeout(async () => {
+            if (cancellationStates.has(chatId)) {
+                const currentState = cancellationStates.get(chatId)!;
+                if (currentState.step === 'WAITING_REASON') {
+                    // Auto-Cancel Logic
+                    console.log(`⏰ Auto-cancelling ${chatId} due to timeout.`);
+                    try {
+                        const serverUrl = 'http://ec2-50-18-72-244.us-west-1.compute.amazonaws.com/api/bot/cancel';
+                        /* using axios */
+                        const response = await axios.post(serverUrl, {
+                            phone: chatId.replace('@c.us', ''),
+                            reason: "No dió motivos (Timeout 1min)"
+                        });
+
+                        if (response.data.success) {
+                            const appt = appointments.get(chatId);
+                            const clientName = appt ? appt.name : "Cliente";
+
+                            await client.sendMessage(chatId, `Hola ${clientName}, tu cita ha sido cancelada por falta de respuesta.`);
+                        }
+                    } catch (err) {
+                        console.error("Auto-cancel failed", err);
+                    }
+                    cancellationStates.delete(chatId);
+                }
+            }
+        }, 60000); // 1 minute
+
+        cancellationStates.set(chatId, { step: 'WAITING_REASON', timestamp: Date.now(), timeoutId: timeoutId });
+
+        await client.sendMessage(chatId, "Lamentamos esto. 😟\n\nPor favor indícanos brevemente el **motivo de la cancelación** para procesarla:");
+        return;
+    }
+
+    // 3. IGNORE if in Request Mode (or Context Check)
+    // The previous logic had: if (chatState.get(chatId) !== "WAITING_CONFIRMATION") return;
+    // We should keep this for the Confirmation Flow, BUT carefully.
+
+    // Logic: If NO state (IDLE or Undefined) -> Ignore
+    // If WAITING_CONFIRMATION -> Process "1" or Default
+    const currentState = chatState.get(chatId);
+    if (!currentState || currentState !== "WAITING_CONFIRMATION") {
+        return; // Ignore random messages
+    }
+
+    // 4. Confirmation Trigger
+    const confirmKeywords = ["1", "si", "sí", "confirmar", "confirm", "ok"];
+    const text = normalize(message.body); // Use normalized for confirmation check just in case
+
+    if (confirmKeywords.some((w) => text === w || text.includes(w))) {
         const appt = appointments.get(chatId);
 
         chatState.set(chatId, "IDLE");
@@ -119,16 +220,8 @@ client.on("message", async (message) => {
         return;
     }
 
-    // ❌ CANCELAR
-    if (CANCEL.some((w) => text === w || text.includes(w))) {
-        chatState.set(chatId, "IDLE");
-        appointments.delete(chatId);
-
-        await message.reply("❌ Tu cita fue cancelada.");
-        return;
-    }
-
-    // ⚠️ respuesta inválida (solo cuando espera)
+    // 5. Default Handler (Only for WAITING_CONFIRMATION state)
+    // ⚠️ respuesta inválida
     await message.reply(
         "Por favor responde:\n1️⃣ Confirmar\n2️⃣ Cancelar"
     );
@@ -211,6 +304,7 @@ client.initialize();
 interface CancellationState {
     step: 'WAITING_REASON';
     timestamp: number;
+    timeoutId: NodeJS.Timeout; // Added timeoutId to state
 }
 const cancellationStates = new Map<string, CancellationState>();
 
@@ -226,8 +320,11 @@ client.on("message", async (msg) => {
     if (cancellationStates.has(chatId)) {
         const state = cancellationStates.get(chatId)!;
 
-        // Timeout check (e.g., 10 mins)
-        if (Date.now() - state.timestamp > 10 * 60 * 1000) {
+        // Clear the timeout as the user has responded
+        clearTimeout(state.timeoutId);
+
+        // Timeout check (e.g., 10 mins) - This check is now less critical due to the timeoutId
+        if (Date.now() - state.timestamp > 10 * 60 * 1000) { // Still good to have for edge cases
             cancellationStates.delete(chatId);
             await client.sendMessage(chatId, "⏳ Se ha agotado el tiempo para la cancelación. Por favor inicia el proceso nuevamente si lo deseas.");
             return;
@@ -237,29 +334,15 @@ client.on("message", async (msg) => {
         console.log(`Processing Cancellation Reason from ${chatId}: ${body}`);
 
         try {
-            // Call Server API
-            // Use 'localhost' or '127.0.0.1' -> In Local Bot, localhost is the machine.
-            // But we used 'http://localhost:3000' for Laravel -> Bot.
-            // Bot -> Laravel is usually 'http://127.0.0.1:8000' (if using `php artisan serve`) 
-            // OR the Server URL if Laravel is remote.
-            // WAIT! The User said "Colocar cron... sabiendo que el servidor tiene 1GB".
-            // The Bot is LOCAL. The Laravel is REMOTE (EC2).
-            // So we must hit the EC2 URL: http://ec2-50-18-72-244...
-            // Or better, use a config variable.
-
             // FIXME: Hardcoding EC2 URL for now based on context 
             const serverUrl = 'http://ec2-50-18-72-244.us-west-1.compute.amazonaws.com/api/bot/cancel';
 
-            const response = await fetch(serverUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    phone: chatId.replace('@c.us', ''),
-                    reason: body
-                })
+            const response = await axios.post(serverUrl, { // Using axios
+                phone: chatId.replace('@c.us', ''),
+                reason: body
             });
 
-            const data = await response.json();
+            const data = response.data; // Axios response data
 
             if (data.success) {
                 await client.sendMessage(chatId, "✅ Tu cita ha sido cancelada correctamente.");
@@ -281,7 +364,44 @@ client.on("message", async (msg) => {
     const cancelKeywords = ["2", "no", "cancelar", "cancel"];
     if (cancelKeywords.includes(lowerBody)) {
         // Start Cancellation Flow
-        cancellationStates.set(chatId, { step: 'WAITING_REASON', timestamp: Date.now() });
+
+        // Timeout Logic: Check in 60 seconds if state still exists
+        // If it does, cancel with default reason.
+        const timeoutId = setTimeout(async () => {
+            if (cancellationStates.has(chatId)) {
+                const currentState = cancellationStates.get(chatId)!;
+                if (currentState.step === 'WAITING_REASON') {
+                    // Auto-Cancel Logic
+                    console.log(`⏰ Auto-cancelling ${chatId} due to timeout.`);
+                    try {
+                        const serverUrl = 'http://ec2-50-18-72-244.us-west-1.compute.amazonaws.com/api/bot/cancel';
+                        /* using axios */
+                        const response = await axios.post(serverUrl, {
+                            phone: chatId.replace('@c.us', ''),
+                            reason: "No dió motivos (Timeout 1min)"
+                        });
+
+                        if (response.data.success) {
+                            // Notify User by Name? We need the name.
+                            // We don't have the name in 'state', maybe in 'appointments' map?
+                            // But 'appointments' map might have been cleared if we moved to state?
+                            // No, 'appointments' map seems to persist until confirmed?
+                            // Actually, in the ORIGINAL logic (lines 109, 125) it deleted from map.
+                            // We should check 'appointments' map.
+                            const appt = appointments.get(chatId);
+                            const clientName = appt ? appt.name : "Cliente";
+
+                            await client.sendMessage(chatId, `Hola ${clientName}, tu cita ha sido cancelada por falta de respuesta.`);
+                        }
+                    } catch (err) {
+                        console.error("Auto-cancel failed", err);
+                    }
+                    cancellationStates.delete(chatId);
+                }
+            }
+        }, 60000); // 1 minute
+
+        cancellationStates.set(chatId, { step: 'WAITING_REASON', timestamp: Date.now(), timeoutId: timeoutId });
 
         await client.sendMessage(chatId, "Lamentamos esto. 😟\n\nPor favor indícanos brevemente el **motivo de la cancelación** para procesarla:");
         return;
@@ -291,11 +411,15 @@ client.on("message", async (msg) => {
     const confirmKeywords = ["1", "si", "sí", "confirmar", "confirm", "ok"];
     if (confirmKeywords.includes(lowerBody)) {
         // Just visual confirmation as per previous logic
-        await client.sendMessage(chatId, "✅ **Cita Confirmada**\n\n¡Gracias! Te esperamos en Barbería JR.");
+        const appt = appointments.get(chatId);
+        appointments.delete(chatId); // Clear memory
+
+        await client.sendMessage(chatId, `✅ **Cita Confirmada**\n\n¡Gracias ${appt?.name || ''}! Te esperamos en Barbería JR.`);
         return;
     }
 
-    // Default: Ignore other messages or send "I don't understand" (Better to ignore)
+    // Default: Ignore other messages
+
 });
 
 // --- NEW ENDPOINT: REMINDER ---
