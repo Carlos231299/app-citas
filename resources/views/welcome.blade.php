@@ -37,32 +37,7 @@
 
             <div class="card-body p-0">
                 <!-- Step 1: Services -->
-                <!-- NEW: Multi-Booking Quantity Selector -->
-                <div id="step-quantity" class="mb-4 bg-white p-4 rounded-3 shadow-sm border border-light text-center">
-                    <label class="form-label d-block fw-bold mb-3 text-secondary small text-uppercase ls-1">
-                        <i class="bi bi-calendar-plus me-1 text-primary"></i> ¿Cuántas citas deseas agendar?
-                    </label>
-                    <div class="w-100 mw-sm-50 mx-auto">
-                        <select id="quantity-selector" class="form-select form-select-lg text-center fw-bold text-dark border-2 border-primary shadow-sm" style="background-image: none;" onchange="setQuantity(this.value, null)">
-                            @for($i=1; $i<=10; $i++)
-                                <option value="{{ $i }}">{{ $i }} {{ $i === 1 ? 'Cita' : 'Citas' }}</option>
-                            @endfor
-                        </select>
-                    </div>
-                    <div class="form-text text-muted small mt-2"><i class="bi bi-info-circle me-1"></i>Puedes elegir diferentes días, horas o barberos para cada una.</div>
-                    <input type="hidden" id="appointment_quantity" value="1">
-                </div>
-                
-                <!-- Status Indicator for Multi-Booking -->
-                <div id="multi-booking-indicator" class="alert alert-soft-primary border-0 shadow-sm mb-4 d-none">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <span class="badge bg-primary rounded-pill px-3 py-2">Cita <span id="current-appt-index">1</span> / <span id="total-appt-count">1</span></span>
-                        <small class="text-primary fw-bold">Configurando tu cita...</small>
-                    </div>
-                    <div class="progress mt-2" style="height: 5px;">
-                        <div id="multi-progress-bar" class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
-                    </div>
-                </div>
+
 
                 <div id="step-services" class="p-4 p-md-5 bg-white">
                     <h5 class="mb-4 text-dark fw-bold border-bottom pb-2">Selecciona un servicio</h5>
@@ -112,8 +87,6 @@
 
                     <form action="{{ route('book') }}" method="POST" id="bookingForm">
                         @csrf
-                        
-
                         <input type="hidden" name="service_id" id="service_id">
                         
                         <!-- Custom Details Field (Initially Hidden) -->
@@ -427,58 +400,6 @@
         document.getElementById('step3-tab').classList.add('text-primary'); 
     }
 
-    // --- MULTI-BOOKING LOGIC ---
-    let appointmentQueue = [];
-    let totalAppointments = 1;
-    let currentApptIndex = 1;
-
-    window.setQuantity = function(qty, btn) {
-        qty = parseInt(qty);
-        totalAppointments = qty;
-        document.getElementById('appointment_quantity').value = qty;
-        
-        // Show/Hide Indicator
-        const indicator = document.getElementById('multi-booking-indicator');
-        if (qty > 1) {
-            indicator.classList.remove('d-none');
-            updateIndicator();
-            
-            // Toast Confirmation
-            const Toast = Swal.mixin({
-                toast: true, position: 'top-end', showConfirmButton: false, timer: 2000,
-                timerProgressBar: false
-            });
-            Toast.fire({ icon: 'info', title: `Modo Multi-Citas: ${qty} citas` });
-        } else {
-            indicator.classList.add('d-none');
-        }
-    };
-
-    function updateIndicator() {
-        document.getElementById('current-appt-index').innerText = currentApptIndex;
-        document.getElementById('total-appt-count').innerText = totalAppointments;
-        const progress = ((currentApptIndex - 1) / totalAppointments) * 100;
-        document.getElementById('multi-progress-bar').style.width = `${progress}%`;
-    }
-
-    function resetFormForNext() {
-        // Clear hidden inputs
-        document.getElementById('service_id').value = '';
-        document.getElementById('barber_id').value = '';
-        document.getElementById('time').value = '';
-        document.getElementById('date').value = ''; // Force new date selection? Or keep it? Let's clear for safety.
-        
-        // Clear UI selections
-        document.getElementById('slots-container').innerHTML = '<span class="text-muted small align-self-center">Selecciona profesional y fecha...</span>';
-        
-        // Reset Steps
-        const step1Tab = new bootstrap.Tab(document.getElementById('step1-tab'));
-        step1Tab.show();
-        
-        // Scroll top
-        document.getElementById('bookingForm').scrollIntoView({ behavior: 'smooth' });
-    }
-
     // AJAX Submission Handling
     document.getElementById('bookingForm').addEventListener('submit', function(e) {
         e.preventDefault(); 
@@ -492,6 +413,8 @@
                 text: 'Por favor selecciona una hora disponible para tu cita.',
                 confirmButtonColor: '#3085d6'
             });
+            document.getElementById('slots-container').classList.add('border-danger');
+            setTimeout(() => document.getElementById('slots-container').classList.remove('border-danger'), 2000);
             return; 
         }
 
@@ -504,76 +427,49 @@
              return;
         }
 
-        // --- COLLECT DATA ---
-        const formData = new FormData(this);
-        const dataObj = Object.fromEntries(formData.entries());
-        // Handle phone prefix consolidation for object
-        dataObj.client_phone = (dataObj.phone_prefix || '') + (dataObj.phone_number || '');
-        
-        // --- MULTI-BOOKING QUEUE ---
-        if (currentApptIndex < totalAppointments) {
-            // Push to Queue & Continue
-            appointmentQueue.push(dataObj);
-            
-            Swal.fire({
-                title: `¡Cita ${currentApptIndex} guardada!`,
-                text: "Vamos a configurar la siguiente cita.",
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false
-            });
-
-            currentApptIndex++;
-            updateIndicator();
-            resetFormForNext();
-            
-            // Keep Client Name/Phone filled? User might want to book for different people?
-            // "agendar varios turnos" implies usually same person.
-            // Let's Keep Name/Phone populated to be nice, but allow edit.
-            // The resetFormForNext only clears service/date/time.
-            return;
-        }
-
-        // --- FINAL SUBMISSION ---
-        // Push the LAST one
-        appointmentQueue.push(dataObj);
-
         const btn = this.querySelector('button[type="submit"]');
         const originalText = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
 
-        // Send JSON payload
-        axios.post(this.action, { appointments: appointmentQueue })
+        const formData = new FormData(this);
+
+        axios.post(this.action, formData)
              .then(response => {
                   const data = response.data;
-                  // Handle Multi-Success
-                  if (data.count && data.count > 0) {
-                      Swal.fire({
-                          title: '¡Citas Agendadas!',
-                          html: `Se han registrado exitosamente <b>${data.count} citas</b>.<br>Te contactaremos por WhatsApp.`,
-                          icon: 'success',
-                          confirmButtonText: 'Perfecto',
-                          confirmButtonColor: '#10B981'
-                      }).then(() => {
-                          location.reload();
-                      });
-                  } else if (data.is_request) {
-                      // Legacy Single Request handling
+                  
+                  if (data.is_request) {
                       Swal.fire({
                           title: '¡Solicitud Recibida!',
-                          html: "Tu solicitud ha sido registrada.<br>Te notificaremos por WhatsApp.",
+                          html: "Tu solicitud para <b>" + formData.get('client_name') + "</b> ha sido registrada.<br><br>Tu cita está en <b>ESPERA DE CONFIRMACIÓN</b> para ser apartada.<br>Te notificaremos por WhatsApp.",
                           icon: 'info',
-                          confirmButtonText: 'Aceptar'
-                      }).then(() => location.reload());
+                          showCancelButton: true,
+                          confirmButtonText: '¿Quieres agendar una nueva cita?',
+                          cancelButtonText: 'Cerrar',
+                          confirmButtonColor: '#3B82F6',
+                          cancelButtonColor: '#6c757d',
+                          allowOutsideClick: false
+                      }).then((result) => {
+                          location.reload(); 
+                      });
                   } else {
-                      // Legacy Single Success
+                      let waUrl = data.whatsapp_url;
                       Swal.fire({
                           title: '¡Cita Confirmada!',
-                          html: "Tu cita ha sido agendada exitosamente.",
+                          html: "Hola <b>" + formData.get('client_name') + "</b>, tu cita ha sido agendada exitosamente.<br><br>Te contactaremos por WhatsApp con los detalles.",
                           icon: 'success',
-                          confirmButtonText: 'Aceptar'
-                      }).then(() => location.reload());
+                          showCancelButton: true,
+                          confirmButtonText: '¿Quieres agendar una nueva cita?',
+                          cancelButtonText: 'Cerrar',
+                          confirmButtonColor: '#10B981',
+                          cancelButtonColor: '#6c757d',
+                          allowOutsideClick: false
+                      }).then((result) => {
+                          if (waUrl) {
+                              window.open(waUrl, '_blank');
+                          }
+                          location.reload();
+                      });
                   }
              })
              .catch(error => {
@@ -582,27 +478,6 @@
                    if (error.response && error.response.data && error.response.data.message) {
                        errorMsg = error.response.data.message;
                    }
-                  Swal.fire({ icon: 'error', title: 'Error', html: errorMsg });
-             })
-             .finally(() => {
-                  btn.disabled = false;
-                  btn.innerHTML = originalText;
-                  appointmentQueue = []; // Reset on error too?
-             });
-    });
-             .catch(error => {
-                  console.error(error);
-                  let errorMsg = 'No se pudo procesar la reserva. Intenta nuevamente.';
-                  if (error.response && error.response.data && error.response.data.errors) {
-                       // Format validation errors
-                       errorMsg = Object.values(error.response.data.errors).flat().join('<br>');
-                  } else if (error.response && error.response.data.message) {
-                       errorMsg = error.response.data.message;
-                       if (errorMsg === 'CSRF token mismatch.') {
-                           errorMsg = 'La sesión ha expirado por inactividad. Por favor, recarga la página e intenta nuevamente.';
-                       }
-                  }
-                  
                   Swal.fire({
                        icon: 'error',
                        title: 'Atención',

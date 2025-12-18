@@ -27,4 +27,8 @@ Thumbs.db
 pruebas.pem
 whatsapp-bot.zip
 whatsapp-bot-bundle/
-whatsapp-bot-local/
+
+# Local Bot
+whatsapp-bot-local/node_modules/
+whatsapp-bot-local/.wwebjs_auth/
+whatsapp-bot-local/dist/

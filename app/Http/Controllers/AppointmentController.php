@@ -160,93 +160,24 @@ class AppointmentController extends Controller
     // Book Appointment
     public function store(Request $request)
     {
-        // Permission Check
+        // Permission Check: Only Admin can book internally
+        // Public booking is different (publicIndex), but this store is used by both?
+        // Wait! This function handles PUBLIC booking via POST /book too!
+        // Route::post('/book', ...) is Public (Line 15 web.php).
+        
+        // ISSUE: public bookings must be allowed.
+        // Dashboard uses the SAME route?
+        // Let's check dashboard.blade.php submitAdminBooking -> axios.post("{{ route('book') }}")
+        
+        // If the route is shared, we differentiate by Auth.
+        // If Auth::check(), it's an internal booking.
+        // User wants "Barber cannot book".
+        // So if (auth()->check() && auth()->user()->role !== 'admin') -> ABORT.
+        
         if (auth()->check() && trim(auth()->user()->role) !== 'admin') {
              return response()->json(['message' => 'No tienes permisos para agendar citas.'], 403);
         }
 
-        // --- MULTI-BOOKING LOGIC (New) ---
-        if ($request->has('appointments') && is_array($request->input('appointments'))) {
-            $createdCount = 0;
-            $errors = [];
-
-            foreach ($request->input('appointments') as $index => $apptData) {
-                try {
-                    // Create a phantom Request object to reuse validation or just manual create
-                    // Manual creation is safer here to avoid messing with Request global state
-                    
-                    // 1. Basic Validation
-                    if (empty($apptData['service_id']) || empty($apptData['barber_id']) || empty($apptData['date']) || empty($apptData['time'])) {
-                        continue; // Skip invalid
-                    }
-
-                    $scheduledAt = Carbon::parse($apptData['date'] . ' ' . $apptData['time']);
-                    
-                    // Logic
-                    $service = Service::find($apptData['service_id']);
-                    $serviceName = strtolower(trim($service->name));
-                    $isOtro = (strpos($serviceName, 'otro') !== false) || ($service->is_custom == 1);
-                    $isRequest = $isOtro;
-
-                    if (auth()->check()) {
-                        $status = 'scheduled';
-                        $isRequest = false;
-                    } else {
-                        $status = $isRequest ? 'request' : 'scheduled';
-                    }
-                    
-                    // Phone logic
-                    $phone = $apptData['client_phone'] ?? ($apptData['phone_prefix'] . $apptData['phone_number']);
-
-                    $appointment = Appointment::create([
-                        'service_id' => $apptData['service_id'],
-                        'barber_id' => $apptData['barber_id'],
-                        'scheduled_at' => $scheduledAt,
-                        'client_name' => $apptData['client_name'],
-                        'client_phone' => $phone,
-                        'custom_details' => $apptData['custom_details'] ?? null,
-                        'status' => $status
-                    ]);
-                    
-                    // Notification
-                    $barberObj = Barber::find($apptData['barber_id']);
-                    $barberName = $barberObj ? $barberObj->name : 'Barbería JR';
-                    
-                    try {
-                        $notificationServiceName = $service->name;
-                        if (!empty($apptData['custom_details'])) {
-                             $notificationServiceName .= " ({$apptData['custom_details']})";
-                        }
-            
-                        \Illuminate\Support\Facades\Http::timeout(2)->post('http://localhost:3000/appointment', [
-                            'phone' => $phone,
-                            'name' => $apptData['client_name'],
-                            'date' => $apptData['date'],
-                            'time' => $apptData['time'],
-                            'place' => 'Barbería JR',
-                            'barber_name' => $barberName,
-                            'service_name' => $notificationServiceName,
-                            'is_request' => $isRequest
-                        ]);
-                    } catch (\Exception $waE) {
-                        \Illuminate\Support\Facades\Log::error("WA Multi Error: " . $waE->getMessage());
-                    }
-
-                    $createdCount++;
-
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error("Multi Booking Error Index $index: " . $e->getMessage());
-                }
-            }
-            
-            return response()->json([
-                'success' => true,
-                'message' => "Se agendaron {$createdCount} citas exitosamente.",
-                'count' => $createdCount
-            ]);
-        }
-        
-        // --- SINGLE BOOKING LOGIC (Legacy/Standard) ---
         $request->validate([
             'service_id' => 'required',
             'barber_id' => 'required',
@@ -420,6 +351,13 @@ class AppointmentController extends Controller
     // Admin: Update Appointment
     public function update(Request $request, Appointment $appointment)
     {
+        // Permission Check
+        if (trim(auth()->user()->role) !== 'admin') {
+            if (auth()->user()->barber?->id != $appointment->barber_id) {
+                return response()->json(['message' => 'No autorizado.'], 403);
+            }
+        }
+
         $validated = $request->validate([
             'date' => 'required|date',
             'time' => 'required',
@@ -441,6 +379,15 @@ class AppointmentController extends Controller
     // Admin: Mark Complete with Price
     public function complete(Request $request, Appointment $appointment)
     {
+        // Permission Check
+        if (trim(auth()->user()->role) !== 'admin') {
+            if (auth()->user()->barber?->id != $appointment->barber_id) {
+                 return request()->wantsJson() 
+                     ? response()->json(['message' => 'No autorizado.'], 403)
+                     : abort(403, 'No tienes permiso para completar esta cita.');
+            }
+        }
+
         $data = ['status' => 'completed'];
         
         if ($request->has('confirmed_price')) {
@@ -457,6 +404,15 @@ class AppointmentController extends Controller
     // Admin: Cancel
     public function cancel(Request $request, Appointment $appointment)
     {
+        // Permission Check
+        if (trim(auth()->user()->role) !== 'admin') {
+            if (auth()->user()->barber?->id != $appointment->barber_id) {
+                 return request()->wantsJson() 
+                     ? response()->json(['message' => 'No autorizado.'], 403)
+                     : abort(403, 'No tienes permiso para cancelar esta cita.');
+            }
+        }
+
         $appointment->update([
             'status' => 'cancelled',
             'cancellation_reason' => $request->reason ?? 'Cancelada por administrador'
@@ -470,6 +426,13 @@ class AppointmentController extends Controller
     // Admin: Confirm Request (Otro Servicio -> Scheduled)
     public function confirm(Request $request, Appointment $appointment)
     {
+        // Permission Check
+        if (trim(auth()->user()->role) !== 'admin') {
+            if (auth()->user()->barber?->id != $appointment->barber_id) {
+                return response()->json(['message' => 'No autorizado.'], 403);
+            }
+        }
+
         try {
             // Default to service price if not provided or valid
             $finalPrice = $request->input('price');

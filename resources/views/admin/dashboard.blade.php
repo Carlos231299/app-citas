@@ -6,6 +6,55 @@
 @section('content')
 <div class="d-flex flex-column h-100">
     <!-- Stats Row -->
+    <!-- Stats Row -->
+    @if(isset($pendingRequests) && $pendingRequests->count() > 0)
+    <div class="alert alert-info border-0 shadow-sm mb-4 d-flex align-items-center" role="alert">
+        <div class="flex-grow-1">
+            <h5 class="alert-heading fw-bold mb-1"><i class="bi bi-exclamation-circle-fill me-2"></i>Solicitudes Pendientes</h5>
+            <p class="mb-0 small">Tienes <strong>{{ $pendingRequests->count() }}</strong> cita(s) esperando confirmación y precio final.</p>
+        </div>
+        <button class="btn btn-light text-info fw-bold shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#pendingRequestsList" aria-expanded="false">
+            Ver Solicitudes <i class="bi bi-chevron-down ms-1"></i>
+        </button>
+    </div>
+    
+    <div class="collapse show mb-4" id="pendingRequestsList">
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="list-group list-group-flush">
+                @foreach($pendingRequests as $req)
+                    <div class="list-group-item p-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
+                                <i class="bi bi-person-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-1">{{ $req->client_name }}</h6>
+                                <div class="text-muted small">
+                                    <i class="bi bi-scissors me-1"></i> {{ $req->service->name }} 
+                                    @if($req->custom_details) <span class="badge bg-warning text-dark ms-1">{{ $req->custom_details }}</span> @endif
+                                </div>
+                                <div class="text-muted small mt-1">
+                                    <i class="bi bi-calendar me-1"></i> {{ $req->scheduled_at->format('d/m/Y') }} 
+                                    <i class="bi bi-clock ms-2 me-1"></i> {{ $req->scheduled_at->format('g:i A') }}
+                                    @if($req->barber) <span class="ms-2 badge bg-secondary">{{ $req->barber->name }}</span> @endif
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                             <button onclick="rejectRequest({{ $req->id }})" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-x-lg"></i> Rechazar
+                            </button>
+                            <button onclick="confirmRequest({{ $req->id }}, '{{ $req->service->name }}', {{ $req->service->price ?? 0 }})" class="btn btn-primary btn-sm fw-bold px-3">
+                                <i class="bi bi-check-lg me-1"></i> Confirmar
+                            </button>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+    @endif
+
     <div class="row g-2 mb-4 animate-fade-in">
         @php
             $colClass = trim(auth()->user()->role) === 'admin' ? 'col-6 col-md-6 col-xl-3' : 'col-md-6';
@@ -291,6 +340,58 @@
 @push('scripts')
 <script>
     // ... Existing scripts ...
+
+    // Request Handling
+    function confirmRequest(id, serviceName, basePrice) {
+        Swal.fire({
+            title: '¿Confirmar Cita?',
+            html: `
+                <p class="text-muted mb-3">Servicio: <b>${serviceName}</b></p>
+                <div class="form-text mt-2">Se enviará el mensaje de WhatsApp al cliente indicando que la cita ha sido agendada.</div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Sí, Confirmar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#10B981'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Submit Status Change (Price will remain as is or default)
+                axios.patch(`/appointments/${id}/confirm`)
+                .then(response => {
+                    Swal.fire('¡Confirmada!', 'La cita ha sido agendada y notificada.', 'success').then(() => {
+                        location.reload();
+                    });
+                }).catch(err => {
+                    console.error(err);
+                    Swal.fire('Error', 'No se pudo confirmar. Revisa la consola o conexión.', 'error');
+                });
+            }
+        });
+    }
+
+    function rejectRequest(id) {
+        Swal.fire({
+            title: '¿Rechazar Solicitud?',
+            text: "Se marcará como cancelada.",
+            input: 'text',
+            inputPlaceholder: 'Motivo (opcional)...',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, rechazar',
+            confirmButtonColor: '#d33'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                 axios.patch(`/appointments/${id}/cancel`, {
+                    reason: result.value || 'No disponible'
+                }).then(response => {
+                    Swal.fire('Descartada', 'La solicitud fue rechazada.', 'success').then(() => {
+                        location.reload();
+                    });
+                }).catch(err => {
+                    Swal.fire('Error', 'Error al rechazar.', 'error');
+                });
+            }
+        });
+    }
 
     // Admin Booking Logic
     const bookingModal = new bootstrap.Modal(document.getElementById('adminBookingModal'));
