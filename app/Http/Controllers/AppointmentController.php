@@ -174,8 +174,13 @@ class AppointmentController extends Controller
         // User wants "Barber cannot book".
         // So if (auth()->check() && auth()->user()->role !== 'admin') -> ABORT.
         
+        // Permission Check: Admin can book for anyone. Barber can ONLY book for themselves.
         if (auth()->check() && trim(auth()->user()->role) !== 'admin') {
-             return response()->json(['message' => 'No tienes permisos para agendar citas.'], 403);
+             $userBarberId = auth()->user()->barber?->id;
+             // If not a barber or trying to book for someone else
+             if (!$userBarberId || $request->barber_id != $userBarberId) {
+                 return response()->json(['message' => 'Solo puedes agendar citas para ti mismo.'], 403);
+             }
         }
 
         $request->validate([
