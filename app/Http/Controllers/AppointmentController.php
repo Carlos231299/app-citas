@@ -160,24 +160,93 @@ class AppointmentController extends Controller
     // Book Appointment
     public function store(Request $request)
     {
-        // Permission Check: Only Admin can book internally
-        // Public booking is different (publicIndex), but this store is used by both?
-        // Wait! This function handles PUBLIC booking via POST /book too!
-        // Route::post('/book', ...) is Public (Line 15 web.php).
-        
-        // ISSUE: public bookings must be allowed.
-        // Dashboard uses the SAME route?
-        // Let's check dashboard.blade.php submitAdminBooking -> axios.post("{{ route('book') }}")
-        
-        // If the route is shared, we differentiate by Auth.
-        // If Auth::check(), it's an internal booking.
-        // User wants "Barber cannot book".
-        // So if (auth()->check() && auth()->user()->role !== 'admin') -> ABORT.
-        
+        // Permission Check
         if (auth()->check() && trim(auth()->user()->role) !== 'admin') {
              return response()->json(['message' => 'No tienes permisos para agendar citas.'], 403);
         }
 
+        // --- MULTI-BOOKING LOGIC (New) ---
+        if ($request->has('appointments') && is_array($request->input('appointments'))) {
+            $createdCount = 0;
+            $errors = [];
+
+            foreach ($request->input('appointments') as $index => $apptData) {
+                try {
+                    // Create a phantom Request object to reuse validation or just manual create
+                    // Manual creation is safer here to avoid messing with Request global state
+                    
+                    // 1. Basic Validation
+                    if (empty($apptData['service_id']) || empty($apptData['barber_id']) || empty($apptData['date']) || empty($apptData['time'])) {
+                        continue; // Skip invalid
+                    }
+
+                    $scheduledAt = Carbon::parse($apptData['date'] . ' ' . $apptData['time']);
+                    
+                    // Logic
+                    $service = Service::find($apptData['service_id']);
+                    $serviceName = strtolower(trim($service->name));
+                    $isOtro = (strpos($serviceName, 'otro') !== false) || ($service->is_custom == 1);
+                    $isRequest = $isOtro;
+
+                    if (auth()->check()) {
+                        $status = 'scheduled';
+                        $isRequest = false;
+                    } else {
+                        $status = $isRequest ? 'request' : 'scheduled';
+                    }
+                    
+                    // Phone logic
+                    $phone = $apptData['client_phone'] ?? ($apptData['phone_prefix'] . $apptData['phone_number']);
+
+                    $appointment = Appointment::create([
+                        'service_id' => $apptData['service_id'],
+                        'barber_id' => $apptData['barber_id'],
+                        'scheduled_at' => $scheduledAt,
+                        'client_name' => $apptData['client_name'],
+                        'client_phone' => $phone,
+                        'custom_details' => $apptData['custom_details'] ?? null,
+                        'status' => $status
+                    ]);
+                    
+                    // Notification
+                    $barberObj = Barber::find($apptData['barber_id']);
+                    $barberName = $barberObj ? $barberObj->name : 'Barbería JR';
+                    
+                    try {
+                        $notificationServiceName = $service->name;
+                        if (!empty($apptData['custom_details'])) {
+                             $notificationServiceName .= " ({$apptData['custom_details']})";
+                        }
+            
+                        \Illuminate\Support\Facades\Http::timeout(2)->post('http://localhost:3000/appointment', [
+                            'phone' => $phone,
+                            'name' => $apptData['client_name'],
+                            'date' => $apptData['date'],
+                            'time' => $apptData['time'],
+                            'place' => 'Barbería JR',
+                            'barber_name' => $barberName,
+                            'service_name' => $notificationServiceName,
+                            'is_request' => $isRequest
+                        ]);
+                    } catch (\Exception $waE) {
+                        \Illuminate\Support\Facades\Log::error("WA Multi Error: " . $waE->getMessage());
+                    }
+
+                    $createdCount++;
+
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Multi Booking Error Index $index: " . $e->getMessage());
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => "Se agendaron {$createdCount} citas exitosamente.",
+                'count' => $createdCount
+            ]);
+        }
+        
+        // --- SINGLE BOOKING LOGIC (Legacy/Standard) ---
         $request->validate([
             'service_id' => 'required',
             'barber_id' => 'required',
@@ -204,17 +273,26 @@ class AppointmentController extends Controller
         $service = Service::find($request->service_id);
         $serviceName = strtolower(trim($service->name));
         
-        // $isRequest = !empty($request->custom_details) || in_array($serviceName, ['otro', 'otro servicio']);
+        // DEBUG: Trace what the server sees
+        \Illuminate\Support\Facades\Log::info("🔍 Booking Debug: Service Name = [{$serviceName}], DB is_custom = [{$service->is_custom}]");
+
+        // Logic: Request (Pre-reservada) IF:
+        // 1. Service is marked 'is_custom' in DB
+        // 2. Name contains 'otro'
         
-        // MOD: Siempre confirmar cita (No Pre-Reservas)
-        $isRequest = false; 
+        // Native PHP check for robustness
+        $isOtro = (strpos($serviceName, 'otro') !== false) || ($service->is_custom == 1);
         
+        $isRequest = $isOtro; // Strictly only for "Otro" type services
+        
+        \Illuminate\Support\Facades\Log::info("🔍 Booking Debug: Result isRequest = [" . ($isRequest ? 'TRUE' : 'FALSE') . "]");
+
         // If Admin is booking, always 'scheduled' (Confirmed)
         if (auth()->check()) {
             $status = 'scheduled';
+            $isRequest = false;
         } else {
-            //$status = $isRequest ? 'request' : 'scheduled';
-            $status = 'scheduled';
+            $status = $isRequest ? 'request' : 'scheduled';
         }
 
         if ($request->has(['phone_prefix', 'phone_number'])) {
@@ -235,43 +313,45 @@ class AppointmentController extends Controller
 
         $whatsappUrl = null;
         
-        // Sender Number (Twilio Sandbox) - Used for Opt-in/Voucher
+        // Sender Number (Twilio Sandbox) - unused now but kept for legacy
         $senderNumber = '14155238886'; 
         
-        // Logic for WhatsApp Link or Auto-Send
+        // Fetch Objects for Notification
+        $barberObj = Barber::find($request->barber_id);
+        $barberName = $barberObj ? $barberObj->name : 'Barbería JR';
+        
+        // Logic for WhatsApp Link (Frontend) vs Auto-Send (Bot)
         if($isRequest) {
-            // Public Request
-            $barber = Barber::find($request->barber_id);
-            $phone = $barber->whatsapp_number ?? $senderNumber; 
-            $msg = "Hola {$barber->name}, soy *{$request->client_name}*. Quisiera agendar para *{$request->custom_details}* el día {$request->date} a las {$request->time}. Quedo atento.";
-            $whatsappUrl = "https://wa.me/{$phone}?text=" . urlencode($msg);
+            // Public Request -> "Otro Servicio"
+            // Show alert "Solicitud Creada", but NO WhatsApp Link (User request: "borrar todo lo que tenga que ver con el comprobante")
+            // Instead, we will trigger the Bot to send a "Waiting Confirmation" message.
+            $whatsappUrl = null; 
         } else {
-            // Scheduled (Confirmed) - Voucher Flow
-            // Fetch Barber for the message details
-            $barber = Barber::find($request->barber_id);
-            
-            $msg = "Hola, soy *{$request->client_name}* 👋.\n\n" .
-                   "Acabo de reservar una cita en Barbería JR:\n" .
-                   "💈 *Barbero:* {$barber->name}\n" .
-                   "✂️ *Servicio:* {$service->name}\n" .
-                   "📅 *Fecha:* {$request->date}\n" .
-                   "⏰ *Hora:* {$request->time}\n\n" .
-                   "Este es mi comprobante. Quedo atento a su confirmación.";
-            
-            $whatsappUrl = "https://wa.me/{$senderNumber}?text=" . urlencode($msg);
+            // Scheduled (Confirmed)
+            // No manual voucher link anymore.
+            $whatsappUrl = null;
+        }
 
-            // WhatsApp Notification (Enabled)
-            try {
-                \Illuminate\Support\Facades\Http::post('http://localhost:3000/appointment', [
-                    'phone' => $request->phone_prefix . $request->phone_number,
-                    'name' => $request->client_name,
-                    'date' => $request->date,
-                    'time' => $request->time,
-                    'place' => 'Barbería JR'
-                ]);
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('WA Notification Error: ' . $e->getMessage());
+        // 🚀 ALWAYS Send Notification to Local Bot (if active)
+        try {
+            $notificationServiceName = $service->name;
+            if ($request->custom_details) {
+                 $notificationServiceName .= " ({$request->custom_details})";
             }
+
+            // Timeout after 2 seconds to avoid 500 Error
+            \Illuminate\Support\Facades\Http::timeout(2)->post('http://localhost:3000/appointment', [
+                'phone' => $request->phone_prefix . $request->phone_number,
+                'name' => $request->client_name,
+                'date' => $request->date,
+                'time' => $request->time,
+                'place' => 'Barbería JR',
+                'barber_name' => $barberName,
+                'service_name' => $notificationServiceName,
+                'is_request' => $isRequest // true = waiting, false = confirmed
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('WA Notification Error: ' . $e->getMessage());
         }
 
         if ($request->wantsJson()) {
@@ -314,20 +394,27 @@ class AppointmentController extends Controller
 
         $todaysAppointments = $query->get();
 
+        // [NEW] Fetch Requests (Pending Confirmation)
+        $requestQuery = Appointment::where('status', 'request')->orderBy('created_at', 'asc');
+        
+        if (trim(auth()->user()->role) !== 'admin') {
+             $barberId = auth()->user()->barber?->id;
+             if ($barberId) $requestQuery->where('barber_id', $barberId);
+        }
+        $pendingRequests = $requestQuery->get();
+
         $stats = [
             'total_today' => $todaysAppointments->count(),
             'revenue_today' => $todaysAppointments->where('status', 'completed')->sum('price'),
             'pending_today' => $todaysAppointments->where('status', 'scheduled')->count(),
-            'active_barbers' => Barber::where('is_active', true)->count()
+            'active_barbers' => Barber::where('is_active', true)->count(),
+            'pending_requests' => $pendingRequests->count() 
         ];
 
         $services = Service::all();
         $barbers = Barber::all();
 
-        // Get appointments for Calendar (handled by API usually, but if initial render needs them?)
-        // Actually, calendar fetches via API. We just need the view.
-        
-        return view('admin.dashboard', compact('stats', 'services', 'barbers'));
+        return view('admin.dashboard', compact('stats', 'services', 'barbers', 'pendingRequests'));
     }
 
     // Admin: Update Appointment
@@ -378,6 +465,64 @@ class AppointmentController extends Controller
         return request()->wantsJson() 
             ? response()->json(['message' => 'Cancelada'])
             : redirect()->back()->with('success', 'Cita cancelada');
+    }
+
+    // Admin: Confirm Request (Otro Servicio -> Scheduled)
+    public function confirm(Request $request, Appointment $appointment)
+    {
+        try {
+            // Default to service price if not provided or valid
+            $finalPrice = $request->input('price');
+            if (is_null($finalPrice) || $finalPrice === '') {
+                 $finalPrice = $appointment->service->price;
+            }
+    
+            $appointment->update([
+                'status' => 'scheduled',
+                'price' => $finalPrice,
+            ]);
+    
+            // Send WhatsApp Confirmation (Manual Trigger via Bot)
+            $serviceName = $appointment->service->name;
+            if ($appointment->custom_details) {
+                 $serviceName .= " ({$appointment->custom_details})";
+            }
+            
+            // Timeout after 2 seconds to avoid 500 Error if Tunnel is down
+            
+            try {
+                \Illuminate\Support\Facades\Http::timeout(2)->post('http://localhost:3000/appointment', [
+                    'phone' => $appointment->client_phone,
+                    'name' => $appointment->client_name,
+                    'date' => $appointment->scheduled_at->format('Y-m-d'),
+                    'time' => $appointment->scheduled_at->format('g:i A'),
+                    'barber_name' => $appointment->barber->name,
+                    'service_name' => $serviceName,
+                    'is_request' => false, // FALSE sets 'Confirmed' template
+                    'display_price' => 'Acordar con el Barbero'
+                ]);
+            } catch (\Exception $botError) {
+                // Log bot error but DO NOT fail the request
+                \Illuminate\Support\Facades\Log::error("Bot Trigger Failed (Confirm): " . $botError->getMessage());
+            }
+            
+            
+            return response()->json(['message' => 'Solicitud confirmada']);
+
+        } catch (\Throwable $e) {
+            // WRITE ERROR TO PUBLIC FILE for debugging
+            try {
+                file_put_contents(public_path('last_error.txt'), date('Y-m-d H:i:s') . " - Error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+            } catch (\Exception $writeErr) {
+                // Ignore write error
+            }
+
+            \Illuminate\Support\Facades\Log::error("Critical Confirm Error: " . $e->getMessage());
+            return response()->json([
+                'message' => 'Error interno al confirmar',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
     // Calendar View (FullCalendar)
     public function calendar()
