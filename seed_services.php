@@ -15,14 +15,14 @@ if ($admin) {
 // 2. Seed Services (Idempotent)
 // Using exact list from DatabaseSeeder
 $services = [
-    ['name' => 'Corte', 'price' => 15000, 'icon' => 'scissors'],
-    ['name' => 'Corte + Barba', 'price' => 20000, 'icon' => 'person-badge'],
-    ['name' => 'Corte Niño', 'price' => 12000, 'icon' => 'emoji-smile'],
-    ['name' => 'Barba', 'price' => 10000, 'icon' => 'bezier2'],
-    ['name' => 'Corte + Cejas', 'price' => 17000, 'icon' => 'eye'],
-    ['name' => 'Barba + Cerquillo', 'price' => 12000, 'icon' => 'brush'],
-    ['name' => 'Mascarilla + Masaje', 'price' => 15000, 'icon' => 'droplet'],
-    ['name' => 'Otro servicio', 'price' => 0, 'icon' => 'stars'],
+    ['name' => 'Corte', 'price' => 15000, 'extra_price' => 0, 'icon' => 'scissors'],
+    ['name' => 'Corte + Barba', 'price' => 20000, 'extra_price' => 0, 'icon' => 'person-badge'],
+    ['name' => 'Corte Niño', 'price' => 12000, 'extra_price' => 0, 'icon' => 'emoji-smile'],
+    ['name' => 'Barba', 'price' => 10000, 'extra_price' => 0, 'icon' => 'bezier2'],
+    ['name' => 'Corte + Cejas', 'price' => 17000, 'extra_price' => 0, 'icon' => 'eye'],
+    ['name' => 'Barba + Cerquillo', 'price' => 12000, 'extra_price' => 0, 'icon' => 'brush'],
+    ['name' => 'Mascarilla + Masaje', 'price' => 15000, 'extra_price' => 0, 'icon' => 'droplet'],
+    ['name' => 'Otro servicio', 'price' => 0, 'extra_price' => 0, 'icon' => 'stars'],
 ];
 
 foreach ($services as $svc) {

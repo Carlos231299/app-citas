@@ -44,7 +44,7 @@
                     <div class="list-group list-group-flush border rounded-3">
                         @foreach($services as $service)
                         <button type="button" class="list-group-item list-group-item-action p-3 d-flex align-items-center mb-2 rounded-3 shadow-sm border-0 service-item" 
-                            onclick="selectService({{ $service->id }}, '{{ $service->name }}', {{ $service->price ?? 0 }}, this, {{ $service->is_custom ? 'true' : 'false' }})"
+                            onclick="selectService({{ $service->id }}, '{{ $service->name }}', {{ $service->price ?? 0 }}, {{ $service->extra_price ?? 0 }}, this, {{ $service->is_custom ? 'true' : 'false' }})"
                             id="service-btn-{{ $service->id }}">
                             
                             <div class="d-flex gap-1 me-3">
@@ -214,11 +214,12 @@
 
 @push('scripts')
 <script>
-    function selectService(id, name, price, element, isCustom) {
+    function selectService(id, name, price, extraPrice, element, isCustom) {
         // Set Data
         const serviceInput = document.getElementById('service_id');
         serviceInput.value = id;
         serviceInput.dataset.price = price; // Store base price
+        serviceInput.dataset.extraPrice = extraPrice; // Store extra price
         
         // Logic for default text when price is 0
         const priceText = price > 0 ? '$' + new Intl.NumberFormat('es-CO').format(price) : '(Se confirmará en el sitio)';
@@ -368,7 +369,9 @@
         btn.className = 'btn btn-primary btn-sm m-1 slot-btn text-white';
         
         // Special Price Logic
-        const basePrice = parseInt(document.getElementById('service_id').dataset.price || 0);
+        const serviceInput = document.getElementById('service_id');
+        const basePrice = parseInt(serviceInput.dataset.price || 0);
+        const extraPrice = parseInt(serviceInput.dataset.extraPrice || 0);
         
         // Parse time (e.g. "04:30 AM")
         const [timePart, meridiem] = time.split(' ');
@@ -382,16 +385,15 @@
         
         const priceDisplay = document.getElementById('summary-price-display');
         
-        if (basePrice > 0 && (isEarly || isLate)) {
-            const finalPrice = basePrice * 2;
-            priceDisplay.innerHTML = `<span class="text-danger fw-bold">$${new Intl.NumberFormat('es-CO').format(finalPrice)} (Tarifa Especial x2)</span>`;
+        if ((isEarly || isLate) && extraPrice > 0) {
+            priceDisplay.innerHTML = `<span class="text-danger fw-bold">$${new Intl.NumberFormat('es-CO').format(extraPrice)} (Tarifa Especial)</span>`;
             
             // Toast
             const Toast = Swal.mixin({
                 toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
                 timerProgressBar: true, didOpen: (toast) => { toast.onmouseenter = Swal.stopTimer; toast.onmouseleave = Swal.resumeTimer; }
             });
-            Toast.fire({ icon: 'warning', title: 'Horario Especial seleccionado. La tarifa se duplica.' });
+            Toast.fire({ icon: 'warning', title: 'Horario Especial seleccionado. Aplica tarifa extra.' });
         } else if(basePrice > 0) {
             priceDisplay.innerHTML = `$${new Intl.NumberFormat('es-CO').format(basePrice)}`;
         }

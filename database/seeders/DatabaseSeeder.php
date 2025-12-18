@@ -29,35 +29,39 @@ class DatabaseSeeder extends Seeder
 
         // Services (Bootstrap Icons)
         $services = [
-            ['name' => 'Corte', 'price' => 15000, 'icon' => 'scissors'],
-            ['name' => 'Corte + Barba', 'price' => 20000, 'icon' => 'person-badge'],
-            ['name' => 'Corte Niño', 'price' => 12000, 'icon' => 'emoji-smile'],
-            ['name' => 'Barba', 'price' => 10000, 'icon' => 'bezier2'],
-            ['name' => 'Corte + Cejas', 'price' => 17000, 'icon' => 'eye'],
-            ['name' => 'Barba + Cerquillo', 'price' => 12000, 'icon' => 'brush'],
-            ['name' => 'Mascarilla + Masaje', 'price' => 15000, 'icon' => 'droplet'],
-            ['name' => 'Otro servicio', 'price' => 0, 'icon' => 'stars'],
+            ['name' => 'Corte', 'price' => 15000, 'extra_price' => 0, 'icon' => 'scissors'],
+            ['name' => 'Corte + Barba', 'price' => 20000, 'extra_price' => 0, 'icon' => 'person-badge'],
+            ['name' => 'Corte Niño', 'price' => 12000, 'extra_price' => 0, 'icon' => 'emoji-smile'],
+            ['name' => 'Barba', 'price' => 10000, 'extra_price' => 0, 'icon' => 'bezier2'],
+            ['name' => 'Corte + Cejas', 'price' => 17000, 'extra_price' => 0, 'icon' => 'eye'],
+            ['name' => 'Barba + Cerquillo', 'price' => 12000, 'extra_price' => 0, 'icon' => 'brush'],
+            ['name' => 'Mascarilla + Masaje', 'price' => 15000, 'extra_price' => 0, 'icon' => 'droplet'],
+            ['name' => 'Otro servicio', 'price' => 0, 'extra_price' => 0, 'icon' => 'stars'],
         ];
 
         foreach ($services as $service) {
             Service::create($service);
         }
 
-        // Custom User Requested
-        User::create([
-            'name' => 'Carlos Bastidas',
-            'username' => 'Carlos23',
-            'email' => 'cbastidas52@gmail.com',
-            'password' => bcrypt('password'),
-            'role' => 'standard', // Changed to standard to test barber role
-        ]);
+        // Custom User Requested - Fetch Existing
+        $user = User::where('username', 'Carlos23')->first();
+        if (!$user) {
+             // Fallback only if really missing
+            $user = User::create([
+                'name' => 'Carlos Bastidas',
+                'username' => 'Carlos23',
+                'email' => 'cbastidas52@gmail.com',
+                'password' => bcrypt('password'),
+                'role' => 'standard', 
+            ]);
+        }
 
         // Create Barber Profile for Carlos23
         \App\Models\Barber::create([
             'name' => 'Carlos Bastidas',
             'whatsapp_number' => '+573001234567',
             'is_active' => true,
-            'user_id' => \App\Models\User::where('username', 'Carlos23')->first()->id,
+            'user_id' => $user->id,
         ]);
 
         // NO Default Barber (Clean State requested)
