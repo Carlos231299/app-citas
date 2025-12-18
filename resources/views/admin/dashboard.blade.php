@@ -199,12 +199,10 @@
 
                     </select>
 
-                    @if(trim(auth()->user()->role) === 'admin')
                     <button class="btn btn-primary btn-sm rounded-pill px-3 fw-bold d-flex align-items-center gap-2 shadow-sm" onclick="openBookingModal()">
                         <i class="bi bi-plus-lg"></i>
                         <span class="d-none d-sm-inline">Apartar Cita</span>
                     </button>
-                    @endif
                     <div class="dropdown">
                     <button class="btn btn-outline-secondary dropdown-toggle btn-sm fw-bold border-0 bg-transparent text-dark d-flex align-items-center gap-2" type="button" id="calendarViewBtn" data-bs-toggle="dropdown" aria-expanded="false" style="color: #3C4043 !important;">
                         <span>Mes</span>

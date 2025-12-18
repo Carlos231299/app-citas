@@ -67,6 +67,7 @@
                                 <i class="bi bi-circle-fill text-success me-2" id="status-icon"></i>
                                 <span id="status-text">DISPONIBLE PARA RESERVAS</span>
                             </label>
+                            <input type="hidden" name="is_active" value="0">
                             <input class="form-check-input ms-auto" type="checkbox" id="is_active" name="is_active" value="1" {{ $user->barber->is_active ? 'checked' : '' }} style="transform: scale(1.4);">
                         </div>
                         <div id="unavailability-section" class="mt-3 {{ $user->barber->is_active ? 'd-none' : '' }}">
@@ -91,6 +92,7 @@
                                 <i class="bi bi-moon-stars-fill text-warning me-2"></i>
                                 <span>HABILITAR HORARIO EXTRA</span>
                             </label>
+                            <input type="hidden" name="special_mode" value="0">
                             <input class="form-check-input ms-auto" type="checkbox" id="special_mode" name="special_mode" value="1" {{ $user->barber->special_mode ? 'checked' : '' }} style="transform: scale(1.4);">
                         </div>
                         <div id="extra-time-section" class="mt-3 {{ $user->barber->special_mode ? '' : 'd-none' }}">
