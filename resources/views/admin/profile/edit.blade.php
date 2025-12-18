@@ -68,7 +68,7 @@
                                 <span id="status-text">DISPONIBLE PARA RESERVAS</span>
                             </label>
                             <input type="hidden" name="is_active" value="0">
-                            <input class="form-check-input ms-auto" type="checkbox" id="is_active" name="is_active" value="1" {{ $user->barber->is_active ? 'checked' : '' }} style="transform: scale(1.4);">
+                            <input class="form-check-input ms-auto" type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', $user->barber->is_active) ? 'checked' : '' }} style="transform: scale(1.4);">
                         </div>
                         <div id="unavailability-section" class="mt-3 {{ $user->barber->is_active ? 'd-none' : '' }}">
                             <small class="text-muted d-block mb-2">Define el periodo de ausencia (opcional):</small>
@@ -93,18 +93,18 @@
                                 <span>HABILITAR HORARIO EXTRA</span>
                             </label>
                             <input type="hidden" name="special_mode" value="0">
-                            <input class="form-check-input ms-auto" type="checkbox" id="special_mode" name="special_mode" value="1" {{ $user->barber->special_mode ? 'checked' : '' }} style="transform: scale(1.4);">
+                            <input class="form-check-input ms-auto" type="checkbox" id="special_mode" name="special_mode" value="1" {{ old('special_mode', $user->barber->special_mode) ? 'checked' : '' }} style="transform: scale(1.4);">
                         </div>
-                        <div id="extra-time-section" class="mt-3 {{ $user->barber->special_mode ? '' : 'd-none' }}">
+                        <div id="extra-time-section" class="mt-3 {{ old('special_mode', $user->barber->special_mode) ? '' : 'd-none' }}">
                             <small class="text-dark d-block mb-2">Permite citas <strong>4AM-8AM</strong> y <strong>6PM-10PM</strong> en estas fechas:</small>
                             <div class="row g-2">
                                 <div class="col-6">
                                     <label class="small fw-bold text-secondary">Desde</label>
-                                    <input type="date" name="extra_time_start" class="form-control form-control-sm" value="{{ $user->barber->extra_time_start }}">
+                                    <input type="date" name="extra_time_start" class="form-control form-control-sm" value="{{ old('extra_time_start', $user->barber->extra_time_start) }}">
                                 </div>
                                 <div class="col-6">
                                     <label class="small fw-bold text-secondary">Hasta</label>
-                                    <input type="date" name="extra_time_end" class="form-control form-control-sm" value="{{ $user->barber->extra_time_end }}">
+                                    <input type="date" name="extra_time_end" class="form-control form-control-sm" value="{{ old('extra_time_end', $user->barber->extra_time_end) }}">
                                 </div>
                             </div>
                         </div>

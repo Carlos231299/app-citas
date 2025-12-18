@@ -64,11 +64,11 @@ class ProfileController extends Controller
             $barberData = $request->validate([
                 'whatsapp_number' => 'nullable|string|max:20',
                 'is_active' => 'sometimes|boolean',
-                'unavailable_start' => 'nullable|date',
-                'unavailable_end' => 'nullable|date|after_or_equal:unavailable_start',
+                'unavailable_start' => 'nullable|date|required_if:is_active,0,false',
+                'unavailable_end' => 'nullable|date|after_or_equal:unavailable_start|required_if:is_active,0,false',
                 'special_mode' => 'sometimes|boolean',
-                'extra_time_start' => 'nullable|date', // Only date part needed, but form sends date
-                'extra_time_end' => 'nullable|date|after_or_equal:extra_time_start',
+                'extra_time_start' => 'nullable|date|required_if:special_mode,1,true', 
+                'extra_time_end' => 'nullable|date|after_or_equal:extra_time_start|required_if:special_mode,1,true',
             ]);
 
             // Logic from BarberController:
@@ -85,7 +85,13 @@ class ProfileController extends Controller
                 $barberData['special_mode'] = false;
             }
 
+            // DEBUG LOGGING
+            \Illuminate\Support\Facades\Log::info('ProfileUpdate PRE-VALIDATION', $request->all());
+            
             $barber->update($barberData);
+            
+            // DEBUG LOGGING
+            \Illuminate\Support\Facades\Log::info('ProfileUpdate POST-UPDATE', ['barber' => $barber->fresh()->toArray(), 'data' => $barberData]);
         }
 
         return back()->with('success', 'Perfil actualizado correctamente.');
