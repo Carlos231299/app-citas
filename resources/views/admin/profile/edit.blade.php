@@ -151,7 +151,9 @@
                             });
 
                             // --- DATE CONSTRAINTS LOGIC ---
-                            const today = new Date().toISOString().split('T')[0];
+                            // Fix: Use Local Time instead of UTC to prevent skipping "Today" late at night
+                            const now = new Date();
+                            const today = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
 
                             // Generic function to link Start -> End
                             function setupDateConstraints(startId, endId) {
