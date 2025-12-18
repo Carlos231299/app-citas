@@ -207,6 +207,97 @@ app.post("/appointment", async (req, res) => {
 
 client.initialize();
 
+// --- CANCELLATION STATE MACHINE ---
+interface CancellationState {
+    step: 'WAITING_REASON';
+    timestamp: number;
+}
+const cancellationStates = new Map<string, CancellationState>();
+
+client.on("message", async (msg) => {
+    // Basic Logging
+    // console.log("Received:", msg.body, "From:", msg.from);
+
+    const chatId = msg.from;
+    const body = msg.body.trim();
+    const lowerBody = body.toLowerCase();
+
+    // 1. Check if User is in Cancellation State (Waiting for Reason)
+    if (cancellationStates.has(chatId)) {
+        const state = cancellationStates.get(chatId)!;
+
+        // Timeout check (e.g., 10 mins)
+        if (Date.now() - state.timestamp > 10 * 60 * 1000) {
+            cancellationStates.delete(chatId);
+            await client.sendMessage(chatId, "⏳ Se ha agotado el tiempo para la cancelación. Por favor inicia el proceso nuevamente si lo deseas.");
+            return;
+        }
+
+        // Process Reason
+        console.log(`Processing Cancellation Reason from ${chatId}: ${body}`);
+
+        try {
+            // Call Server API
+            // Use 'localhost' or '127.0.0.1' -> In Local Bot, localhost is the machine.
+            // But we used 'http://localhost:3000' for Laravel -> Bot.
+            // Bot -> Laravel is usually 'http://127.0.0.1:8000' (if using `php artisan serve`) 
+            // OR the Server URL if Laravel is remote.
+            // WAIT! The User said "Colocar cron... sabiendo que el servidor tiene 1GB".
+            // The Bot is LOCAL. The Laravel is REMOTE (EC2).
+            // So we must hit the EC2 URL: http://ec2-50-18-72-244...
+            // Or better, use a config variable.
+
+            // FIXME: Hardcoding EC2 URL for now based on context 
+            const serverUrl = 'http://ec2-50-18-72-244.us-west-1.compute.amazonaws.com/api/bot/cancel';
+
+            const response = await fetch(serverUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    phone: chatId.replace('@c.us', ''),
+                    reason: body
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                await client.sendMessage(chatId, "✅ Tu cita ha sido cancelada correctamente.");
+            } else {
+                await client.sendMessage(chatId, "❌ No encontramos una cita próxima para cancelar o ya ocurrió un error.");
+            }
+        } catch (error) {
+            console.error('API Error:', error);
+            await client.sendMessage(chatId, "❌ Error de conexión al procesar tu solicitud.");
+        }
+
+        // Clear State
+        cancellationStates.delete(chatId);
+        return;
+    }
+
+    // 2. Normal Logic (Cancel Trigger)
+    // Triggers: "2", "no", "cancelar", "cancel"
+    const cancelKeywords = ["2", "no", "cancelar", "cancel"];
+    if (cancelKeywords.includes(lowerBody)) {
+        // Start Cancellation Flow
+        cancellationStates.set(chatId, { step: 'WAITING_REASON', timestamp: Date.now() });
+
+        await client.sendMessage(chatId, "Lamentamos esto. 😟\n\nPor favor indícanos brevemente el **motivo de la cancelación** para procesarla:");
+        return;
+    }
+
+    // 3. Confirmation Trigger (Existing Logic)
+    const confirmKeywords = ["1", "si", "sí", "confirmar", "confirm", "ok"];
+    if (confirmKeywords.includes(lowerBody)) {
+        // Just visual confirmation as per previous logic
+        await client.sendMessage(chatId, "✅ **Cita Confirmada**\n\n¡Gracias! Te esperamos en Barbería JR.");
+        return;
+    }
+
+    // Default: Ignore other messages or send "I don't understand" (Better to ignore)
+});
+
 // --- NEW ENDPOINT: REMINDER ---
 app.post('/reminder', async (req, res) => {
     const { phone, name, time, barber_name, service_name } = req.body;

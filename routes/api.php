@@ -8,4 +8,5 @@ use App\Http\Controllers\AppointmentController;
 Route::get('/slots', [AppointmentController::class, 'getAvailableSlots']);
 // Route::get('/calendar/events', [AppointmentController::class, 'events']);
 
-// Routes moved to web.php for auth consistency
+// Bot Routes
+Route::post('/bot/cancel', [AppointmentController::class, 'cancelFromBot']);

@@ -492,6 +492,37 @@ class AppointmentController extends Controller
             ], 500);
         }
     }
+    // Bot: Cancel Appointment via API
+    public function cancelFromBot(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required',
+            'reason' => 'required'
+        ]);
+
+        $phone = $request->phone;
+        // Clean phone (remove @c.us if present, although controller shouldn't care)
+        // Ideally phone comes clean.
+        
+        // Find upcoming scheduled appointment for this phone
+        $appointment = Appointment::where('client_phone', $phone)
+            ->where('status', 'scheduled')
+            ->where('scheduled_at', '>=', Carbon::now())
+            ->orderBy('scheduled_at', 'asc')
+            ->first();
+
+        if (!$appointment) {
+             return response()->json(['success' => false, 'message' => 'No active appointment found'], 404);
+        }
+
+        $appointment->update([
+            'status' => 'cancelled',
+            'cancellation_reason' => $request->reason
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Cancelled']);
+    }
+
     // Calendar View (FullCalendar)
     public function calendar()
     {
