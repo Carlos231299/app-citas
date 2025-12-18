@@ -501,18 +501,29 @@ class AppointmentController extends Controller
         ]);
 
         $phone = $request->phone;
-        // Clean phone (remove @c.us if present, although controller shouldn't care)
-        // Ideally phone comes clean.
         
-        // Find upcoming scheduled appointment for this phone
-        $appointment = Appointment::where('client_phone', $phone)
+        // Robust Phone Matching: Use last 10 digits to match DB
+        // Remove non-digits
+        $digits = preg_replace('/\D/', '', $phone);
+        $last10 = substr($digits, -10);
+
+        // Find upcoming scheduled appointment for this phone (fuzzy match)
+        $appointment = Appointment::where('client_phone', 'LIKE', "%$last10")
             ->where('status', 'scheduled')
             ->where('scheduled_at', '>=', Carbon::now())
             ->orderBy('scheduled_at', 'asc')
             ->first();
 
         if (!$appointment) {
-             return response()->json(['success' => false, 'message' => 'No active appointment found'], 404);
+             // Fallback: Try with + prefix just in case
+             $appointment = Appointment::where('client_phone', '+' . $digits)
+                ->where('status', 'scheduled')
+                ->where('scheduled_at', '>=', Carbon::now())
+                ->first();
+        }
+
+        if (!$appointment) {
+             return response()->json(['success' => false, 'message' => 'No active appointment found for phone: ' . $phone], 404);
         }
 
         $appointment->update([
