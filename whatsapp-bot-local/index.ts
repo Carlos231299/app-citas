@@ -207,6 +207,37 @@ app.post("/appointment", async (req, res) => {
 
 client.initialize();
 
+// --- NEW ENDPOINT: REMINDER ---
+app.post('/reminder', async (req, res) => {
+    const { phone, name, time, barber_name, service_name } = req.body;
+    console.log(`⏰ Sending Reminder to ${name} (${phone}) for ${time}`);
+
+    try {
+        if (!client) {
+            console.error('❌ Client not ready');
+            return res.status(503).json({ error: 'WhatsApp client not ready' });
+        }
+
+        const chatId = phone.includes("@c.us")
+            ? phone
+            : phone.replace(/\D/g, "") + "@c.us";
+
+        const reminderMsg = `⏳ *RECORDATORIO DE CITA* ⏳\n\n` +
+            `Hola *${name}*, te recordamos tu cita hoy:\n\n` +
+            `⏰ *Hora:* ${time}\n` +
+            `💈 *Barbero:* ${barber_name}\n` +
+            `💇‍♂️ *Servicio:* ${service_name}\n\n` +
+            `Estamos esperándote. ¿Confirmas tu llegada?`;
+
+        await client.sendMessage(chatId, reminderMsg);
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('❌ Error sending reminder:', error);
+        res.status(500).json({ error: 'Failed' });
+    }
+});
+
 app.listen(3000, () => {
     console.log("🚀 Server running on http://localhost:3000");
 });

@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('app:check-whats-app-notifications')->everyMinute();
+Schedule::command('appointments:remind')->everyMinute();
