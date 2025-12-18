@@ -25,10 +25,11 @@ class ServiceController extends Controller
         $request->validate([
             'name' => 'required',
             'price' => 'required|numeric',
+            'extra_price' => 'nullable|numeric',
             'icon' => 'required|string',
         ]);
 
-        Service::create($request->only(['name', 'description', 'price', 'icon']));
+        Service::create($request->only(['name', 'description', 'price', 'extra_price', 'icon']));
 
         return redirect()->back()->with('success', 'Servicio creado correctamente.');
     }
@@ -41,10 +42,11 @@ class ServiceController extends Controller
         $request->validate([
             'name' => 'required',
             'price' => 'required|numeric',
+            'extra_price' => 'nullable|numeric',
             'icon' => 'required|string',
         ]);
 
-        $service->update($request->only(['name', 'description', 'price', 'icon']));
+        $service->update($request->only(['name', 'description', 'price', 'extra_price', 'icon']));
 
         return redirect()->back()->with('success', 'Servicio actualizado correctamente.');
     }

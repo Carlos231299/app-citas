@@ -237,6 +237,17 @@ class AppointmentController extends Controller
             $clientPhone = $request->client_phone;
         }
 
+        // PRICE CALCULATION (Extra Time Logic)
+        // Standard Hours: 09:00 - 19:00 (Implied)
+        // Extra Time: Before 09:00 OR After 19:00 (>= 19:00)
+        $hour = $scheduledAt->hour;
+        $isExtraTime = ($hour < 9 || $hour >= 19);
+        
+        $finalPrice = $service->price; // Default
+        if ($isExtraTime && $service->extra_price > 0) {
+            $finalPrice = $service->extra_price;
+        }
+
         $appointment = Appointment::create([
             'service_id' => $request->service_id,
             'barber_id' => $request->barber_id,
@@ -244,7 +255,8 @@ class AppointmentController extends Controller
             'client_name' => $request->client_name,
             'client_phone' => $clientPhone,
             'custom_details' => $request->custom_details,
-            'status' => $status
+            'status' => $status,
+            'price' => $finalPrice
         ]);
 
         $whatsappUrl = null;

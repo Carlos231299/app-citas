@@ -78,9 +78,15 @@
                         <label class="form-label text-secondary small fw-bold">NOMBRE</label>
                         <input type="text" name="name" class="form-control" required autocomplete="off">
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label text-secondary small fw-bold">PRECIO</label>
-                        <input type="number" name="price" class="form-control" required autocomplete="off">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-secondary small fw-bold">PRECIO NORMAL</label>
+                            <input type="number" name="price" class="form-control" required autocomplete="off">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-warning small fw-bold">VALOR EN HORARIO EXTRA</label>
+                            <input type="number" name="extra_price" class="form-control" placeholder="Opcional" autocomplete="off">
+                        </div>
                     </div>
                     
                     <!-- Icon Logic: Image or Text -->
@@ -127,9 +133,15 @@
                         <label class="form-label text-secondary small fw-bold">NOMBRE</label>
                         <input type="text" name="name" id="edit_name" class="form-control" required autocomplete="off">
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label text-secondary small fw-bold">PRECIO</label>
-                        <input type="number" name="price" id="edit_price" class="form-control" required autocomplete="off">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-secondary small fw-bold">PRECIO NORMAL</label>
+                            <input type="number" name="price" id="edit_price" class="form-control" required autocomplete="off">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-warning small fw-bold">VALOR EN HORARIO EXTRA</label>
+                            <input type="number" name="extra_price" id="edit_extra_price" class="form-control" placeholder="Opcional" autocomplete="off">
+                        </div>
                     </div>
                     
                     <div class="mb-3">
@@ -263,7 +275,9 @@
     function editService(service) {
         document.getElementById('editForm').action = `/services/${service.id}`;
         document.getElementById('edit_name').value = service.name;
+        document.getElementById('edit_name').value = service.name;
         document.getElementById('edit_price').value = service.price;
+        document.getElementById('edit_extra_price').value = service.extra_price || '';
         document.getElementById('edit_description').value = service.description || '';
         document.getElementById('edit_icon').value = service.icon || 'scissors';
 
