@@ -149,6 +149,40 @@
                                     extraSection.classList.add('d-none');
                                 }
                             });
+
+                            // --- DATE CONSTRAINTS LOGIC ---
+                            const today = new Date().toISOString().split('T')[0];
+
+                            // Generic function to link Start -> End
+                            function setupDateConstraints(startId, endId) {
+                                const startInput = document.querySelector(`input[name="${startId}"]`);
+                                const endInput = document.querySelector(`input[name="${endId}"]`);
+                                
+                                if(startInput && endInput) {
+                                    // 1. Initial Constraint: Start >= Today
+                                    startInput.setAttribute('min', today);
+                                    
+                                    // 2. If start has value, end min = start
+                                    if(startInput.value) {
+                                        endInput.setAttribute('min', startInput.value);
+                                    } else {
+                                        endInput.setAttribute('min', today);
+                                    }
+
+                                    // 3. Listener
+                                    startInput.addEventListener('change', function() {
+                                        endInput.setAttribute('min', this.value);
+                                        // If end is now less than start, clear it
+                                        if(endInput.value && endInput.value < this.value) {
+                                            endInput.value = this.value;
+                                        }
+                                    });
+                                }
+                            }
+
+                            // Apply to both sections
+                            setupDateConstraints('unavailable_start', 'unavailable_end');
+                            setupDateConstraints('extra_time_start', 'extra_time_end');
                         });
                     </script>
                     @endif

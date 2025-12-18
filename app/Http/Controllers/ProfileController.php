@@ -64,11 +64,11 @@ class ProfileController extends Controller
             $barberData = $request->validate([
                 'whatsapp_number' => 'nullable|string|max:20',
                 'is_active' => 'sometimes|boolean',
-                'unavailable_start' => 'nullable|date|required_if:is_active,0,false',
-                'unavailable_end' => 'nullable|date|after_or_equal:unavailable_start|required_if:is_active,0,false',
+                'unavailable_start' => 'nullable|date|required_if:is_active,0|after_or_equal:today',
+                'unavailable_end' => 'nullable|date|after_or_equal:unavailable_start|required_if:is_active,0',
                 'special_mode' => 'sometimes|boolean',
-                'extra_time_start' => 'nullable|date|required_if:special_mode,1,true', 
-                'extra_time_end' => 'nullable|date|after_or_equal:extra_time_start|required_if:special_mode,1,true',
+                'extra_time_start' => 'nullable|date|required_if:special_mode,1|after_or_equal:today', 
+                'extra_time_end' => 'nullable|date|after_or_equal:extra_time_start|required_if:special_mode,1',
             ]);
 
             // Logic from BarberController:
