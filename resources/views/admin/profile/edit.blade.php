@@ -56,138 +56,244 @@
                     </div>
                     @endif
 
-                    @if($user->barber)
-                    <hr class="my-4">
-                    <h5 class="fw-bold text-primary mb-4">Mi Estado y Disponibilidad</h5>
+                </form>
 
-                    <!-- Status Switch -->
-                    <div class="mb-4 p-3 bg-light rounded-3 border">
-                        <div class="form-check form-switch d-flex align-items-center justify-content-between ps-0">
-                            <label class="form-check-label fw-bold text-dark" for="is_active">
-                                <i class="bi bi-circle-fill text-success me-2" id="status-icon"></i>
-                                <span id="status-text">DISPONIBLE PARA RESERVAS</span>
-                            </label>
-                            <input type="hidden" name="is_active" value="0">
-                            <input class="form-check-input ms-auto" type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', $user->barber->is_active) ? 'checked' : '' }} style="transform: scale(1.4);">
-                        </div>
-                        <div id="unavailability-section" class="mt-3 {{ $user->barber->is_active ? 'd-none' : '' }}">
-                            <small class="text-muted d-block mb-2">Define el periodo de ausencia (opcional):</small>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <label class="small fw-bold text-secondary">Desde</label>
-                                    <input type="date" name="unavailable_start" class="form-control form-control-sm" value="{{ $user->barber->unavailable_start?->format('Y-m-d') }}">
-                                </div>
-                                <div class="col-6">
-                                    <label class="small fw-bold text-secondary">Hasta</label>
-                                    <input type="date" name="unavailable_end" class="form-control form-control-sm" value="{{ $user->barber->unavailable_end?->format('Y-m-d') }}">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Extra Time Switch -->
-                    <div class="mb-4 p-3 bg-warning bg-opacity-10 rounded-3 border border-warning">
-                        <div class="form-check form-switch d-flex align-items-center justify-content-between ps-0">
-                            <label class="form-check-label fw-bold text-dark" for="special_mode">
-                                <i class="bi bi-moon-stars-fill text-warning me-2"></i>
-                                <span>HABILITAR HORARIO EXTRA</span>
-                            </label>
-                            <input type="hidden" name="special_mode" value="0">
-                            <input class="form-check-input ms-auto" type="checkbox" id="special_mode" name="special_mode" value="1" {{ old('special_mode', $user->barber->special_mode) ? 'checked' : '' }} style="transform: scale(1.4);">
-                        </div>
-                        <div id="extra-time-section" class="mt-3 {{ old('special_mode', $user->barber->special_mode) ? '' : 'd-none' }}">
-                            <small class="text-dark d-block mb-2">Permite citas <strong>4AM-8AM</strong> y <strong>6PM-10PM</strong> en estas fechas:</small>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <label class="small fw-bold text-secondary">Desde</label>
-                                    <input type="date" name="extra_time_start" class="form-control form-control-sm" value="{{ old('extra_time_start', $user->barber->extra_time_start) }}">
-                                </div>
-                                <div class="col-6">
-                                    <label class="small fw-bold text-secondary">Hasta</label>
-                                    <input type="date" name="extra_time_end" class="form-control form-control-sm" value="{{ old('extra_time_end', $user->barber->extra_time_end) }}">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            const activeSwitch = document.getElementById('is_active');
-                            const unavailableSection = document.getElementById('unavailability-section');
-                            const statusText = document.getElementById('status-text');
-                            const statusIcon = document.getElementById('status-icon');
+                <!-- SECCIÓN DE DISPONIBILIDAD (AJAX - Estilo Admin) -->
+                @if($user->barber)
+                <div class="mt-5 pt-4 border-top">
+                    <h5 class="fw-bold mb-3 text-dark">Gestionar Disponibilidad</h5>
+                    <div class="card bg-white border-0 shadow-sm">
+                        <div class="card-body p-4">
                             
-                            const specialSwitch = document.getElementById('special_mode');
-                            const extraSection = document.getElementById('extra-time-section');
+                            <!-- Active Switch -->
+                            <div class="form-check form-switch mb-4 d-flex align-items-center">
+                                <input class="form-check-input me-3" type="checkbox" role="switch" id="active_switch"
+                                    onchange="handleStatusChange(this)" {{ $user->barber->is_active ? 'checked' : '' }} style="transform: scale(1.4);">
+                                
+                                <div class="d-flex flex-column">
+                                    <label class="form-check-label fw-bold {{ $user->barber->is_active ? 'text-success' : 'text-muted' }}" 
+                                        id="active_label" for="active_switch">
+                                        {{ $user->barber->is_active ? 'DISPONIBLE PARA RESERVAS' : 'NO DISPONIBLE (INACTIVO)' }}
+                                    </label>
+                                    @if($user->barber->unavailable_start && $user->barber->unavailable_end)
+                                        <small class="text-muted">Hasta: {{ $user->barber->unavailable_end->format('d M, h:i A') }}</small>
+                                    @endif
+                                </div>
+                            </div>
 
-                            activeSwitch.addEventListener('change', function() {
-                                if(this.checked) {
-                                    unavailableSection.classList.add('d-none');
-                                    statusText.textContent = 'DISPONIBLE PARA RESERVAS';
-                                    statusText.classList.remove('text-muted');
-                                    statusIcon.className = 'bi bi-circle-fill text-success me-2';
-                                } else {
-                                    unavailableSection.classList.remove('d-none');
-                                    statusText.textContent = 'NO DISPONIBLE (INACTIVO)';
-                                    statusText.classList.add('text-muted');
-                                    statusIcon.className = 'bi bi-circle-fill text-secondary me-2';
-                                    
-                                    // Logic: If inactive, warn users
-                                    Swal.fire({
-                                        title: '¿Pasar a Inactivo?',
-                                        text: 'No aparecerás en la lista de reservas (excepto Horario Extra si está activo).',
-                                        icon: 'warning',
-                                        confirmButtonText: 'Entendido'
-                                    });
-                                }
-                            });
+                            <!-- Extra Time Switch -->
+                            <div class="form-check form-switch d-flex align-items-center">
+                                <input class="form-check-input me-3 bg-warning border-warning" type="checkbox" role="switch" id="extra_switch"
+                                    onchange="handleExtraTimeChange(this)" {{ $user->barber->special_mode ? 'checked' : '' }} style="transform: scale(1.4);">
+                                
+                                <div class="d-flex flex-column">
+                                    <label class="form-check-label fw-bold text-warning" for="extra_switch">
+                                        <i class="bi bi-moon-stars-fill"></i> HABILITAR HORARIO EXTRA
+                                    </label>
+                                    <small class="text-muted">Permite citas 4AM-8AM y 6PM-10PM</small>
+                                    @if($user->barber->special_mode && $user->barber->extra_time_start)
+                                        <small class="text-dark fw-bold mt-1">
+                                            {{ \Carbon\Carbon::parse($user->barber->extra_time_start)->format('d/m') }} - {{ \Carbon\Carbon::parse($user->barber->extra_time_end)->format('d/m') }}
+                                        </small>
+                                    @endif
+                                </div>
+                            </div>
 
-                            specialSwitch.addEventListener('change', function() {
-                                if(this.checked) {
-                                    extraSection.classList.remove('d-none');
-                                } else {
-                                    extraSection.classList.add('d-none');
-                                }
-                            });
+                        </div>
+                    </div>
+                </div>
 
-                            // --- DATE CONSTRAINTS LOGIC ---
-                            // Fix: Use Local Time instead of UTC to prevent skipping "Today" late at night
+                @push('scripts')
+                <script>
+                    // Logic Adapted from Admin/Barbers/Index
+                    
+                    // Handle Extra Time Status Change
+                    function handleExtraTimeChange(switchEl) {
+                        const isTurningOn = switchEl.checked;
+                        
+                        if (isTurningOn) {
+                            // Turning ON: Ask for Dates
+                            switchEl.checked = false; // Visually revert until confirmed
+                            
+                            // Fix Timezone: Use format YYYY-MM-DD based on local time
                             const now = new Date();
                             const today = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
 
-                            // Generic function to link Start -> End
-                            function setupDateConstraints(startId, endId) {
-                                const startInput = document.querySelector(`input[name="${startId}"]`);
-                                const endInput = document.querySelector(`input[name="${endId}"]`);
-                                
-                                if(startInput && endInput) {
-                                    // 1. Initial Constraint: Start >= Today
-                                    startInput.setAttribute('min', today);
+                            Swal.fire({
+                                title: 'Horario Extra',
+                                html: `
+                                    <p class="small text-muted mb-3">Define los días que trabajarás horario extendido.</p>
+                                    <div class="text-start">
+                                        <label class="form-label small fw-bold">Desde</label>
+                                        <input type="date" id="swal_extra_start" class="form-control mb-2" min="${today}">
+                                        <label class="form-label small fw-bold">Hasta</label>
+                                        <input type="date" id="swal_extra_end" class="form-control" min="${today}">
+                                    </div>
+                                `,
+                                showCancelButton: true,
+                                confirmButtonText: 'Activar',
+                                didOpen: () => {
+                                    const startEl = document.getElementById('swal_extra_start');
+                                    const endEl = document.getElementById('swal_extra_end');
                                     
-                                    // 2. If start has value, end min = start
-                                    if(startInput.value) {
-                                        endInput.setAttribute('min', startInput.value);
-                                    } else {
-                                        endInput.setAttribute('min', today);
-                                    }
-
-                                    // 3. Listener
-                                    startInput.addEventListener('change', function() {
-                                        endInput.setAttribute('min', this.value);
-                                        // If end is now less than start, clear it
-                                        if(endInput.value && endInput.value < this.value) {
-                                            endInput.value = this.value;
-                                        }
+                                    // Enforce Logic: End >= Start
+                                    startEl.addEventListener('change', () => {
+                                         endEl.min = startEl.value;
+                                         if(endEl.value && endEl.value < startEl.value) {
+                                             endEl.value = startEl.value;
+                                         }
                                     });
+                                },
+                                preConfirm: () => {
+                                    const start = document.getElementById('swal_extra_start').value;
+                                    const end = document.getElementById('swal_extra_end').value;
+                                    if(!start || !end) {
+                                         Swal.showValidationMessage('Ambas fechas son requeridas');
+                                         return false;
+                                    }
+                                    if(end < start) {
+                                         Swal.showValidationMessage('La fecha final no puede ser antes de la inicial');
+                                         return false;
+                                    }
+                                    return { start, end };
                                 }
-                            }
+                            }).then((res) => {
+                                if (res.isConfirmed) {
+                                    sendUpdate({ 
+                                        special_mode: true, 
+                                        extra_time_start: res.value.start, 
+                                        extra_time_end: res.value.end 
+                                    }, switchEl, true); // true = force checked if success
+                                }
+                            });
+                        } else {
+                            // Turning OFF
+                            sendUpdate({ special_mode: false }, switchEl);
+                        }
+                    }
 
-                            // Apply to both sections
-                            setupDateConstraints('unavailable_start', 'unavailable_end');
-                            setupDateConstraints('extra_time_start', 'extra_time_end');
+                    // Handle Status Toggle (Inactive/Active)
+                    function handleStatusChange(switchEl) {
+                        const isTurningOn = switchEl.checked;
+                        
+                        // Timezone fix for DateTime inputs
+                        const now = new Date();
+                        const nowString = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0,16);
+
+                        // If Turning ON: Just do it (clears unavailability)
+                        if (isTurningOn) {
+                            sendUpdate({ is_active: 1, unavailable_start: null, unavailable_end: null }, switchEl);
+                            return;
+                        }
+
+                        // If Turning OFF: Ask Type
+                        switchEl.checked = true; // Revert visually while asking
+
+                        Swal.fire({
+                            title: 'Desactivar Perfil',
+                            text: `¿Deseas desactivarte permanentemente o temporalmente?`,
+                            icon: 'question',
+                            showDenyButton: true,
+                            showCancelButton: true,
+                            confirmButtonText: 'Temporalmente',
+                            denyButtonText: 'Indefinidamente',
+                            cancelButtonText: 'Cancelar',
+                            confirmButtonColor: '#ffc107', // Warning/Temp
+                            denyButtonColor: '#EF4444' // Danger/Perm
+                        }).then((result) => {
+                            if (result.isDenied) {
+                                // Indefinite
+                                switchEl.checked = false; // Visually apply
+                                sendUpdate({ is_active: 0, unavailable_start: null, unavailable_end: null }, switchEl);
+                            } else if (result.isConfirmed) {
+                                // Temporary -> Ask Dates
+                                askTemporaryRange(switchEl, nowString);
+                            }
                         });
-                    </script>
-                    @endif
+                    }
+
+                    function askTemporaryRange(switchEl, nowString) {
+                        Swal.fire({
+                            title: 'Inactividad Temporal',
+                            html: `
+                                <p class="small text-muted mb-3">Define cuándo volverás a estar disponible.</p>
+                                <div class="text-start">
+                                    <label class="form-label small fw-bold">Desde (Inicio Inactividad)</label>
+                                    <input type="datetime-local" id="swal_temp_start" class="form-control mb-2" 
+                                           min="${nowString}" value="${nowString}">
+                                    
+                                    <label class="form-label small fw-bold">Hasta (Regreso)</label>
+                                    <input type="datetime-local" id="swal_temp_end" class="form-control" 
+                                           min="${nowString}">
+                                </div>
+                            `,
+                            showCancelButton: true,
+                            confirmButtonText: 'Guardar',
+                            didOpen: () => {
+                                const startEl = document.getElementById('swal_temp_start');
+                                const endEl = document.getElementById('swal_temp_end');
+                                
+                                // Enforce Logic: End >= Start
+                                startEl.addEventListener('change', () => {
+                                     endEl.min = startEl.value;
+                                     if(endEl.value && endEl.value < startEl.value) {
+                                         endEl.value = startEl.value;
+                                     }
+                                });
+                            },
+                            preConfirm: () => {
+                                const start = document.getElementById('swal_temp_start').value;
+                                const end = document.getElementById('swal_temp_end').value;
+                                
+                                if(!start || !end) {
+                                     Swal.showValidationMessage('Ambas fechas son requeridas');
+                                     return false;
+                                }
+                                if(end < start) {
+                                     Swal.showValidationMessage('La fecha de regreso no puede ser anterior al inicio');
+                                     return false;
+                                }
+                                return { start, end };
+                            }
+                        }).then((res) => {
+                            if (res.isConfirmed) {
+                                // Send Update: KEEP is_active = 1, but set dates (as per Admin logic preference)
+                                sendUpdate({ 
+                                    is_active: 1, 
+                                    unavailable_start: res.value.start, 
+                                    unavailable_end: res.value.end 
+                                }, switchEl, true);
+                            }
+                        });
+                    }
+
+                    function sendUpdate(payload, switchEl, forceCheck = false) {
+                        axios.put('{{ route("profile.updateStatus") }}', { ...payload, _token: '{{ csrf_token() }}' })
+                            .then((response) => {
+                                const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
+                                Toast.fire({ icon: 'success', title: 'Estado actualizado' });
+                                
+                                if(forceCheck) {
+                                    switchEl.checked = true;
+                                }
+
+                                // Update Labels Visually if needed (or reload)
+                                // Reloading is safest to sync server state labels/colors
+                                setTimeout(() => location.reload(), 1000);
+                            })
+                            .catch((error) => {
+                                switchEl.checked = !switchEl.checked; // Revert
+                                console.error(error);
+                                let msg = 'No se pudo actualizar';
+                                if (error.response && error.response.data && error.response.data.message) {
+                                    msg = error.response.data.message;
+                                }
+                                Swal.fire('Error', msg, 'error');
+                            });
+                    }
+                </script>
+                @endpush
+                @endif
 
                     <h5 class="fw-bold text-primary mb-4">Seguridad</h5>
 
