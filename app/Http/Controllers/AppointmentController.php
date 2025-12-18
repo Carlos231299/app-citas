@@ -507,11 +507,11 @@ class AppointmentController extends Controller
         $digits = preg_replace('/\D/', '', $phone);
         $last10 = substr($digits, -10);
 
-        // Find upcoming scheduled appointment for this phone (fuzzy match)
+        // Find the MOST RECENTLY CREATED appointment for this phone
+        // matching the user's "undo last action" intent.
         $appointment = Appointment::where('client_phone', 'LIKE', "%$last10")
-            ->where('status', 'scheduled')
-            ->where('scheduled_at', '>=', Carbon::now())
-            ->orderBy('scheduled_at', 'asc')
+            ->whereIn('status', ['scheduled', 'request'])
+            ->orderBy('created_at', 'desc') // Target the one just created
             ->first();
 
         if (!$appointment) {

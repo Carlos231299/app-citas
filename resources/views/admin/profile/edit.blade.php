@@ -56,6 +56,12 @@
                     </div>
                     @endif
 
+                    <div class="text-end mt-4">
+                        <button type="submit" class="btn btn-primary px-4 fw-bold">
+                            <i class="bi bi-save me-2"></i> GUARDAR CAMBIOS
+                        </button>
+                    </div>
+
                 </form>
 
                 <!-- SECCIÓN DE DISPONIBILIDAD (AJAX - Estilo Admin) -->

@@ -192,7 +192,7 @@ client.on("message", async (message) => {
 
         cancellationStates.set(chatId, { step: 'WAITING_REASON', timestamp: Date.now(), timeoutId: timeoutId });
 
-        await client.sendMessage(chatId, "Lamentamos esto. 😟\n\nPor favor indícanos brevemente el **motivo de la cancelación** para procesarla:");
+        await client.sendMessage(chatId, "Lamentamos esto. 😟\n\nPor favor indícanos brevemente el *motivo de la cancelación* para procesarla:");
         return;
     }
 
