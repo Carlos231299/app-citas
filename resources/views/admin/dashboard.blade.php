@@ -178,7 +178,7 @@
     </div>
     
     <!-- Calendar Container -->
-    <div class="card border-0 shadow-sm flex-grow-1 overflow-hidden" style="min-height: 600px;">
+    <div class="card border-0 shadow-sm flex-grow-1 overflow-auto" style="min-height: 600px;">
         <div class="card-body p-0 p-md-3 h-100 position-relative">
             <!-- Custom View Selector -->
             <div id="custom-view-selector" class="d-none">
