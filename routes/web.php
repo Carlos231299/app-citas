@@ -49,6 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/appointments/{appointment}/confirm', [AppointmentController::class, 'confirm'])->name('appointments.confirm');
     Route::patch('/appointments/{appointment}/complete', [AppointmentController::class, 'complete'])->name('appointments.complete');
     Route::patch('/appointments/{appointment}/complete', [AppointmentController::class, 'complete'])->name('appointments.complete');
+    Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
     Route::resource('services', ServiceController::class);
     Route::resource('barbers', BarberController::class);
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');

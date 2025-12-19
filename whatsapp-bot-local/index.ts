@@ -280,8 +280,8 @@ app.post("/appointment", async (req, res) => {
         // User: "debe mandar también el barbero en el mensaje"
         chatState.set(chatId, "WAITING_CONFIRMATION"); // Enable interactive confirmation
 
-        // Dynamic Price Line
-        const priceLine = display_price ? `💰 *Precio:* ${display_price}\n` : '';
+        // Dynamic Price Value
+        const priceText = display_price || 'Por confirmar';
 
         await client.sendMessage(
             chatId,
@@ -292,7 +292,7 @@ app.post("/appointment", async (req, res) => {
             `💈 *Barbero:* ${barber_name}\n` +
             `📅 *Fecha:* ${date}\n` +
             `⏰ *Hora:* ${time}\n` +
-            `${priceLine}\n` +
+            `💰 *Precio:* ${priceText}\n\n` +
             `Por favor confirma tu asistencia respondiendo:\n` +
             `1️⃣ Confirmar\n` +
             `2️⃣ Cancelar`
@@ -311,10 +311,33 @@ client.initialize();
 
 // --- REMINDER ENDPOINT ---
 
+// --- GENERIC SEND MESSAGE ENDPOINT ---
+app.post('/send-message', async (req, res) => {
+    const { phone, message } = req.body;
+    console.log(`📨 Sending Generic Message to ${phone}`);
+
+    try {
+        if (!client) {
+            return res.status(503).json({ error: 'WhatsApp client not ready' });
+        }
+
+        const chatId = phone.includes("@c.us")
+            ? phone
+            : phone.replace(/\D/g, "") + "@c.us";
+
+        await client.sendMessage(chatId, message);
+        res.json({ success: true });
+
+    } catch (error) {
+        console.error('❌ Error sending generic message:', error);
+        res.status(500).json({ error: 'Failed' });
+    }
+});
+
 // --- NEW ENDPOINT: REMINDER ---
 app.post('/reminder', async (req, res) => {
-    const { phone, name, time, barber_name, service_name } = req.body;
-    console.log(`⏰ Sending Reminder to ${name} (${phone}) for ${time}`);
+    const { phone, name, time, barber_name, service_name, date, place, display_price } = req.body;
+    console.log(`⏰ Sending Interactive Reminder to ${name} (${phone}) for ${time}`);
 
     try {
         if (!client) {
@@ -326,12 +349,31 @@ app.post('/reminder', async (req, res) => {
             ? phone
             : phone.replace(/\D/g, "") + "@c.us";
 
+        // 1. Restore/Set State for Interaction
+        appointments.set(chatId, {
+            name,
+            time,
+            barber_name,
+            service_name,
+            date: date || 'Hoy',
+            place: place || 'Barbería JR',
+            is_request: false
+        });
+
+        // 2. Enable Confirmation Mode
+        chatState.set(chatId, "WAITING_CONFIRMATION");
+
+        const priceLine = display_price ? `💰 *Precio:* ${display_price}\n` : '';
+
         const reminderMsg = `⏳ *RECORDATORIO DE CITA* ⏳\n\n` +
             `Hola *${name}*, te recordamos tu cita hoy:\n\n` +
             `⏰ *Hora:* ${time}\n` +
             `💈 *Barbero:* ${barber_name}\n` +
-            `💇‍♂️ *Servicio:* ${service_name}\n\n` +
-            `Estamos esperándote. ¿Confirmas tu llegada?`;
+            `💇‍♂️ *Servicio:* ${service_name}\n` +
+            priceLine + "\n"; +
+                `Estamos esperándote. Por favor confirma:\n` +
+                `1️⃣ Confirmar\n` +
+                `2️⃣ Cancelar`;
 
         await client.sendMessage(chatId, reminderMsg);
 

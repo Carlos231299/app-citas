@@ -45,7 +45,16 @@
                             {{ $service->description }}
                         </div>
                     </td>
-                    <td class="text-dark fw-bold">${{ number_format($service->price, 0, ',', '.') }}</td>
+                    <td class="text-dark">
+                        <div class="fw-bold">${{ number_format($service->price, 0, ',', '.') }}</div>
+                        @if($service->extra_price > 0)
+                            <small class="badge bg-warning text-dark border border-dark border-opacity-25" title="Tarifa Horario Extra">
+                                <i class="bi bi-clock-history me-1"></i>Extra: ${{ number_format($service->extra_price, 0, ',', '.') }}
+                            </small>
+                        @else
+                            <small class="text-muted fst-italic" style="font-size: 0.75rem;">Sin tarifa extra</small>
+                        @endif
+                    </td>
                     <td class="text-end pe-4">
                         <button class="btn btn-sm btn-light text-primary border me-1 mb-1" onclick='editService(@json($service))' title="Editar">
                             <i class="bi bi-pencil-fill"></i>

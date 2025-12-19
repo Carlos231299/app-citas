@@ -22,7 +22,7 @@ $services = [
     ['name' => 'Corte + Cejas', 'price' => 17000, 'extra_price' => 0, 'icon' => 'eye'],
     ['name' => 'Barba + Cerquillo', 'price' => 12000, 'extra_price' => 0, 'icon' => 'brush'],
     ['name' => 'Mascarilla + Masaje', 'price' => 15000, 'extra_price' => 0, 'icon' => 'droplet'],
-    ['name' => 'Otro servicio', 'price' => 0, 'extra_price' => 0, 'icon' => 'stars'],
+    ['name' => 'Otro servicio', 'price' => 0, 'extra_price' => 0, 'icon' => 'stars', 'is_custom' => 1],
 ];
 
 foreach ($services as $svc) {

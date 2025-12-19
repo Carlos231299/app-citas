@@ -458,7 +458,11 @@
 
         const formData = new FormData(e.target);
 
-        axios.post("{{ route('book') }}", formData)
+        axios.post("{{ route('book') }}", formData, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
             .then(response => {
                 bookingModal.hide();
                 Swal.fire({
@@ -469,7 +473,7 @@
                     showConfirmButton: false
                 });
                 // Refresh Calendar
-                calendar.refetchEvents();
+                if(window.calendarInstance) window.calendarInstance.refetchEvents();
             })
             .catch(err => {
                 console.error(err);
@@ -496,7 +500,7 @@
         showRejected: true, // Cancelled
         showCompleted: true
     };
-    let calendarInstance = null;
+    window.calendarInstance = null;
 
     function initCalendar() {
         var calendarEl = document.getElementById('calendar');
@@ -505,7 +509,7 @@
         // Initialize State UI
         updateCheckboxes();
 
-        calendarInstance = new FullCalendar.Calendar(calendarEl, {
+        window.calendarInstance = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             themeSystem: 'bootstrap5',
             headerToolbar: {
@@ -702,11 +706,24 @@
                             <button onclick="editAppointment(${event.id})" class="btn btn-primary px-4">
                                 <i class="bi bi-pencil-fill me-1"></i> Editar
                             </button>
-                            <button onclick="cancelAppointment(${event.id})" class="btn btn-danger px-4">
-                                <i class="bi bi-trash-fill me-1"></i> Cancelar
+                            <button onclick="cancelAppointment(${event.id})" class="btn btn-warning px-4 text-white">
+                                <i class="bi bi-slash-circle me-1"></i> Cancelar
+                            </button>
+                            <button onclick="deleteAppointment(${event.id})" class="btn btn-danger px-4">
+                                <i class="bi bi-trash-fill me-1"></i> Eliminar
                             </button>
                         </div>
                     `;
+                } else if (props.type === 'appointment') {
+                     // For Cancelled/Completed/Request - Show Delete Button
+                     actionButtons = `
+                        <div class="d-flex justify-content-center gap-2 mt-4 flex-wrap">
+                            <button onclick="deleteAppointment(${event.id})" class="btn btn-danger px-4">
+                                <i class="bi bi-trash-fill me-1"></i> Eliminar Definitivamente
+                            </button>
+                        </div>
+                    `;
+                }
                 }
 
                 Swal.fire({
@@ -1562,3 +1579,41 @@
     }    
 </style>
 @endpush
+
+@push('scripts')
+<script>
+    function deleteAppointment(id) {
+        Swal.fire({
+            title: '¿Eliminar Definitivamente?',
+            text: "Esta acción borrará la cita de la base de datos y NO se puede deshacer.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, borrar para siempre',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.delete(`/appointments/${id}`)
+                .then(response => {
+                    Swal.fire(
+                        '¡Eliminado!',
+                        'La cita ha sido borrada.',
+                        'success'
+                    ).then(() => {
+                        // Refresh Calendar
+                        if(window.calendarInstance) window.calendarInstance.refetchEvents();
+                    });
+                })
+                .catch(error => {
+                    console.error(error);
+                    Swal.fire(
+                        'Error',
+                        'No se pudo eliminar la cita.',
+                        'error'
+                    );
+                });
+            }
+        })
+    }
+</script>

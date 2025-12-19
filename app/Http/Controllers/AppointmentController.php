@@ -224,9 +224,15 @@ class AppointmentController extends Controller
         \Illuminate\Support\Facades\Log::info("🔍 Booking Debug: Result isRequest = [" . ($isRequest ? 'TRUE' : 'FALSE') . "]");
 
         // If Admin is booking, always 'scheduled' (Confirmed)
+        // If Admin is booking, generally 'scheduled' (Confirmed)
+        // BUT if it is 'Otro servicio' (isRequest), it must remain as 'request' for price negotiation.
         if (auth()->check()) {
-            $status = 'scheduled';
-            $isRequest = false;
+            if ($isRequest) {
+                // Keep as request
+                $status = 'request';
+            } else {
+                $status = 'scheduled';
+            }
         } else {
             $status = $isRequest ? 'request' : 'scheduled';
         }
@@ -241,7 +247,9 @@ class AppointmentController extends Controller
         // Standard Hours: 09:00 - 19:00 (Implied)
         // Extra Time: Before 09:00 OR After 19:00 (>= 19:00)
         $hour = $scheduledAt->hour;
-        $isExtraTime = ($hour < 9 || $hour >= 19);
+        $minute = $scheduledAt->minute;
+        // Extra Time: Before 8:00 AM OR After 18:30 (6:30 PM)
+        $isExtraTime = ($hour < 8 || ($hour > 18) || ($hour === 18 && $minute >= 30));
         
         $finalPrice = $service->price; // Default
         if ($isExtraTime && $service->extra_price > 0) {
@@ -287,7 +295,19 @@ class AppointmentController extends Controller
                  $notificationServiceName .= " ({$request->custom_details})";
             }
 
+            // FORMAT PRICE FOR WHATSAPP
+            $formattedPrice = number_format($finalPrice, 0, ',', '.');
+            if ($isRequest) {
+                 $displayPrice = "Acordar con el barbero";
+            } else {
+                 $displayPrice = "$" . $formattedPrice;
+                 if ($isExtraTime && $service->extra_price > 0) {
+                     $displayPrice .= " (Horario Extra)";
+                 }
+            }
+
             // Timeout after 2 seconds to avoid 500 Error
+            \Illuminate\Support\Facades\Log::info("🤖 Bot Payload: display_price = [{$displayPrice}], is_request = [{$isRequest}]");
             \Illuminate\Support\Facades\Http::timeout(2)->post('http://localhost:3000/appointment', [
                 'phone' => $request->phone_prefix . $request->phone_number,
                 'name' => $request->client_name,
@@ -296,10 +316,34 @@ class AppointmentController extends Controller
                 'place' => 'Barbería JR',
                 'barber_name' => $barberName,
                 'service_name' => $notificationServiceName,
-                'is_request' => $isRequest // true = waiting, false = confirmed
+                'is_request' => $isRequest, // true = waiting, false = confirmed
+                'display_price' => $displayPrice
             ]);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('WA Notification Error: ' . $e->getMessage());
+        }
+
+
+        // NOTIFY BARBER IF IT IS A REQUEST (Otro Servicio)
+        if ($isRequest && $request->barber_id) {
+             try {
+                 $barber = Barber::find($request->barber_id);
+                 if ($barber && $barber->whatsapp_number) {
+                     $msg = "🔔 *Nueva Solicitud de Cita*\n\n" .
+                            "👤 *Cliente:* {$request->client_name}\n" .
+                            "📞 *Tel:* {$clientPhone}\n" .
+                            "💇‍♂️ *Servicio:* {$serviceName}\n" .
+                            "📅 *Fecha:* {$scheduledAt->format('Y-m-d H:i')}\n\n" .
+                            "⚠️ Ingresa a la plataforma para aceptar o rechazar.";
+                     
+                     \Illuminate\Support\Facades\Http::timeout(2)->post('http://localhost:3000/send-message', [
+                         'phone' => $barber->whatsapp_number,
+                         'message' => $msg
+                     ]);
+                 }
+             } catch (\Exception $e) {
+                 \Illuminate\Support\Facades\Log::error('Barber Notification Error: ' . $e->getMessage());
+             }
         }
 
         if ($request->wantsJson()) {
@@ -434,10 +478,43 @@ class AppointmentController extends Controller
             'status' => 'cancelled',
             'cancellation_reason' => $request->reason ?? 'Cancelada por administrador'
         ]);
+
+        // NOTIFY CLIENT VIA WHATSAPP
+        try {
+            $msg = "❌ *Cita Cancelada/Rechazada* ❌\n\n" .
+                   "Hola *{$appointment->client_name}*,\n" .
+                   "Tu cita para *{$appointment->service->name}* ha sido cancelada.\n\n" .
+                   "📝 *Motivo:* " . ($request->reason ?? 'No especificado') . "\n\n" .
+                   "Te invitamos a agendar nuevamente.";
+
+            \Illuminate\Support\Facades\Http::timeout(2)->post('http://localhost:3000/send-message', [
+                'phone' => $appointment->client_phone,
+                'message' => $msg
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Client Cancellation Notification Error: ' . $e->getMessage());
+        }
         
         return request()->wantsJson() 
             ? response()->json(['message' => 'Cancelada'])
             : redirect()->back()->with('success', 'Cita cancelada');
+    }
+
+    // Admin: Delete Appointment (Hard Delete)
+    public function destroy(Appointment $appointment)
+    {
+        // Permission Check
+        if (trim(auth()->user()->role) !== 'admin') {
+            return response()->json(['message' => 'No autorizado. Solo administradores pueden eliminar.'], 403);
+        }
+
+        try {
+            $appointment->delete(); // Hard delete
+            return response()->json(['message' => 'Cita eliminada definitivamente.']);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Delete Error: ' . $e->getMessage());
+            return response()->json(['message' => 'Error al eliminar la cita.'], 500);
+        }
     }
 
     // Admin: Confirm Request (Otro Servicio -> Scheduled)
@@ -542,6 +619,25 @@ class AppointmentController extends Controller
             'status' => 'cancelled',
             'cancellation_reason' => $request->reason
         ]);
+
+        // NOTIFY BARBER OF CANCELLATION
+        if ($appointment->barber && $appointment->barber->whatsapp_number) {
+             try {
+                 $msg = "❌ *Cita Cancelada por Cliente* ❌\n\n" .
+                        "👤 *Cliente:* {$appointment->client_name}\n" .
+                        "📞 *Tel:* {$appointment->client_phone}\n" .
+                        "💇‍♂️ *Servicio:* {$appointment->service->name}\n" .
+                        "📅 *Fecha:* {$appointment->scheduled_at->format('Y-m-d H:i')}\n\n" .
+                        "📝 *Motivo:* " . ($request->reason ?? 'No especificado');
+                 
+                 \Illuminate\Support\Facades\Http::timeout(2)->post('http://localhost:3000/send-message', [
+                     'phone' => $appointment->barber->whatsapp_number,
+                     'message' => $msg
+                 ]);
+             } catch (\Exception $e) {
+                 \Illuminate\Support\Facades\Log::error('Barber Cancel Notification Error: ' . $e->getMessage());
+             }
+        }
 
         return response()->json(['success' => true, 'message' => 'Cancelled']);
     }
