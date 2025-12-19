@@ -25,8 +25,8 @@ const client = new Client({
     authStrategy: new LocalAuth(), // 👈 no pide QR cada vez
     puppeteer: {
         headless: false,
-        // executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
+        timeout: 60000,
     },
 });
 

@@ -62,7 +62,7 @@
                         </button>
                     </div>
 
-                </form>
+                <!-- End Personal Info Section -->
 
                 <!-- SECCIÓN DE DISPONIBILIDAD (AJAX - Estilo Admin) -->
                 @if($user->barber)
