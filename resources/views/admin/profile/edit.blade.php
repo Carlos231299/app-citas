@@ -118,13 +118,18 @@
                             <!-- Lunch Break Switch -->
                             <div class="form-check form-switch d-flex align-items-center mt-4 border-top pt-3">
                                 <input class="form-check-input me-3 bg-success border-success" type="checkbox" role="switch" id="lunch_switch"
-                                    onchange="sendUpdate({ work_during_lunch: this.checked ? 1 : 0 }, this)" {{ $user->barber->work_during_lunch ? 'checked' : '' }} style="transform: scale(1.4);">
+                                    onchange="handleLunchChange(this)" {{ $user->barber->work_during_lunch ? 'checked' : '' }} style="transform: scale(1.4);">
                                 
                                 <div class="d-flex flex-column">
                                     <label class="form-check-label fw-bold text-success" for="lunch_switch">
                                         <i class="bi bi-cup-hot-fill"></i> TRABAJAR EN HORA DE ALMUERZO
                                     </label>
-                                    <small class="text-muted">Habilita citas de 12:00 PM a 1:00 PM (Mediodía).</small>
+                                    <small class="text-muted">Habilita citas de 12:00 PM a 1:00 PM.</small>
+                                    @if($user->barber->work_during_lunch && $user->barber->lunch_work_start)
+                                        <small class="text-dark fw-bold mt-1">
+                                            {{ \Carbon\Carbon::parse($user->barber->lunch_work_start)->format('d/m') }} - {{ \Carbon\Carbon::parse($user->barber->lunch_work_end)->format('d/m') }}
+                                        </small>
+                                    @endif
                                 </div>
                             </div>
 
@@ -198,6 +203,64 @@
                         } else {
                             // Turning OFF
                             sendUpdate({ special_mode: false }, switchEl);
+                        }
+                    }
+
+                    // Handle Lunch Work Change
+                    function handleLunchChange(switchEl) {
+                        const isTurningOn = switchEl.checked;
+                        
+                        if (isTurningOn) {
+                            switchEl.checked = false; // Revert visually
+                            
+                            const now = new Date();
+                            const today = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+
+                            Swal.fire({
+                                title: 'Trabajar en Almuerzo',
+                                html: `
+                                    <p class="small text-muted mb-3">Define los días que atenderás en hora de almuerzo (12pm - 1pm).</p>
+                                    <div class="text-start">
+                                        <label class="form-label small fw-bold">Desde</label>
+                                        <input type="date" id="swal_lunch_start" class="form-control mb-2" min="${today}">
+                                        <label class="form-label small fw-bold">Hasta</label>
+                                        <input type="date" id="swal_lunch_end" class="form-control" min="${today}">
+                                    </div>
+                                `,
+                                showCancelButton: true,
+                                confirmButtonText: 'Activar',
+                                didOpen: () => {
+                                    const startEl = document.getElementById('swal_lunch_start');
+                                    const endEl = document.getElementById('swal_lunch_end');
+                                    startEl.addEventListener('change', () => {
+                                         endEl.min = startEl.value;
+                                         if(endEl.value && endEl.value < startEl.value) endEl.value = startEl.value;
+                                    });
+                                },
+                                preConfirm: () => {
+                                    const start = document.getElementById('swal_lunch_start').value;
+                                    const end = document.getElementById('swal_lunch_end').value;
+                                    if(!start || !end) {
+                                         Swal.showValidationMessage('Ambas fechas son requeridas');
+                                         return false;
+                                    }
+                                    if(end < start) {
+                                         Swal.showValidationMessage('La fecha final no puede ser antes de la inicial');
+                                         return false;
+                                    }
+                                    return { start, end };
+                                }
+                            }).then((res) => {
+                                if (res.isConfirmed) {
+                                    sendUpdate({ 
+                                        work_during_lunch: true, 
+                                        lunch_work_start: res.value.start, 
+                                        lunch_work_end: res.value.end 
+                                    }, switchEl, true);
+                                }
+                            });
+                        } else {
+                            sendUpdate({ work_during_lunch: false }, switchEl);
                         }
                     }
 

@@ -19,6 +19,8 @@ class Barber extends Model
         'is_active' => 'boolean',
         'special_mode' => 'boolean',
         'work_during_lunch' => 'boolean',
+        'lunch_work_start' => 'date',
+        'lunch_work_end' => 'date',
     ];
 
     public function user()

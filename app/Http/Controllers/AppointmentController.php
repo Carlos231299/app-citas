@@ -153,6 +153,25 @@ class AppointmentController extends Controller
                          continue;
                      }
                 }
+                // 12:00 - 13:00 is Lunch Break
+                if ($hour === 12) {
+                    $isLunchBreak = true;
+                    
+                    // Check if barber works during lunch for THIS specific date
+                    if ($barber->work_during_lunch && $barber->lunch_work_start && $barber->lunch_work_end) {
+                        $checkDate = Carbon::parse($date);
+                        $startLunch = Carbon::parse($barber->lunch_work_start)->startOfDay();
+                        $endLunch = Carbon::parse($barber->lunch_work_end)->endOfDay();
+                        
+                        if ($checkDate->between($startLunch, $endLunch)) {
+                            $isLunchBreak = false; // It's NOT a break today
+                        }
+                    }
+                    
+                    if ($isLunchBreak) {
+                        continue;
+                    }
+                }
 
                 if (!in_array($timeString, $bookedSlots)) {
                     $slots[] = Carbon::createFromFormat('H:i', $timeString)->format('g:i A');

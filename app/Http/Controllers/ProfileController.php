@@ -121,6 +121,8 @@ class ProfileController extends Controller
             'extra_time_start' => 'nullable|date|required_if:special_mode,1|after_or_equal:yesterday', 
             'extra_time_end' => 'nullable|date|after_or_equal:extra_time_start|required_if:special_mode,1',
             'work_during_lunch' => 'sometimes|boolean',
+            'lunch_work_start' => 'nullable|date|required_if:work_during_lunch,1|after_or_equal:yesterday',
+            'lunch_work_end' => 'nullable|date|after_or_equal:lunch_work_start|required_if:work_during_lunch,1',
             'deactivation_reason' => 'nullable|string|max:255',
         ];
 
