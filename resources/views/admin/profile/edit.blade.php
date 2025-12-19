@@ -12,6 +12,16 @@
                     @csrf
                     @method('PUT')
 
+                    @if ($errors->any())
+                        <div class="alert alert-danger shadow-sm border-0 rounded-3 mb-4">
+                            <ul class="mb-0 small fw-bold">
+                                @foreach ($errors->all() as $error)
+                                    <li><i class="bi bi-exclamation-triangle-fill me-2"></i> {{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <h5 class="fw-bold text-primary mb-4">Información Personal</h5>
                     
                     <!-- Avatar Selection -->
@@ -305,17 +315,23 @@
 
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">CONTRASEÑA ACTUAL (Solo si desea cambiarla)</label>
-                        <input type="password" name="current_password" class="form-control">
+                        <input type="password" name="current_password" class="form-control @error('current_password') is-invalid @enderror">
+                        @error('current_password')
+                            <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
+                        @enderror
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-secondary small fw-bold">NUEVA CONTRASEÑA</label>
                             <div class="input-group">
-                                <input type="password" name="new_password" id="new_password" class="form-control" autocomplete="new-password">
+                                <input type="password" name="new_password" id="new_password" class="form-control @error('new_password') is-invalid @enderror" autocomplete="new-password">
                                 <button class="btn btn-outline-secondary border-start-0 text-secondary" type="button" id="toggleNewPassword">
                                     <i class="bi bi-eye"></i>
                                 </button>
+                                @error('new_password')
+                                    <span class="invalid-feedback d-block ps-2"><strong>{{ $message }}</strong></span>
+                                @enderror
                             </div>
                             <!-- Checklist -->
                             <div class="mt-2">
