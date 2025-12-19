@@ -84,7 +84,7 @@
                             <!-- Active Switch -->
                             <div class="form-check form-switch mb-4 d-flex align-items-center">
                                 <input class="form-check-input me-3" type="checkbox" role="switch" id="active_switch"
-                                    onchange="handleNewStatusChange(this)" {{ $user->barber->is_active ? 'checked' : '' }} style="transform: scale(1.4);">
+                                    onchange="handleStatusChange(this)" {{ $user->barber->is_active ? 'checked' : '' }} style="transform: scale(1.4);">
                                 
                                 <div class="d-flex flex-column">
                                     <label class="form-check-label fw-bold {{ $user->barber->is_active ? 'text-success' : 'text-muted' }}" 
@@ -95,16 +95,6 @@
                                         <small class="text-muted">Hasta: {{ $user->barber->unavailable_end->format('d M, h:i A') }}</small>
                                     @endif
                                 </div>
-                            </div>
-
-                            <!-- Deactivation Reason Input (Hidden when Active) -->
-                            <div id="deactivation-reason-container" class="mt-3 ps-5 {{ $user->barber->is_active ? 'd-none' : '' }}">
-                                <label class="form-label small fw-bold text-danger">MOTIVO DE INACTIVIDAD (Opcional)</label>
-                                <input type="text" class="form-control" id="deactivation_reason" 
-                                    value="{{ old('deactivation_reason', $user->barber->deactivation_reason) }}"
-                                    placeholder="Ej: Almuerzo, Vacaciones, Diligencia..."
-                                    onchange="sendUpdate({ deactivation_reason: this.value }, this)">
-                                <small class="text-muted">Esto se mostrará a los clientes cuando intenten agendar.</small>
                             </div>
 
                             <!-- Extra Time Switch -->
