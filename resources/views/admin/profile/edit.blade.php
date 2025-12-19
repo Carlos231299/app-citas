@@ -87,9 +87,9 @@
                                     onchange="handleStatusChange(this)" {{ $user->barber->is_active ? 'checked' : '' }} style="transform: scale(1.4);">
                                 
                                 <div class="d-flex flex-column">
-                                    <label class="form-check-label fw-bold {{ $user->barber->is_active ? 'text-success' : 'text-muted' }}" 
+                                    <label class="form-check-label fw-bold {{ $user->barber->is_active ? ($user->barber->unavailable_end ? 'text-warning' : 'text-success') : 'text-muted' }}" 
                                         id="active_label" for="active_switch">
-                                        {{ $user->barber->is_active ? 'DISPONIBLE PARA RESERVAS' : 'NO DISPONIBLE (INACTIVO)' }}
+                                        {{ $user->barber->is_active ? ($user->barber->unavailable_end ? 'NO DISPONIBLE (TEMPORAL)' : 'DISPONIBLE PARA RESERVAS') : 'NO DISPONIBLE (INACTIVO)' }}
                                     </label>
                                     @if($user->barber->unavailable_start && $user->barber->unavailable_end)
                                         <small class="text-muted">Hasta: {{ $user->barber->unavailable_end->format('d M, h:i A') }}</small>
@@ -106,7 +106,7 @@
                                     <label class="form-check-label fw-bold text-warning" for="extra_switch">
                                         <i class="bi bi-moon-stars-fill"></i> HABILITAR HORARIO EXTRA
                                     </label>
-                                    <small class="text-muted">Permite citas 4AM-8AM y 6PM-10PM</small>
+                                    <small class="text-muted">Permite citas 4AM-8AM y 10PM en adelante</small>
                                     @if($user->barber->special_mode && $user->barber->extra_time_start)
                                         <small class="text-dark fw-bold mt-1">
                                             {{ \Carbon\Carbon::parse($user->barber->extra_time_start)->format('d/m') }} - {{ \Carbon\Carbon::parse($user->barber->extra_time_end)->format('d/m') }}

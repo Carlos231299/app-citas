@@ -93,7 +93,7 @@ class AppointmentController extends Controller
         }
 
         $start = 4; // Allow checking from 4 AM
-        $end = 22;
+        $end = 24; // Allow checking until end of day
 
         $slots = [];
         // ... (query existing bookings) ...
@@ -111,17 +111,17 @@ class AppointmentController extends Controller
                 // Lunch Break Logic: Standard break is 12-13.
                 // If work_during_lunch is TRUE, we treat 12-13 as regular hours.
                 $isLunchHour = ($hour >= 12 && $hour < 13);
-                $isWorkHour = ($hour >= 8 && $hour < 18); // 8AM - 6PM total range
+                $isWorkHour = ($hour >= 8 && $hour < 22); // 8AM - 10PM (Extended Normal Hours)
 
                 if ($barber->work_during_lunch) {
-                    $isRegular = $isWorkHour; // 8-18 (Includes 12-13)
+                    $isRegular = $isWorkHour; // 8-22 (Includes 12-13)
                 } else {
-                    $isRegular = $isWorkHour && !$isLunchHour; // 8-18 excluding 12-13
+                    $isRegular = $isWorkHour && !$isLunchHour; // 8-22 excluding 12-13
                 }
                 
                 // Special Early & Late
-                $isEarlySpecial = ($hour >= 4 && $hour < 7) || ($hour == 7 && $minute == '00');
-                $isLateSpecial = ($hour > 18) || ($hour == 18 && $minute == '30'); // 18:30+
+                $isEarlySpecial = ($hour >= 4 && $hour < 8); // 4AM - 8AM
+                $isLateSpecial = ($hour >= 22); // 22:00+ (10PM onwards)
 
                 // Determine validity
                 $isValid = false;
