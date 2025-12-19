@@ -108,7 +108,16 @@ class AppointmentController extends Controller
         for ($hour = $start; $hour < $end; $hour++) {
             foreach (['00', '30'] as $minute) {
                 // Logic Filter
-                $isRegular = ($hour >= 8 && $hour < 12) || ($hour >= 13 && $hour < 18);
+                // Lunch Break Logic: Standard break is 12-13.
+                // If work_during_lunch is TRUE, we treat 12-13 as regular hours.
+                $isLunchHour = ($hour >= 12 && $hour < 13);
+                $isWorkHour = ($hour >= 8 && $hour < 18); // 8AM - 6PM total range
+
+                if ($barber->work_during_lunch) {
+                    $isRegular = $isWorkHour; // 8-18 (Includes 12-13)
+                } else {
+                    $isRegular = $isWorkHour && !$isLunchHour; // 8-18 excluding 12-13
+                }
                 
                 // Special Early & Late
                 $isEarlySpecial = ($hour >= 4 && $hour < 7) || ($hour == 7 && $minute == '00');

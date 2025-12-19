@@ -17,6 +17,9 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
+        // DEBUG: Check if request reaches here
+        // dd($request->all());
+
         $user = auth()->user();
         
         $validated = $request->validate([
@@ -69,6 +72,7 @@ class ProfileController extends Controller
                 'special_mode' => 'sometimes|boolean',
                 'extra_time_start' => 'nullable|date|required_if:special_mode,1|after_or_equal:yesterday', 
                 'extra_time_end' => 'nullable|date|after_or_equal:extra_time_start|required_if:special_mode,1',
+                'work_during_lunch' => 'sometimes|boolean',
             ]);
 
             // Logic from BarberController:
@@ -115,6 +119,7 @@ class ProfileController extends Controller
             'special_mode' => 'sometimes|boolean',
             'extra_time_start' => 'nullable|date|required_if:special_mode,1|after_or_equal:yesterday', 
             'extra_time_end' => 'nullable|date|after_or_equal:extra_time_start|required_if:special_mode,1',
+            'work_during_lunch' => 'sometimes|boolean',
         ];
 
         $validated = $request->validate($rules);

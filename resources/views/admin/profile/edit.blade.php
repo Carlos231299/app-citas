@@ -115,6 +115,19 @@
                                 </div>
                             </div>
 
+                            <!-- Lunch Break Switch -->
+                            <div class="form-check form-switch d-flex align-items-center mt-4 border-top pt-3">
+                                <input class="form-check-input me-3 bg-success border-success" type="checkbox" role="switch" id="lunch_switch"
+                                    onchange="sendUpdate({ work_during_lunch: this.checked ? 1 : 0 }, this)" {{ $user->barber->work_during_lunch ? 'checked' : '' }} style="transform: scale(1.4);">
+                                
+                                <div class="d-flex flex-column">
+                                    <label class="form-check-label fw-bold text-success" for="lunch_switch">
+                                        <i class="bi bi-cup-hot-fill"></i> TRABAJAR EN HORA DE ALMUERZO
+                                    </label>
+                                    <small class="text-muted">Habilita citas de 12:00 PM a 1:00 PM (Mediodía).</small>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
