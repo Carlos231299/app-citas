@@ -73,6 +73,7 @@ class ProfileController extends Controller
                 'extra_time_start' => 'nullable|date|required_if:special_mode,1|after_or_equal:yesterday', 
                 'extra_time_end' => 'nullable|date|after_or_equal:extra_time_start|required_if:special_mode,1',
                 'work_during_lunch' => 'sometimes|boolean',
+                'deactivation_reason' => 'nullable|string|max:255',
             ]);
 
             // Logic from BarberController:
@@ -120,6 +121,7 @@ class ProfileController extends Controller
             'extra_time_start' => 'nullable|date|required_if:special_mode,1|after_or_equal:yesterday', 
             'extra_time_end' => 'nullable|date|after_or_equal:extra_time_start|required_if:special_mode,1',
             'work_during_lunch' => 'sometimes|boolean',
+            'deactivation_reason' => 'nullable|string|max:255',
         ];
 
         $validated = $request->validate($rules);

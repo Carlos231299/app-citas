@@ -142,7 +142,8 @@
                                                 data-status="{{ $status }}" 
                                                 data-return="{{ $returnDate }}"
                                                 data-extra-start="{{ $barber->extra_time_start ? \Carbon\Carbon::parse($barber->extra_time_start)->format('d/m') : '' }}"
-                                                data-extra-end="{{ $barber->extra_time_end ? \Carbon\Carbon::parse($barber->extra_time_end)->format('d/m') : '' }}">
+                                                data-extra-end="{{ $barber->extra_time_end ? \Carbon\Carbon::parse($barber->extra_time_end)->format('d/m') : '' }}"
+                                                data-reason="{{ $barber->deactivation_reason }}">
                                             {{ $barber->name }}
                                         </option>
                                     @endforeach
@@ -300,16 +301,22 @@
         const selectedOption = select.options[select.selectedIndex];
         const status = selectedOption.getAttribute('data-status');
         const returnDate = selectedOption.getAttribute('data-return');
+        const reason = selectedOption.getAttribute('data-reason');
         
         const dateInput = document.getElementById('date');
         const container = document.getElementById('slots-container');
 
         // Check Status
         if (status === 'indefinite') {
+            let msg = 'Este barbero no está disponible por ahora.';
+            if(reason && reason !== 'null' && reason.trim() !== '') {
+                msg = `<b>Motivo:</b> ${reason}`;
+            }
+
             Swal.fire({
                 icon: 'warning',
                 title: 'No disponible',
-                text: 'Este barbero no está disponible indefinidamente. Por favor selecciona otro.',
+                html: msg,
                 confirmButtonColor: '#3085d6',
             });
             // Reset Selection

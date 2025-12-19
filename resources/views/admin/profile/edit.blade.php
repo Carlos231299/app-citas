@@ -84,7 +84,7 @@
                             <!-- Active Switch -->
                             <div class="form-check form-switch mb-4 d-flex align-items-center">
                                 <input class="form-check-input me-3" type="checkbox" role="switch" id="active_switch"
-                                    onchange="handleStatusChange(this)" {{ $user->barber->is_active ? 'checked' : '' }} style="transform: scale(1.4);">
+                                    onchange="handleNewStatusChange(this)" {{ $user->barber->is_active ? 'checked' : '' }} style="transform: scale(1.4);">
                                 
                                 <div class="d-flex flex-column">
                                     <label class="form-check-label fw-bold {{ $user->barber->is_active ? 'text-success' : 'text-muted' }}" 
@@ -95,6 +95,16 @@
                                         <small class="text-muted">Hasta: {{ $user->barber->unavailable_end->format('d M, h:i A') }}</small>
                                     @endif
                                 </div>
+                            </div>
+
+                            <!-- Deactivation Reason Input (Hidden when Active) -->
+                            <div id="deactivation-reason-container" class="mt-3 ps-5 {{ $user->barber->is_active ? 'd-none' : '' }}">
+                                <label class="form-label small fw-bold text-danger">MOTIVO DE INACTIVIDAD (Opcional)</label>
+                                <input type="text" class="form-control" id="deactivation_reason" 
+                                    value="{{ old('deactivation_reason', $user->barber->deactivation_reason) }}"
+                                    placeholder="Ej: Almuerzo, Vacaciones, Diligencia..."
+                                    onchange="sendUpdate({ deactivation_reason: this.value }, this)">
+                                <small class="text-muted">Esto se mostrará a los clientes cuando intenten agendar.</small>
                             </div>
 
                             <!-- Extra Time Switch -->
@@ -438,22 +448,47 @@
             if(li) updateItem(li, isValid);
         }
 
-        function updateItem(element, isValid, reset = false) {
-            const icon = element.querySelector('i');
-            if (reset) {
-                element.className = 'text-muted';
+        function updateItem(li, isValid, isGray = false) {
+            const icon = li.querySelector('i');
+            if(isGray) {
+                li.className = 'text-muted';
                 icon.className = 'bi bi-circle me-1';
-                return;
-            }
-
-            if (isValid) {
-                element.className = 'text-success text-decoration-line-through fw-bold';
+                icon.style.color = '';
+            } else if(isValid) {
+                li.className = 'text-success fw-bold';
                 icon.className = 'bi bi-check-circle-fill me-1';
+                icon.style.color = 'var(--bs-success)';
             } else {
-                element.className = 'text-muted';
+                li.className = 'text-muted'; // Keep gray if invalid, or red? User prefers subtle
                 icon.className = 'bi bi-circle me-1';
             }
         }
+
+        // New Handler for Status Switch
+        window.handleNewStatusChange = function(el) {
+            const isChecked = el.checked;
+            const label = document.getElementById('active_label');
+            const reasonContainer = document.getElementById('deactivation-reason-container');
+            
+            if(isChecked) {
+                label.innerText = 'DISPONIBLE PARA RESERVAS';
+                label.classList.remove('text-muted');
+                label.classList.add('text-success');
+                if(reasonContainer) reasonContainer.classList.add('d-none');
+            } else {
+                label.innerText = 'NO DISPONIBLE (INACTIVO)';
+                label.classList.remove('text-success');
+                label.classList.add('text-muted');
+                if(reasonContainer) reasonContainer.classList.remove('d-none');
+            }
+            
+            // Call the original generic updater if it exists, or axios directly
+            if(typeof sendUpdate === 'function') {
+                sendUpdate({ is_active: isChecked ? 1 : 0 }, el);
+            } else {
+                console.error('sendUpdate function not found');
+            }
+        };
     });
 </script>
             </div>
