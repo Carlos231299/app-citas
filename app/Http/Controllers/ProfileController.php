@@ -141,4 +141,12 @@ class ProfileController extends Controller
             'barber' => $barber->fresh()
         ]);
     }
+    public function markTourSeen()
+    {
+        $user = auth()->user();
+        $user->has_seen_tour = true;
+        $user->save();
+
+        return response()->json(['success' => true]);
+    }
 }

@@ -22,6 +22,11 @@
     <!-- Flatpickr for Mini Calendar -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/airbnb.css">
+    
+    <!-- Driver.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
+
     <style>
         /* Loading Bar */
         #nprogress { pointer-events: none; }
@@ -224,5 +229,63 @@
         }
     </script>
     
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const hasSeenTour = {{ auth()->user()->has_seen_tour ? 'true' : 'false' }};
+            const userRole = "{{ auth()->user()->role }}";
+
+            // Only run if not seen and on dashboard (optional constraint)
+            if (!hasSeenTour) {
+                const driverObj = window.driver.js.driver({
+                    showProgress: true,
+                    animate: true,
+                    doneBtnText: '¡Listo!',
+                    nextBtnText: 'Siguiente',
+                    prevBtnText: 'Atrás',
+                    allowClose: false,
+                    onDestroyed: () => {
+                        // Mark as seen on exit (complete or close)
+                        markTourAsSeen();
+                    }
+                });
+
+                const steps = [];
+
+                if (userRole === 'admin') {
+                    steps.push(
+                        { element: '.sidebar-header-text', popover: { title: 'Bienvenido', description: 'Este es tu nuevo panel de administración.' } },
+                        { element: '.bi-calendar-week-fill', popover: { title: 'Agenda', description: 'Aquí puedes ver y gestionar todas las citas.' } },
+                        { element: '.bi-scissors', popover: { title: 'Servicios', description: 'Agrega o edita los servicios y precios de la barbería.' } },
+                        { element: '#barberFilter', popover: { title: 'Filtro', description: 'Filtra el calendario para ver la agenda de un barbero específico.' } },
+                        { element: '.btn-primary.rounded-pill', popover: { title: 'Nueva Cita', description: 'Registra citas manualmente para clientes que llamen o lleguen al local.' } }
+                    );
+                } else {
+                    // Barber Flow
+                    steps.push(
+                        { element: '.sidebar-header-text', popover: { title: 'Bienvenido', description: 'Este es tu panel de barbero.' } },
+                        { element: '.bi-calendar-week-fill', popover: { title: 'Mi Agenda', description: 'Aquí verás tus citas asignadas.' } },
+                        { element: '#calendar', popover: { title: 'Calendario', description: 'Toca una cita para ver detalles o cambiar su estado (Completar/Cancelar).' } }
+                    );
+                }
+
+                driverObj.setSteps(steps);
+                
+                // Small delay to ensure UI renders
+                setTimeout(() => {
+                    driverObj.drive();
+                }, 1000);
+            }
+
+            function markTourAsSeen() {
+                axios.post("{{ route('profile.markTourSeen') }}")
+                    .then(response => {
+                        console.log('Tour marked as seen');
+                    })
+                    .catch(error => {
+                        console.error('Error marking tour:', error);
+                    });
+            }
+        });
+    </script>
 </body>
 </html>
