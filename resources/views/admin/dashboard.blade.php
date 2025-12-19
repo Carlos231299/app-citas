@@ -724,7 +724,7 @@
                         </div>
                     `;
                 }
-                }
+
 
                 Swal.fire({
                     title: event.title,
