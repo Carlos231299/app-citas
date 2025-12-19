@@ -334,55 +334,7 @@ app.post('/send-message', async (req, res) => {
     }
 });
 
-// --- NEW ENDPOINT: REMINDER ---
-app.post('/reminder', async (req, res) => {
-    const { phone, name, time, barber_name, service_name, date, place, display_price } = req.body;
-    console.log(`⏰ Sending Interactive Reminder to ${name} (${phone}) for ${time}`);
-
-    try {
-        if (!client) {
-            console.error('❌ Client not ready');
-            return res.status(503).json({ error: 'WhatsApp client not ready' });
-        }
-
-        const chatId = phone.includes("@c.us")
-            ? phone
-            : phone.replace(/\D/g, "") + "@c.us";
-
-        // 1. Restore/Set State for Interaction
-        appointments.set(chatId, {
-            name,
-            time,
-            barber_name,
-            service_name,
-            date: date || 'Hoy',
-            place: place || 'Barbería JR',
-            is_request: false
-        });
-
-        // 2. Enable Confirmation Mode
-        chatState.set(chatId, "WAITING_CONFIRMATION");
-
-        const priceLine = display_price ? `💰 *Precio:* ${display_price}\n` : '';
-
-        const reminderMsg = `⏳ *RECORDATORIO DE CITA* ⏳\n\n` +
-            `Hola *${name}*, te recordamos tu cita hoy:\n\n` +
-            `⏰ *Hora:* ${time}\n` +
-            `💈 *Barbero:* ${barber_name}\n` +
-            `💇‍♂️ *Servicio:* ${service_name}\n` +
-            priceLine + "\n"; +
-                `Estamos esperándote. Por favor confirma:\n` +
-                `1️⃣ Confirmar\n` +
-                `2️⃣ Cancelar`;
-
-        await client.sendMessage(chatId, reminderMsg);
-
-        res.json({ success: true });
-    } catch (error) {
-        console.error('❌ Error sending reminder:', error);
-        res.status(500).json({ error: 'Failed' });
-    }
-});
+// Reminder endpoint removed by request
 
 app.listen(3000, () => {
     console.log("🚀 Server running on http://localhost:3000");
