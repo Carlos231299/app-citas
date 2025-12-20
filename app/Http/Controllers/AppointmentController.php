@@ -13,7 +13,7 @@ class AppointmentController extends Controller
     // Public Booking Page Data
     public function publicIndex()
     {
-        $services = Service::all();
+        $services = Service::orderBy('sort_order')->get();
         // Fetch ALL barbers to show unavailability messages
         $barbers = Barber::all();
         return view('welcome', compact('services', 'barbers'));
@@ -272,12 +272,13 @@ class AppointmentController extends Controller
         }
 
         // PRICE CALCULATION (Extra Time Logic)
-        // Standard Hours: 09:00 - 19:00 (Implied)
-        // Extra Time: Before 09:00 OR After 19:00 (>= 19:00)
+        // Standard Hours: 08:00 - 22:00
+        // Extra Time: Before 08:00 OR After 22:00 (10 PM)
         $hour = $scheduledAt->hour;
         $minute = $scheduledAt->minute;
-        // Extra Time: Before 8:00 AM OR After 18:30 (6:30 PM)
-        $isExtraTime = ($hour < 8 || ($hour > 18) || ($hour === 18 && $minute >= 30));
+        
+        // Extra Time: Before 8:00 AM OR After 22:00 (10 PM)
+        $isExtraTime = ($hour < 8 || $hour >= 22);
         
         $finalPrice = $service->price; // Default
         if ($isExtraTime && $service->extra_price > 0) {
@@ -431,7 +432,7 @@ class AppointmentController extends Controller
             'pending_requests' => $pendingRequests->count() 
         ];
 
-        $services = Service::all();
+        $services = Service::orderBy('sort_order')->get();
         $barbers = Barber::all();
 
         return view('admin.dashboard', compact('stats', 'services', 'barbers', 'pendingRequests'));
@@ -612,6 +613,8 @@ class AppointmentController extends Controller
     // Bot: Cancel Appointment via API
     public function cancelFromBot(Request $request)
     {
+        \Illuminate\Support\Facades\Log::info("🤖 Bot Cancel Request Received. Phone: {$request->phone}, Reason: {$request->reason}");
+
         $request->validate([
             'phone' => 'required',
             'reason' => 'required'

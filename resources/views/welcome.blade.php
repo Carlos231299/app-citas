@@ -388,7 +388,7 @@
         if (meridiem === 'AM' && hours === 12) hours = 0;
         
         const isEarly = hours < 8; // 4, 5, 6, 7
-        const isLate = hours > 18 || (hours === 18 && minutes >= 30);
+        const isLate = hours >= 22; // 22:00 onwards
         
         const priceDisplay = document.getElementById('summary-price-display');
         

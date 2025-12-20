@@ -75,7 +75,7 @@ function normalize(text: string): string {
         .trim();
 }
 
-const CONFIRM = ["1", "si", "confirmar", "confirmo", "ok", "dale"];
+const CONFIRM = ["1", "si", "confirmar", "Confirmar", "confirmo", "ok", "dale"];
 const CANCEL = ["2", "no", "cancelar", "cancelo"];
 
 /* =========================
