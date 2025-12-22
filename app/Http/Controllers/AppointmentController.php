@@ -536,6 +536,39 @@ class AppointmentController extends Controller
         : redirect()->back()->with('success', 'Cita completada');
     }
 
+    // [NEW] Re-open Finished Appointment (Rollback)
+    public function reopen(Request $request, Appointment $appointment)
+    {
+        // Permission Check (Same as complete)
+        if (trim(auth()->user()->role) !== 'admin') {
+            if (auth()->user()->barber?->id != $appointment->barber_id) {
+                 return request()->wantsJson() 
+                     ? response()->json(['message' => 'No autorizado.'], 403)
+                     : abort(403, 'No tienes permiso para reabrir esta cita.');
+            }
+        }
+
+        // 1. Restore Stock
+        $appointment->load('products');
+        foreach ($appointment->products as $existingProduct) {
+            $existingProduct->stock += $existingProduct->pivot->quantity;
+            $existingProduct->save();
+        }
+
+        // 2. Detach Products
+        $appointment->products()->detach();
+
+        // 3. Reset Status
+        $appointment->update([
+            'status' => 'scheduled',
+            'confirmed_price' => null // Clear final price
+        ]);
+
+        return request()->wantsJson() 
+            ? response()->json(['message' => 'Reabierta'])
+            : redirect()->back()->with('success', 'Cita reabierta y stock restaurado.');
+    }
+
     // Admin: Cancel
     public function cancel(Request $request, Appointment $appointment)
     {
