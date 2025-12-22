@@ -28,4 +28,9 @@ class Sale extends Model
     {
         return $this->belongsTo(User::class); // Who processed the sale
     }
+
+    public function appointment()
+    {
+        return $this->belongsTo(Appointment::class);
+    }
 }

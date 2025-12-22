@@ -571,27 +571,29 @@ class AppointmentController extends Controller
                 $serviceLabel .= " ({$appointment->custom_details})";
             }
             
-            // Logic: The user wants "Base: $15,000" and "Total: $40,000" (where 25k is products)
-            // So the 'price' for the service item in the invoice should be the service part.
-            $servicePartPrice = $request->confirmed_price ?? $appointment->price;
+            // Correct Logic: The frontend sends the GRAND TOTAL in 'confirmed_price'.
+            // To get the service part, we subtract products total from grand total.
+            $grandTotal = $request->confirmed_price ?? ($appointment->price + $productsTotal);
+            $servicePartPrice = $grandTotal - $productsTotal;
             
+            // Ensure service price isn't negative (edge case)
+            if ($servicePartPrice < 0) $servicePartPrice = 0;
+
             $allInvoiceItems = array_merge([
                 [
                     'product_id' => null, // Indicated it's a service
-                    'product_name' => $serviceLabel . " (Servicio)",
+                    'product_name' => $serviceLabel,
                     'price' => $servicePartPrice,
                     'quantity' => 1,
                     'subtotal' => $servicePartPrice
                 ]
             ], $itemsData);
 
-            $grandTotal = $servicePartPrice + $productsTotal;
-
             $sale = \App\Models\Sale::create([
                 'user_id' => auth()->id(),
                 'client_name' => $appointment->client_name,
                 'appointment_id' => $appointment->id,
-                'total' => $grandTotal, // Grand total (Service Part + Products)
+                'total' => $grandTotal, 
                 'payment_method' => $request->payment_method ?? 'efectivo',
                 'items' => $allInvoiceItems,
                 'completed_at' => now()

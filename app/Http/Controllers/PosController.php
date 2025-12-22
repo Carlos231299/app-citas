@@ -112,7 +112,7 @@ class PosController extends Controller
 
     public function exportSinglePdf(\App\Models\Sale $sale)
     {
-        $sale->load('user');
+        $sale->load(['user', 'appointment.barber', 'appointment.service']);
         
         // Items are already casted to array in model
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.pos.sale_receipt', compact('sale'));
