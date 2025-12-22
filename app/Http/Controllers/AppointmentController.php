@@ -558,9 +558,13 @@ class AppointmentController extends Controller
 
             // [NEW] Only create a Sale Record if products were actually sold
             if ($productsTotal > 0) {
+                // Ensure no duplicate sales for this appointment if re-completed
+                \App\Models\Sale::where('appointment_id', $appointment->id)->delete();
+
                 \App\Models\Sale::create([
                     'user_id' => auth()->id(),
                     'client_name' => $appointment->client_name, // Track who was sold to
+                    'appointment_id' => $appointment->id, // [LINK]
                     'total' => $productsTotal, // Total reflects ONLY products now
                     'payment_method' => $request->payment_method ?? 'efectivo',
                     'items' => $itemsData,
@@ -605,7 +609,10 @@ class AppointmentController extends Controller
         // 2. Detach Products
         $appointment->products()->detach();
 
-        // 3. Reset Status
+        // 3. Delete associated Sale if exists
+        \App\Models\Sale::where('appointment_id', $appointment->id)->delete();
+
+        // 4. Reset Status
         $appointment->update([
             'status' => 'scheduled',
             'confirmed_price' => null,
@@ -639,7 +646,10 @@ class AppointmentController extends Controller
         // 2. Detach everything
         $appointment->products()->detach();
         
-        // 3. Delete
+        // 3. Delete associated Sale if exists
+        \App\Models\Sale::where('appointment_id', $appointment->id)->delete();
+
+        // 4. Delete
         $appointment->delete();
 
         return request()->wantsJson() 
