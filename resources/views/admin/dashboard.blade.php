@@ -1050,6 +1050,18 @@
             title: 'Editar Cita',
             html: `
                 <div class="text-start">
+                    <!-- Client Info -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold small text-muted">NOMBRE CLIENTE</label>
+                            <input type="text" id="edit-client-name" class="form-control" value="${props.client_name || ''}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold small text-muted">WhatsApp</label>
+                            <input type="text" id="edit-client-phone" class="form-control" value="${props.client_phone || ''}" placeholder="Ej: 3001234567">
+                        </div>
+                    </div>
+
                     <!-- Service -->
                     <label class="form-label fw-bold small text-muted">SERVICIO</label>
                     <select id="edit-service" class="form-select mb-3">
@@ -1224,8 +1236,15 @@
                 const service_id = document.getElementById('edit-service').value;
                 const barber_id = document.getElementById('edit-barber').value;
                 const custom_details = document.getElementById('edit-custom-details').value;
+                const client_name = document.getElementById('edit-client-name').value;
+                const client_phone = document.getElementById('edit-client-phone').value;
 
                 // Validation
+                if(!client_name.trim()) {
+                    Swal.showValidationMessage('El nombre del cliente es obligatorio.');
+                    return false;
+                }
+                
                 // 1. Check Date (No past dates)
                 const selectedDate = new Date(date + 'T00:00:00'); // Force local midnight
                 const today = new Date();
@@ -1249,7 +1268,7 @@
                 }
 
                 return {
-                    date, time, service_id, barber_id, custom_details
+                    date, time, service_id, barber_id, custom_details, client_name, client_phone
                 };
             }
         }).then((result) => {

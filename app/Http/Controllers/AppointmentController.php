@@ -466,7 +466,9 @@ class AppointmentController extends Controller
             'date' => 'required|date',
             'time' => 'required',
             'barber_id' => 'required|exists:barbers,id',
-            'service_id' => 'required|exists:services,id'
+            'service_id' => 'required|exists:services,id',
+            'client_name' => 'required|string|max:255',
+            'client_phone' => 'nullable|string'
         ]);
 
         $scheduledAt = Carbon::parse($validated['date'] . ' ' . $validated['time']);
@@ -474,7 +476,10 @@ class AppointmentController extends Controller
         $appointment->update([
             'scheduled_at' => $scheduledAt,
             'barber_id' => $validated['barber_id'],
-            'service_id' => $validated['service_id']
+            'service_id' => $validated['service_id'],
+            'client_name' => $validated['client_name'],
+            'client_phone' => $validated['client_phone'],
+            'custom_details' => $request->custom_details
         ]);
 
         return response()->json(['message' => 'Cita actualizada correctamente']);
@@ -944,6 +949,7 @@ class AppointmentController extends Controller
                         'service_id' => $appointment->service->id,
                         'service' => $appointment->service->name,
                         'status' => $appointment->status,
+                        'client_name' => $appointment->client_name,
                         'client_phone' => $appointment->client_phone,
                         'custom_details' => $appointment->custom_details ?? 'Sin detalles adicionales',
                         'price' => $appointment->confirmed_price ?? $appointment->price,
