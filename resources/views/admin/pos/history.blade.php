@@ -63,7 +63,7 @@
                         <th>Vendedor</th>
                         <th>Método</th>
                         <th>Total</th>
-                        <th>Detalles</th>
+                        <th class="text-end pe-4">Detalles</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -89,10 +89,15 @@
                         <td class="fw-bold text-success">
                             ${{ number_format($sale->total, 0) }}
                         </td>
-                        <td>
-                            <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="collapse" data-bs-target="#saleDetails{{ $sale->id }}">
-                                <i class="bi bi-chevron-down"></i> Ver Items
-                            </button>
+                        <td class="text-end pe-4">
+                            <div class="d-flex gap-1 justify-content-end">
+                                <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="collapse" data-bs-target="#saleDetails{{ $sale->id }}">
+                                    <i class="bi bi-chevron-down"></i> Ver Items
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger border" type="button" onclick="deleteSale({{ $sale->id }})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     <!-- Items Row -->
@@ -137,4 +142,31 @@
     </div>
     @endif
 </div>
+@push('scripts')
+<script>
+    function deleteSale(id) {
+        Swal.fire({
+            title: '¿Eliminar Venta?',
+            text: 'Esta acción no se puede deshacer y ajustará el historial.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#EF4444',
+            cancelButtonColor: '#64748B',
+            confirmButtonText: 'Sí, Eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.delete(`/pos/${id}`)
+                    .then(response => {
+                        Swal.fire('Eliminado', response.data.message, 'success')
+                            .then(() => location.reload());
+                    })
+                    .catch(error => {
+                        Swal.fire('Error', 'No se pudo eliminar el registro.', 'error');
+                    });
+            }
+        });
+    }
+</script>
+@endpush
 @endsection

@@ -110,6 +110,12 @@ class PosController extends Controller
         return $pdf->download('reporte-ventas-' . now()->format('Y-m-d') . '.pdf');
     }
 
+    public function destroy(Sale $sale)
+    {
+        $sale->delete();
+        return response()->json(['success' => true, 'message' => 'Venta eliminada correctamente.']);
+    }
+
     private function applyFilters($query, $request)
     {
         if ($request->filled('date_from')) {
