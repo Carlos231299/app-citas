@@ -1352,8 +1352,21 @@
         let serviceName = "Servicio Cita #" + id;
         if(window.calendarInstance) {
             const event = window.calendarInstance.getEventById(id);
-            if(event && event.extendedProps.service) {
-                serviceName = event.extendedProps.service;
+            if(event) {
+                if(event.extendedProps.service) {
+                    serviceName = event.extendedProps.service;
+                }
+                // [NEW] Load Existing Products if any
+                if(event.extendedProps.products && Array.isArray(event.extendedProps.products)) {
+                    event.extendedProps.products.forEach(p => {
+                        posCart.push({
+                            id: p.id.toString(), // Ensure string for matching
+                            name: p.name,
+                            price: parseFloat(p.price),
+                            qty: parseInt(p.qty)
+                        });
+                    });
+                }
             }
         }
         document.getElementById('pos_service_name').value = serviceName;
