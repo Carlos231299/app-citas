@@ -892,6 +892,9 @@
                             ${props.status === 'completed' ? 
                                 `<div class="mt-3 p-2 bg-success bg-opacity-10 rounded border border-success">
                                     <strong class="text-success"><i class="bi bi-check-circle-fill me-1"></i> Completada con éxito</strong>
+                                    <button onclick="completeAppointment(${event.id}, ${props.price})" class="btn btn-sm btn-outline-success w-100 mt-2">
+                                        <i class="bi bi-pencil-square me-1"></i> Editar Venta / Agregar Productos
+                                    </button>
                                 </div>` : ''
                             }
                         </div>
