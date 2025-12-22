@@ -38,7 +38,7 @@
             width: 260px;
             background: #fff;
             box-shadow: 2px 0 10px rgba(0,0,0,0.05); /* Lighter shadow */
-            z-index: 1045;
+            z-index: 1060; /* Higher than toggle (1050) */
             transform: translateX(-100%); /* Hidden by default */
             transition: transform 0.3s ease;
             overflow-y: auto;
@@ -77,15 +77,15 @@
         /* Adjust main content to not have margin left since sidebar is hidden */
         .main-content {
             margin-left: 0 !important; /* Override explicit margin */
-            padding-left: 15px; /* Add some padding if needed */
+            padding-left: 80px; /* Always space for the floating button */
             padding-right: 15px;
+            padding-top: 15px; /* Ensure top spacing match */
         }
         
         /* Mobile Specific adjustments if needed */
-        @media (min-width: 768px) {
-            .main-content {
-                padding-left: 80px; /* Space for the floating button visualization */
-            }
+        @media (max-width: 768px) {
+            /* On very small screens, maybe reduce padding but ensure header clears? */
+            /* Actually, 80px is fine, keeps it consistent. */
         }
         
         /* Sidebar Hotspot (Left Edge) */
