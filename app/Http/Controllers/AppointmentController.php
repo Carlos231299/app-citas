@@ -643,22 +643,7 @@ class AppointmentController extends Controller
             : redirect()->back()->with('success', 'Cita cancelada');
     }
 
-    // Admin: Delete Appointment (Hard Delete)
-    public function destroy(Appointment $appointment)
-    {
-        // Permission Check
-        if (trim(auth()->user()->role) !== 'admin') {
-            return response()->json(['message' => 'No autorizado. Solo administradores pueden eliminar.'], 403);
-        }
 
-        try {
-            $appointment->delete(); // Hard delete
-            return response()->json(['message' => 'Cita eliminada definitivamente.']);
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Delete Error: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al eliminar la cita.'], 500);
-        }
-    }
 
     // Admin: Confirm Request (Otro Servicio -> Scheduled)
     public function confirm(Request $request, Appointment $appointment)
