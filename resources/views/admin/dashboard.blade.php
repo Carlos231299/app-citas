@@ -303,46 +303,6 @@
     @endif
 
 
-                        <div class="bg-info bg-opacity-10 p-3 rounded-4">
-                            <i class="bi bi-people text-info fs-3"></i>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="mb-2 fw-bold text-dark">{{ $barbers->where('is_active', true)->count() }} <span class="text-muted fs-6 fw-normal">/ {{ $barbers->count() }}</span></h3>
-
-
-                    <div class="d-flex gap-1 overflow-visible">
-                         @foreach($barbers->take(5) as $barber)
-                            @php
-                                $isActive = $barber->is_active;
-                                $isSpecial = $barber->special_mode ?? false;
-                                $rawAvatar = $barber->user->avatar;
-                                $isPath = $rawAvatar && (str_contains($rawAvatar, '/') || str_contains($rawAvatar, '.'));
-                                $initials = substr($barber->name, 0, 1);
-                            @endphp
-
-                            <div class="position-relative" data-bs-toggle="tooltip" title="{{ $barber->name }} {{ $isActive ? '(Activo)' : ($isSpecial ? '(Horario Extra)' : '(Inactivo)') }}">
-                                @if($isPath)
-                                    <img src="{{ asset('storage/' . $rawAvatar) }}" class="rounded-circle border border-2 {{ $isActive ? 'border-success' : 'border-secondary' }}" style="width: 35px; height: 35px; object-fit: cover;">
-                                @elseif($rawAvatar)
-                                    <div class="rounded-circle border border-2 {{ $isActive ? 'border-success' : 'border-secondary' }} bg-light d-flex align-items-center justify-content-center fw-bold text-dark fs-5" style="width: 35px; height: 35px;">
-                                        {{ $rawAvatar }}
-                                    </div>
-                                @else
-                                    <div class="rounded-circle border border-2 {{ $isActive ? 'border-success' : 'border-secondary' }} bg-light d-flex align-items-center justify-content-center fw-bold text-secondary" style="width: 35px; height: 35px;">
-                                        {{ $initials }}
-                                    </div>
-                                @endif
-                                <span class="position-absolute bottom-0 end-0 p-1 bg-{{ $isActive ? 'success' : 'secondary' }} border border-light rounded-circle" style="transform: scale(0.6);"></span>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endif
-    </div>
 
     <!-- Calendar Container -->
     <div class="card border-0 shadow-sm flex-grow-1 overflow-auto" style="min-height: 600px;">
