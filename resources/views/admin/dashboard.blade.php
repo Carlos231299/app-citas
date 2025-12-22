@@ -804,7 +804,6 @@
         }
 
         // Check for Notification Auto-Open
-        const openApptId = "{{ request('open_appointment') }}";
         if(openApptId) {
             const evt = calendarInstance.getEventById(openApptId);
             if(evt) {
@@ -812,7 +811,6 @@
                 setTimeout(() => showEventDetails(evt), 500); // Small delay to ensure render
             }
         }
-    }
     }
     
     // Global Event Details Viewer
@@ -934,7 +932,6 @@
             }
         });
     };
-    }
 
     // Inject Server Data for JS
     const serverData = {
