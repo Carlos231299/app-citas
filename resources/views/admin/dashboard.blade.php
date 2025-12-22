@@ -295,8 +295,8 @@
                                             <!-- Populated via JS -->
                                         </select>
                                         <input type="number" id="pos_product_qty" class="form-control" value="1" min="1" style="max-width: 80px;">
-                                        <button type="button" class="btn btn-primary" onclick="addPosProduct()">
-                                            <i class="bi bi-plus-lg"></i>
+                                        <button type="button" class="btn btn-primary fw-bold px-3" onclick="addPosProduct()">
+                                            <i class="bi bi-cart-plus-fill me-1"></i> Agregar
                                         </button>
                                     </div>
 
