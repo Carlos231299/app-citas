@@ -490,18 +490,30 @@ class AppointmentController extends Controller
         }
 
         $data = ['status' => 'completed'];
-        
-        if ($request->has('confirmed_price')) {
-            $data['confirmed_price'] = $request->confirmed_price;
-        }
+    
+    if ($request->has('confirmed_price')) {
+        $data['confirmed_price'] = $request->confirmed_price;
+    }
 
-        $appointment->update($data);
+    $appointment->update($data);
 
-        // Handle Products (POS)
-        if ($request->has('products') && is_array($request->products)) {
-            foreach ($request->products as $item) {
-                $product = \App\Models\Product::find($item['product_id']);
-                if ($product && $product->stock >= $item['quantity']) {
+    // Handle Products (POS) - Full Sync with Stock Restoration
+    // 1. Restore stock for previously attached products
+    foreach ($appointment->products as $existingProduct) {
+        $existingProduct->stock += $existingProduct->pivot->quantity;
+        $existingProduct->save();
+    }
+    
+    // 2. Clear current attachments
+    $appointment->products()->detach();
+
+    // 3. Process new list
+    if ($request->has('products') && is_array($request->products)) {
+        foreach ($request->products as $item) {
+            $product = \App\Models\Product::find($item['product_id']);
+            if ($product) {
+                 // Check stock (simplified race condition check)
+                 if ($product->stock >= $item['quantity']) {
                     // Attach to pivot
                     $appointment->products()->attach($product->id, [
                         'quantity' => $item['quantity'],
@@ -510,13 +522,14 @@ class AppointmentController extends Controller
                     // Deduct stock
                     $product->stock -= $item['quantity'];
                     $product->save();
-                }
+                 }
             }
         }
+    }
 
-        return request()->wantsJson() 
-            ? response()->json(['message' => 'Completada'])
-            : redirect()->back()->with('success', 'Cita completada');
+    return request()->wantsJson() 
+        ? response()->json(['message' => 'Completada'])
+        : redirect()->back()->with('success', 'Cita completada');
     }
 
     // Admin: Cancel
