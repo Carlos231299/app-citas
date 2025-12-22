@@ -87,6 +87,17 @@
                 padding-left: 80px; /* Space for the floating button visualization */
             }
         }
+        
+        /* Sidebar Hotspot (Left Edge) */
+        .sidebar-hotspot {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20px; /* Width of the sensitive area */
+            height: 100vh;
+            z-index: 1048; /* Below button/sidebar, above content */
+            background: transparent; /* Invisible */
+        }
     </style>
 </head>
 <body class="admin-body">
@@ -96,6 +107,9 @@
     <button class="floating-toggle" id="floatingSidebarToggle">
         <i class="bi bi-list fs-4"></i>
     </button>
+    
+    <!-- Sidebar Hotspot -->
+    <div class="sidebar-hotspot" id="sidebarHotspot"></div>
     
     <!-- Sidebar (Default Hidden/Off-canvas) -->
     <div class="sidebar" id="sidebar">
@@ -182,7 +196,6 @@
     <div class="main-content">
         <!-- Topbar -->
         <header class="mb-4 d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-3">
             <div class="d-flex align-items-center gap-3">
                 <!-- Mobile Toggle Removed (Replaced by Floating) - Kept placeholder for spacing if needed or just remove -->
 
@@ -315,8 +328,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             const sidebar = document.getElementById('sidebar');
             const floatingToggle = document.getElementById('floatingSidebarToggle');
-            const mobileToggle = document.getElementById('mobileSidebarToggle'); // Might be removed in future if floating replaces it fully?
-                                                                                // keeping simply to avoid JS errors if markup remains
+            const hotspot = document.getElementById('sidebarHotspot');
+            const mobileToggle = document.getElementById('mobileSidebarToggle'); 
             
             let closeTimeout;
 
@@ -327,10 +340,10 @@
             }
 
             function closeSidebar() {
-                // Delay closing to allow moving mouse from button to sidebar
+                // Delay closing 
                 closeTimeout = setTimeout(() => {
                     sidebar.classList.remove('open');
-                }, 300); // 300ms grace period
+                }, 300); 
             }
             
             function toggleSidebarCompat(e) {
@@ -345,39 +358,28 @@
 
             // --- Interactions ---
 
-            if (floatingToggle && sidebar) {
-                // Desktop Hover Interaction (Screen > 768px)
-                // Use matchMedia for robust check? Or just runtime check in event?
+            if (sidebar) {
+                // Desktop Hover Interactions
+                const triggers = [floatingToggle, hotspot, sidebar].filter(el => el);
                 
-                // Mouse Enter Button -> Open
-                floatingToggle.addEventListener('mouseenter', () => {
-                   if (window.innerWidth > 768) openSidebar();
-                });
-                
-                // Mouse Leave Button -> Try Close
-                floatingToggle.addEventListener('mouseleave', () => {
-                   if (window.innerWidth > 768) closeSidebar();
-                });
-
-                // Mouse Enter Sidebar -> Keep Open
-                sidebar.addEventListener('mouseenter', () => {
-                   if (window.innerWidth > 768 && closeTimeout) clearTimeout(closeTimeout);
-                });
-
-                // Mouse Leave Sidebar -> Close
-                sidebar.addEventListener('mouseleave', () => {
-                   if (window.innerWidth > 768) closeSidebar();
+                triggers.forEach(trigger => {
+                    trigger.addEventListener('mouseenter', () => {
+                        if (window.innerWidth > 768) openSidebar();
+                    });
+                    
+                    trigger.addEventListener('mouseleave', () => {
+                        if (window.innerWidth > 768) closeSidebar();
+                    });
                 });
 
                 // Mobile / Click Interaction
-                floatingToggle.addEventListener('click', (e) => {
-                    // Always toggle on click, mainly for mobile, or if user prefers clicking on desktop
-                    // But if hover is active, click might be redundant on desktop.
-                    // Let's allow click to toggle for mobile mainly.
-                    if (window.innerWidth <= 768) {
-                        toggleSidebarCompat(e);
-                    }
-                });
+                if (floatingToggle) {
+                    floatingToggle.addEventListener('click', (e) => {
+                        if (window.innerWidth <= 768) {
+                            toggleSidebarCompat(e);
+                        }
+                    });
+                }
             }
 
             // Mobile internal toggle support if still present
