@@ -6,14 +6,16 @@
 @section('content')
 <div class="d-flex flex-column h-100">
     <!-- Stats Row Toggle -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="d-flex align-items-center gap-2">
+    <div class="position-relative mb-3">
+        <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
             <h5 class="fw-bold text-dark mb-0">Resumen del Día</h5>
             <span class="badge bg-primary bg-opacity-10 text-primary small">{{ now()->format('d M') }}</span>
         </div>
-        <button class="btn btn-sm btn-white border shadow-sm rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;" data-bs-toggle="collapse" data-bs-target="#statsCollapse" aria-expanded="true" aria-controls="statsCollapse" title="Mostrar/Ocultar Resumen">
-            <i class="bi bi-chevron-up transition-transform" id="statsCollapseIcon"></i>
-        </button>
+        <div class="position-absolute top-50 end-0 translate-middle-y">
+            <button class="btn btn-sm btn-white border shadow-sm rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;" data-bs-toggle="collapse" data-bs-target="#statsCollapse" aria-expanded="true" aria-controls="statsCollapse" title="Mostrar/Ocultar Resumen">
+                <i class="bi bi-chevron-up transition-transform" id="statsCollapseIcon"></i>
+            </button>
+        </div>
     </div>
 
     <!-- Collapsible Stats Row -->
