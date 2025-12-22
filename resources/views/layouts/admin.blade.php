@@ -25,29 +25,92 @@
     
     <style>
         /* Loading Bar */
+        /* Loading Bar */
         #nprogress { pointer-events: none; }
         #nprogress .bar { background: var(--gold-primary); position: fixed; z-index: 2000; top: 0; left: 0; width: 100%; height: 3px; }
+
+        /* Sidebar Redesign - Hidden by default */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            background: #fff;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05); /* Lighter shadow */
+            z-index: 1045;
+            transform: translateX(-100%); /* Hidden by default */
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+        
+        .sidebar.open {
+            transform: translateX(0); /* Visible */
+        }
+        
+        /* Floating Toggle */
+        .floating-toggle {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1050;
+            width: 45px; /* Slightly larger touch target */
+            height: 45px;
+            border-radius: 50%;
+            background: white;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .floating-toggle:hover {
+            background: #f9fafb;
+            transform: scale(1.05);
+            color: var(--bs-primary);
+        }
+
+        /* Adjust main content to not have margin left since sidebar is hidden */
+        .main-content {
+            margin-left: 0 !important; /* Override explicit margin */
+            padding-left: 15px; /* Add some padding if needed */
+            padding-right: 15px;
+        }
+        
+        /* Mobile Specific adjustments if needed */
+        @media (min-width: 768px) {
+            .main-content {
+                padding-left: 80px; /* Space for the floating button visualization */
+            }
+        }
     </style>
 </head>
 <body class="admin-body">
     <div id="loading-bar" style="display:none; position:fixed; top:0; left:0; height:3px; background:#D4AF37; z-index:9999; transition:width 0.2s;"></div>
     
-    <!-- Sidebar (Default Collapsed) -->
-    <div class="sidebar collapsed" id="sidebar">
+    <!-- Floating Sidebar Toggle -->
+    <button class="floating-toggle" id="floatingSidebarToggle">
+        <i class="bi bi-list fs-4"></i>
+    </button>
+    
+    <!-- Sidebar (Default Hidden/Off-canvas) -->
+    <div class="sidebar" id="sidebar">
         <div class="px-3 py-3 mb-4 border-bottom d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-2 overflow-hidden">
                 {{-- Logo always visible --}}
                 <img src="{{ asset('images/logo.png') }}" alt="Logo" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
                 
-                {{-- Text hidden when collapsed (using sidebar-text class) --}}
+                {{-- Text always visible in open sidebar --}}
                 <div class="sidebar-text d-flex flex-column">
                     <h4 class="fw-bold text-primary mb-0 text-nowrap" style="font-size: 1.1rem;">Barbería JR</h4>
                     <small class="text-secondary text-nowrap" style="font-size: 0.75rem;">Panel de Gestión</small>
                 </div>
             </div>
-            <button class="btn bg-white border shadow-sm text-primary rounded-circle" id="sidebarToggle" style="width: 40px; height: 40px; align-items: center; justify-content: center;">
-                <i class="bi bi-list fs-5"></i>
-            </button>
+            <!-- REMOVED Internal Toggle Button as per request -->
         </div>
 
         <nav class="nav flex-column">
@@ -68,7 +131,7 @@
             
             <!-- POS & Inventory Group -->
             <!-- POS & Inventory Group -->
-            <a class="nav-link sidebar-link" data-bs-toggle="collapse" href="#posSubmenu" role="button" aria-expanded="{{ request()->routeIs('products.*') || request()->routeIs('pos.*') ? 'true' : 'false' }}">
+            <a class="nav-link sidebar-link" data-bs-toggle="collapse" href="#posSubmenu" role="button" aria-expanded="false">
                 <i class="bi bi-shop"></i> 
                 <span class="sidebar-text ms-2 w-100">
                     <div class="d-flex justify-content-between align-items-center">
@@ -77,7 +140,8 @@
                     </div>
                 </span>
             </a>
-            <div class="collapse {{ request()->routeIs('products.*') || request()->routeIs('pos.*') ? 'show' : '' }}" id="posSubmenu">
+            <!-- Removed 'show' class logic to keep it collapsed by default -->
+            <div class="collapse" id="posSubmenu">
                 <nav class="nav flex-column ps-3 border-start border-2 border-light ms-3 mb-2">
                     <a class="nav-link text-secondary py-1 {{ request()->routeIs('pos.*') ? 'fw-bold text-primary' : '' }}" href="{{ route('pos.index') }}">
                         <span class="sidebar-text">Venta de Productos</span>
@@ -119,9 +183,9 @@
         <!-- Topbar -->
         <header class="mb-4 d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-white border shadow-sm text-primary rounded-circle" id="mobileSidebarToggle" style="width: 40px; height: 40px; align-items: center; justify-content: center;">
-                    <i class="bi bi-list fs-5"></i>
-                </button>
+            <div class="d-flex align-items-center gap-3">
+                <!-- Mobile Toggle Removed (Replaced by Floating) - Kept placeholder for spacing if needed or just remove -->
+
                 <h2 class="h4 mb-0 fw-bold text-dark">@yield('header')</h2>
             </div>
             
@@ -249,35 +313,82 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Sidebar Toggle (Desktop Internal)
             const sidebar = document.getElementById('sidebar');
-            const toggle = document.getElementById('sidebarToggle');
-            const mobileToggle = document.getElementById('mobileSidebarToggle');
+            const floatingToggle = document.getElementById('floatingSidebarToggle');
+            const mobileToggle = document.getElementById('mobileSidebarToggle'); // Might be removed in future if floating replaces it fully?
+                                                                                // keeping simply to avoid JS errors if markup remains
             
-            function toggleSidebar(e) {
+            let closeTimeout;
+
+            // --- Toggle Logic ---
+            function openSidebar() {
+                if(closeTimeout) clearTimeout(closeTimeout);
+                sidebar.classList.add('open');
+            }
+
+            function closeSidebar() {
+                // Delay closing to allow moving mouse from button to sidebar
+                closeTimeout = setTimeout(() => {
+                    sidebar.classList.remove('open');
+                }, 300); // 300ms grace period
+            }
+            
+            function toggleSidebarCompat(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                
-                // Use 768 as the threshold (inclusive for ipad portrait often)
-                if (window.innerWidth <= 768) {
-                    sidebar.classList.toggle('open');
-                    sidebar.classList.remove('collapsed'); 
+                if (sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
                 } else {
-                    sidebar.classList.toggle('collapsed');
+                    sidebar.classList.add('open');
                 }
             }
 
-            if(toggle && sidebar) toggle.addEventListener('click', toggleSidebar);
-            if(mobileToggle && sidebar) mobileToggle.addEventListener('click', toggleSidebar);
+            // --- Interactions ---
 
-            // Close sidebar on mobile when clicking outside (overlay)
+            if (floatingToggle && sidebar) {
+                // Desktop Hover Interaction (Screen > 768px)
+                // Use matchMedia for robust check? Or just runtime check in event?
+                
+                // Mouse Enter Button -> Open
+                floatingToggle.addEventListener('mouseenter', () => {
+                   if (window.innerWidth > 768) openSidebar();
+                });
+                
+                // Mouse Leave Button -> Try Close
+                floatingToggle.addEventListener('mouseleave', () => {
+                   if (window.innerWidth > 768) closeSidebar();
+                });
+
+                // Mouse Enter Sidebar -> Keep Open
+                sidebar.addEventListener('mouseenter', () => {
+                   if (window.innerWidth > 768 && closeTimeout) clearTimeout(closeTimeout);
+                });
+
+                // Mouse Leave Sidebar -> Close
+                sidebar.addEventListener('mouseleave', () => {
+                   if (window.innerWidth > 768) closeSidebar();
+                });
+
+                // Mobile / Click Interaction
+                floatingToggle.addEventListener('click', (e) => {
+                    // Always toggle on click, mainly for mobile, or if user prefers clicking on desktop
+                    // But if hover is active, click might be redundant on desktop.
+                    // Let's allow click to toggle for mobile mainly.
+                    if (window.innerWidth <= 768) {
+                        toggleSidebarCompat(e);
+                    }
+                });
+            }
+
+            // Mobile internal toggle support if still present
+            if(mobileToggle) mobileToggle.addEventListener('click', toggleSidebarCompat);
+
+            // Close when clicking outside (Mobile/Tablet usually)
             document.addEventListener('click', (e) => {
-                // If mobile, open, and click outside sidebar and not on toggles
                 if (window.innerWidth <= 768 && 
                     sidebar.classList.contains('open') && 
                     !sidebar.contains(e.target) && 
-                    !mobileToggle.contains(e.target) && 
-                    !toggle.contains(e.target)) {
+                    !floatingToggle.contains(e.target)) {
                     
                     sidebar.classList.remove('open');
                 }
