@@ -123,7 +123,7 @@
     <div class="footer">
         <p class="fw-bold">¡Gracias por elegirnos!</p>
         <p>Este es un comprobante electrónico oficial de la Barbería JR.</p>
-        <p>&copy; {{ date('Y') }} Barbería JR - San Jerónimo</p>
+        <p>&copy; {{ date('Y') }} Barbería JR</p>
     </div>
 </body>
 </html>
