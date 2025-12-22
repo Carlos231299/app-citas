@@ -16,15 +16,20 @@ start "TUNEL SERVIDOR -> BOT (NO CERRAR)" cmd /k "echo Conectando tunel inverso.
 
 :: 3. Servidor Remoto + Tunel Directo
 echo [3/3] Iniciando Servidor y Tunel...
-start "SERVIDOR REMOTO + TUNEL (NO CERRAR)" cmd /k ssh -i pruebas.pem -o StrictHostKeyChecking=no -L 8001:localhost:8000 ubuntu@50.18.72.244 "cd /var/www/html/app-citas && php artisan serve --host=127.0.0.1 --port=8000"
+start "SERVIDOR REMOTO + TUNEL (NO CERRAR)" cmd /k ssh -t -i pruebas.pem -o StrictHostKeyChecking=no -L 8001:localhost:8000 ubuntu@50.18.72.244 "sudo fuser -k 8000/tcp || true; cd /var/www/html/app-citas && php artisan serve --host=127.0.0.1 --port=8000"
+
+:: 4. Abrir Navegador (Unificado)
+echo Esperando estabilidad de red (10 segundos)...
+timeout /t 10 >nul
+echo Abriendo Dashboard en una sola ventana...
+start chrome --new-window "http://localhost:3000" "http://localhost:8001"
 
 echo.
 echo ==========================================
-echo    TRES VENTANAS ABIERTAS
+echo    TODO LISTO - BARBERIA JR
 echo ==========================================
-echo 1. Bot Local (Node.js)
-echo 2. Tunel Inverso
-echo 3. Servidor Remoto (Artisan) + Tunel (8001->8000)
+echo 1. Bot Local: http://localhost:3000
+echo 2. Web App: http://localhost:8001
 echo.
 echo NO CIERRES LAS VENTANAS NEGRAS. MINIMIZALAS.
 echo Cerrando lanzador en 3 segundos...

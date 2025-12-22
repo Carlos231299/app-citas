@@ -836,7 +836,11 @@ class AppointmentController extends Controller
     // Bot: Cancel Appointment via API
     public function cancelFromBot(Request $request)
     {
+        try {
         \Illuminate\Support\Facades\Log::info("🤖 Bot Cancel Request Received. Phone: {$request->phone}, Reason: {$request->reason}");
+    } catch (\Exception $e) {
+        // Log failure shouldn't crash the request
+    }
 
         $request->validate([
             'phone' => 'required',
