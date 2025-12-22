@@ -878,6 +878,19 @@
                             <p class="mb-2"><strong><i class="bi bi-clock me-2"></i>Hora:</strong> ${timeStr}</p>
                             ${props.barber ? `<p class="mb-2"><strong><i class="bi bi-person me-2"></i>Barbero:</strong> ${props.barber}</p>` : ''}
                             ${props.service ? `<p class="mb-2"><strong><i class="bi bi-scissors me-2"></i>Servicio:</strong> ${props.service} ($${props.price})</p>` : ''}
+                            
+                            ${props.products && props.products.length > 0 ? `
+                                <div class="mb-2 ps-4 border-start border-3 border-secondary">
+                                    <small class="text-muted d-block fw-bold">Productos Adicionales:</small>
+                                    ${props.products.map(p => `
+                                        <div class="d-flex justify-content-between small">
+                                            <span>${p.qty}x ${p.name}</span>
+                                            <span class="fw-bold">${formatMoney(p.price * p.qty)}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+
                             ${props.client_phone ? `<p class="mb-2"><strong><i class="bi bi-whatsapp me-2"></i>Teléfono:</strong> ${props.client_phone}</p>` : ''}
                             <p class="mb-2"><strong><i class="bi bi-info-circle me-2"></i>Estado:</strong> ${statusBadge}</p>
                             ${props.custom_details ? `<p class="mb-0 text-muted small mt-3"><em>${props.custom_details}</em></p>` : ''}
@@ -908,7 +921,7 @@
                                 </button>
                             ` : `
                                 <button onclick="completeAppointment(${event.id}, ${props.price})" class="btn btn-primary flex-grow-1 fw-bold">
-                                    <i class="bi bi-pencil-fill me-1"></i> Editar
+                                    <i class="bi bi-arrow-repeat me-1"></i> Volver a Abrir
                                 </button>
                                 <button onclick="Swal.close()" class="btn btn-secondary flex-grow-1 fw-bold">
                                     <i class="bi bi-x mx-1"></i> Cerrar
