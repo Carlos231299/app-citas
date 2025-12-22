@@ -561,57 +561,41 @@ class AppointmentController extends Controller
                 }
             }
 
-            // [NEW] ALWAYS create a Sale Record for invoicing (Service + optional Products)
+            // [NEW] ONLY create a Sale Record if there are PRODUCTS included
             // Ensure no duplicate sales for this appointment if re-completed
             \App\Models\Sale::where('appointment_id', $appointment->id)->delete();
 
-            // Prepare Service item
-            $serviceLabel = $appointment->service->name;
-            if ($appointment->custom_details) {
-                $serviceLabel .= " ({$appointment->custom_details})";
-            }
-            
-            // Correct Logic: The frontend sends the GRAND TOTAL in 'confirmed_price'.
-            // To get the service part, we subtract products total from grand total.
+            $sale = null;
             $grandTotal = $request->confirmed_price ?? ($appointment->price + $productsTotal);
-            $servicePartPrice = $grandTotal - $productsTotal;
-            
-            // Ensure service price isn't negative (edge case)
-            if ($servicePartPrice < 0) $servicePartPrice = 0;
 
-            $allInvoiceItems = array_merge([
-                [
-                    'product_id' => null, // Indicated it's a service
-                    'product_name' => $serviceLabel,
-                    'price' => $servicePartPrice,
-                    'quantity' => 1,
-                    'subtotal' => $servicePartPrice
-                ]
-            ], $itemsData);
-
-            $sale = \App\Models\Sale::create([
-                'user_id' => auth()->id(),
-                'client_name' => $appointment->client_name,
-                'appointment_id' => $appointment->id,
-                'total' => $grandTotal, 
-                'payment_method' => $request->payment_method ?? 'efectivo',
-                'items' => $allInvoiceItems,
-                'completed_at' => now()
-            ]);
+            if (!empty($itemsData)) {
+                $sale = \App\Models\Sale::create([
+                    'user_id' => auth()->id(),
+                    'client_name' => $appointment->client_name,
+                    'appointment_id' => $appointment->id,
+                    'total' => $productsTotal, // Sale total is ONLY for products
+                    'payment_method' => $request->payment_method ?? 'efectivo',
+                    'items' => $itemsData, // ONLY products, NO service
+                    'completed_at' => now()
+                ]);
+            }
             
             DB::commit();
 
             // [NEW] NOTIFY CLIENT VIA WHATSAPP (BOT)
             if ($appointment->client_phone) {
-                // 1. Send Text Summary
+                // 1. Send Text Summary (Always includes service and products total)
                 try {
                     $msg = "✅ *¡Cita Finalizada con Éxito!* ✅\n\n" .
                            "Hola *{$appointment->client_name}*, qué gusto saludarte. ✂️✨\n" .
                            "Tu servicio en *Barbería JR* ha sido procesado.\n\n" .
                            "💰 *Total:* " . '$ ' . number_format($grandTotal, 0) . "\n" .
                            "🙏 ¡Gracias por confiar en nosotros para cuidar tu estilo!\n\n" .
-                           "¡Esperamos verte pronto por aquí! Recuerda que puedes agendar tu próxima cita cuando desees en la plataforma: https://citasbarberiajr.online. 😉\n\n" .
-                           "Te adjuntamos tu recibo digital:";
+                           "¡Esperamos verte pronto por aquí! Recuerda que puedes agendar tu próxima cita cuando desees en la plataforma: https://citasbarberiajr.online. 😉";
+
+                    if ($sale) {
+                        $msg .= "\n\nTe adjuntamos tu recibo digital de productos:";
+                    }
 
                     \Illuminate\Support\Facades\Http::timeout(15)->post('http://localhost:3000/send-message', [
                         'phone' => $appointment->client_phone,
@@ -621,26 +605,28 @@ class AppointmentController extends Controller
                     \Illuminate\Support\Facades\Log::error("Bot Text Message Failed: " . $e->getMessage());
                 }
 
-                // 2. Send PDF Receipt
-                try {
-                    // Generate a temporary signed URL valid for 30 minutes
-                    $pdfUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
-                        'pos.sale.pdf', 
-                        now()->addMinutes(30), 
-                        ['sale' => $sale->id]
-                    );
+                // 2. Send PDF Receipt (ONLY if there are products sold)
+                if ($sale) {
+                    try {
+                        // Generate a temporary signed URL valid for 30 minutes
+                        $pdfUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                            'pos.sale.pdf', 
+                            now()->addMinutes(30), 
+                            ['sale' => $sale->id]
+                        );
 
-                    // Dynamic Filename
-                    $safeClientName = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '', $appointment->client_name);
-                    $filename = "Recibo - {$safeClientName} - " . now()->format('d-m-Y H-i') . ".pdf";
-                    
-                    \Illuminate\Support\Facades\Http::timeout(30)->post('http://localhost:3000/send-pdf', [
-                        'phone' => $appointment->client_phone,
-                        'pdf_url' => $pdfUrl,
-                        'filename' => $filename
-                    ]);
-                } catch (\Exception $botError) {
-                    \Illuminate\Support\Facades\Log::error("Bot PDF Receipt Failed: " . $botError->getMessage());
+                        // Dynamic Filename
+                        $safeClientName = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '', $appointment->client_name);
+                        $filename = "Recibo - {$safeClientName} - " . now()->format('d-m-Y H-i') . ".pdf";
+                        
+                        \Illuminate\Support\Facades\Http::timeout(30)->post('http://localhost:3000/send-pdf', [
+                            'phone' => $appointment->client_phone,
+                            'pdf_url' => $pdfUrl,
+                            'filename' => $filename
+                        ]);
+                    } catch (\Exception $botError) {
+                        \Illuminate\Support\Facades\Log::error("Bot PDF Receipt Failed: " . $botError->getMessage());
+                    }
                 }
             }
 
