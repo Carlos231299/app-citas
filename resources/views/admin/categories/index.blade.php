@@ -5,7 +5,10 @@
 
 @section('content')
 <div class="row">
-    <div class="col-12 mb-4">
+    <div class="col-12 mb-4 d-flex justify-content-between align-items-center">
+        <a href="{{ route('products.index') }}" class="btn btn-outline-secondary shadow-sm rounded-pill fw-bold px-3">
+            <i class="bi bi-arrow-left me-2"></i> Volver
+        </a>
          <button class="btn btn-primary shadow fw-bold rounded-pill" onclick="openCreateCatModal()">
             <i class="bi bi-plus-lg me-2"></i> Nueva Categoría
         </button>
