@@ -80,7 +80,7 @@
             <div class="collapse {{ request()->routeIs('products.*') || request()->routeIs('pos.*') ? 'show' : '' }}" id="posSubmenu">
                 <nav class="nav flex-column ps-3 border-start border-2 border-light ms-3 mb-2">
                     <a class="nav-link text-secondary py-1 {{ request()->routeIs('pos.*') ? 'fw-bold text-primary' : '' }}" href="{{ route('pos.index') }}">
-                        <span class="sidebar-text">Punto de Venta</span>
+                        <span class="sidebar-text">Venta de productos</span>
                     </a>
                     <a class="nav-link text-secondary py-1 {{ request()->routeIs('products.*') ? 'fw-bold text-primary' : '' }}" href="{{ route('products.index') }}">
                         <span class="sidebar-text">Inventario</span>
