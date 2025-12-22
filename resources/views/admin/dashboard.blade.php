@@ -2009,7 +2009,7 @@
     function deleteAppointment(id) {
         Swal.fire({
             title: '¿Eliminar Definitivamente?',
-            text: "Esta acción borrará la cita de la base de datos y NO se puede deshacer.",
+            text: 'Esta acción borrará la cita de la base de datos y NO se puede deshacer.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
@@ -2040,5 +2040,20 @@
             }
         })
     }
+
+    // Collapse Icon Logic
+    document.addEventListener('DOMContentLoaded', function() {
+        const collapseElement = document.getElementById('statsCollapse');
+        const iconElement = document.getElementById('statsCollapseIcon');
+        
+        if(collapseElement && iconElement) {
+            collapseElement.addEventListener('show.bs.collapse', function () {
+                iconElement.classList.replace('bi-chevron-down', 'bi-chevron-up');
+            });
+            collapseElement.addEventListener('hide.bs.collapse', function () {
+                iconElement.classList.replace('bi-chevron-up', 'bi-chevron-down');
+            });
+        }
+    });
 </script>
 @endpush
