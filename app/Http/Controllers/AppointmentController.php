@@ -776,7 +776,7 @@ class AppointmentController extends Controller
 
         // 1. Fetch Regular Appointments
         // 1. Fetch Regular Appointments
-        $query = Appointment::with(['service', 'barber', 'products'])
+        $query = Appointment::with(['service', 'barber', 'products', 'completedBy'])
             ->whereBetween('scheduled_at', [$start, $end])
             ->where('status', '!=', 'request');
 
@@ -825,7 +825,8 @@ class AppointmentController extends Controller
                                 'price' => $prod->pivot->price,
                                 'qty' => $prod->pivot->quantity
                             ];
-                        })
+                        }),
+                        'completed_by' => $appointment->completedBy->name ?? null
                     ]
                 ];
             });
