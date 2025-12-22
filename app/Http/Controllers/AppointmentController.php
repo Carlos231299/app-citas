@@ -960,8 +960,8 @@ class AppointmentController extends Controller
     // JSON Events for FullCalendar
     public function events(Request $request)
     {
-        $start = Carbon::parse($request->start);
-        $end = Carbon::parse($request->end);
+        $start = Carbon::parse($request->start)->startOfDay();
+        $end = Carbon::parse($request->end)->endOfDay();
 
         // 1. Fetch Regular Appointments
         // 1. Fetch Regular Appointments

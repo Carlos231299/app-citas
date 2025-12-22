@@ -935,7 +935,12 @@
         const options = { weekday: 'long', day: 'numeric', month: 'long' };
         label.innerText = new Intl.DateTimeFormat('es-ES', options).format(date);
 
-        const dateStr = date.toISOString().split('T')[0];
+        // Fix: Use local date string instead of UTC ISO string to avoid day shifts
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+        
         const barberId = document.getElementById('barberFilter') ? document.getElementById('barberFilter').value : '';
 
         container.innerHTML = '<div class="text-center py-5"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
