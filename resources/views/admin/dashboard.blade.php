@@ -905,6 +905,7 @@
                             ${props.status === 'completed' ? 
                                 `<div class="mt-3 p-2 bg-success bg-opacity-10 rounded border border-success">
                                     <strong class="text-success"><i class="bi bi-check-circle-fill me-1"></i> Completada con éxito</strong>
+                                    ${props.completed_by ? `<div class="mt-1 small text-dark"><i class="bi bi-person-check me-1"></i>Completada por: <strong>${props.completed_by}</strong></div>` : ''}
                                 </div>` : ''
                             }
                         </div>

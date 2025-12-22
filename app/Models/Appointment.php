@@ -39,4 +39,9 @@ class Appointment extends Model
             default => ucfirst($this->status),
         };
     }
+
+    public function completedBy()
+    {
+        return $this->belongsTo(User::class, 'completed_by');
+    }
 }

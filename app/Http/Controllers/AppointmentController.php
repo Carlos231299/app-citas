@@ -493,11 +493,14 @@ class AppointmentController extends Controller
 
         $data = ['status' => 'completed'];
     
-    if ($request->has('confirmed_price')) {
-        $data['confirmed_price'] = $request->confirmed_price;
-    }
+        if ($request->has('confirmed_price')) {
+            $data['confirmed_price'] = $request->confirmed_price;
+        }
 
-    $appointment->update($data);
+        // [NEW] Record who completed the appointment
+        $data['completed_by'] = auth()->id();
+
+        $appointment->update($data);
 
     // Handle Products (POS) - Full Sync with Stock Restoration
     
