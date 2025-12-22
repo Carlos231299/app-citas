@@ -1472,10 +1472,16 @@
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
 
         const appointmentId = document.getElementById('pos_appointment_id').value;
-        const confirmedPrice = parseFloat(document.getElementById('pos_base_price').value) || 0;
+        const basePrice = parseFloat(document.getElementById('pos_base_price').value) || 0;
+        
+        // Calculate Products Total
+        const productsTotal = posCart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+        
+        // Final Price = Service + Products
+        const finalPrice = basePrice + productsTotal;
 
         const payload = {
-            confirmed_price: confirmedPrice,
+            confirmed_price: finalPrice, // Send Grand Total
             products: posCart.map(i => ({ product_id: i.id, quantity: i.qty }))
         };
 
