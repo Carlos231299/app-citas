@@ -804,13 +804,21 @@
         }
 
         // Check for Notification Auto-Open
+        const openApptId = "{{ request('open_appointment') }}";
         if(openApptId) {
-            const evt = calendarInstance.getEventById(openApptId);
-            if(evt) {
-                calendarInstance.gotoDate(evt.start);
-                setTimeout(() => showEventDetails(evt), 500); // Small delay to ensure render
-            }
+            axios.get(`/appointments/${openApptId}`)
+                .then(res => {
+                    const evtData = res.data;
+                    // Convert ISO strings to Date objects for helper methods
+                    evtData.start = new Date(evtData.start);
+                    evtData.end = new Date(evtData.end);
+                    
+                    if(calendarInstance) calendarInstance.gotoDate(evtData.start);
+                    showEventDetails(evtData);
+                })
+                .catch(err => console.error("Could not load appointment details", err));
         }
+    }
     }
     
     // Global Event Details Viewer

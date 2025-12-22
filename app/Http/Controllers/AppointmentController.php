@@ -800,6 +800,62 @@ class AppointmentController extends Controller
         return view('admin.calendar');
     }
 
+    // Single Appointment Details (For Notifications/Deep Linking)
+    public function show(Appointment $appointment)
+    {
+        // Permissions
+        if (trim(auth()->user()->role) !== 'admin') {
+             $barberId = auth()->user()->barber?->id;
+             if (!$barberId || $appointment->barber_id !== $barberId) {
+                 return response()->json(['error' => 'Unauthorized'], 403);
+             }
+        }
+
+        $appointment->load(['service', 'barber', 'products', 'completedBy']);
+        
+        $duration = 30;
+        $end = $appointment->scheduled_at->copy()->addMinutes($duration);
+
+        // Format products for frontend
+        $formattedProducts = $appointment->products->map(function($p) {
+            return [
+                'id' => $p->id,
+                'name' => $p->name,
+                'qty' => $p->pivot->quantity,
+                'price' => $p->pivot->price // Historical price
+            ];
+        });
+
+        // Exact same structure as 'events' method extendedProps
+        $eventData = [
+            'id' => $appointment->id,
+            'title' => $appointment->client_name . ' (' . $appointment->service->name . ')',
+            'start' => $appointment->scheduled_at->toIso8601String(),
+            'end' => $end->toIso8601String(),
+            'backgroundColor' => $this->getStatusColor($appointment->status),
+            'borderColor' => $this->getStatusColor($appointment->status),
+            'allDay' => false,
+            'extendedProps' => [
+                'type' => 'appointment',
+                'barber' => $appointment->barber->name,
+                'barber_id' => $appointment->barber->id,
+                'service_id' => $appointment->service->id,
+                'service' => $appointment->service->name,
+                'status' => $appointment->status,
+                'client_phone' => $appointment->client_phone,
+                'custom_details' => $appointment->custom_details ?? 'Sin detalles adicionales',
+                'cancellation_reason' => $appointment->cancellation_reason,
+                'price' => $appointment->service->price,
+                'base_price' => $appointment->service->price,
+                'final_price' => $appointment->confirmed_price,
+                'completed_by' => $appointment->completedBy->name ?? null,
+                'products' => $formattedProducts
+            ]
+        ];
+
+        return response()->json($eventData);
+    }
+
     // JSON Events for FullCalendar
     public function events(Request $request)
     {
