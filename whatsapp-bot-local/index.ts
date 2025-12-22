@@ -145,7 +145,7 @@ client.on("message", async (message) => {
             } else {
                 await client.sendMessage(chatId, "❌ No encontramos una cita próxima para cancelar o ya ocurrió un error.");
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('API Error:', error);
             await client.sendMessage(chatId, "❌ Error de conexión al procesar tu solicitud.");
         }
@@ -328,7 +328,7 @@ app.post('/send-message', async (req, res) => {
         await client.sendMessage(chatId, message);
         res.json({ success: true });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('❌ Error sending generic message:', error);
         res.status(500).json({ error: 'Failed' });
     }
@@ -359,7 +359,7 @@ app.post('/send-pdf', async (req, res) => {
 
         res.json({ success: true });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('❌ Error sending PDF:', error);
         res.status(500).json({ error: 'Failed', details: error.message });
     }

@@ -65,9 +65,9 @@
     <table class="items-table">
         <thead>
             <tr>
-                <th>Producto</th>
-                <th class="text-right">Cant.</th>
-                <th class="text-right">Subtotal</th>
+                <th style="width: 60%;">Descripción</th>
+                <th class="text-right" style="width: 15%;">Cant.</th>
+                <th class="text-right" style="width: 25%;">Subtotal</th>
             </tr>
         </thead>
         <tbody>

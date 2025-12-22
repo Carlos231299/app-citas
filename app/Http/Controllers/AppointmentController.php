@@ -561,22 +561,39 @@ class AppointmentController extends Controller
                 }
             }
 
-            // [NEW] Only create a Sale Record if products were actually sold
-            $sale = null;
-            if ($productsTotal > 0) {
-                // Ensure no duplicate sales for this appointment if re-completed
-                \App\Models\Sale::where('appointment_id', $appointment->id)->delete();
+            // [NEW] ALWAYS create a Sale Record for invoicing (Service + optional Products)
+            // Ensure no duplicate sales for this appointment if re-completed
+            \App\Models\Sale::where('appointment_id', $appointment->id)->delete();
 
-                $sale = \App\Models\Sale::create([
-                    'user_id' => auth()->id(),
-                    'client_name' => $appointment->client_name, // Track who was sold to
-                    'appointment_id' => $appointment->id, // [LINK]
-                    'total' => $productsTotal, // Total reflects ONLY products now
-                    'payment_method' => $request->payment_method ?? 'efectivo',
-                    'items' => $itemsData,
-                    'completed_at' => now()
-                ]);
+            // Prepare Service item
+            $serviceLabel = $appointment->service->name;
+            if ($appointment->custom_details) {
+                $serviceLabel .= " ({$appointment->custom_details})";
             }
+            
+            $finalServicePrice = $request->confirmed_price ?? $appointment->price;
+            
+            $allInvoiceItems = array_merge([
+                [
+                    'product_id' => null, // Indicated it's a service
+                    'product_name' => $serviceLabel . " (Servicio)",
+                    'price' => $finalServicePrice,
+                    'quantity' => 1,
+                    'subtotal' => $finalServicePrice
+                ]
+            ], $itemsData);
+
+            $grandTotal = $finalServicePrice + $productsTotal;
+
+            $sale = \App\Models\Sale::create([
+                'user_id' => auth()->id(),
+                'client_name' => $appointment->client_name,
+                'appointment_id' => $appointment->id,
+                'total' => $grandTotal, // Grand total (Service + Products)
+                'payment_method' => $request->payment_method ?? 'efectivo',
+                'items' => $allInvoiceItems,
+                'completed_at' => now()
+            ]);
             
             DB::commit();
 
@@ -584,11 +601,10 @@ class AppointmentController extends Controller
             if ($appointment->client_phone) {
                 try {
                     // 1. Send Text Summary
-                    $totalAmount = $appointment->confirmed_price ?? ($appointment->price + $productsTotal);
                     $msg = "✅ *Cita Finalizada - Barbería JR* ✅\n\n" .
                            "Hola *{$appointment->client_name}*,\n" .
                            "Tu servicio ha finalizado con éxito.\n\n" .
-                           "💰 *Total:* " . '$ ' . number_format($totalAmount, 0) . "\n" .
+                           "💰 *Total:* " . '$ ' . number_format($grandTotal, 0) . "\n" .
                            "🙏 ¡Gracias por tu preferencia!\n\n" .
                            "Te adjuntamos tu recibo a continuación:";
 
@@ -597,25 +613,17 @@ class AppointmentController extends Controller
                         'message' => $msg
                     ]);
 
-                    // 2. Send PDF Receipt if Sale exists
-                    if ($sale) {
-                        // Use a URL accessible by the bot. 
-                        // If bot is local and server is remote, we should use the PUBLIC URL 
-                        // but since the bot is on Carlos's PC and has a tunnel, 
-                        // maybe localhost:8001 works or the public domain.
-                        $pdfUrl = route('pos.sale.pdf', $sale->id);
-                        
-                        // If we are in local development / tunnel context, we might need to adjust this URL 
-                        // so the BOT (local) can reach the PDF. 
-                        // Carlos suggested the bot knows what to do, similar to confirmations.
-                        
-                        \Illuminate\Support\Facades\Http::timeout(5)->post('http://localhost:3000/send-pdf', [
-                            'phone' => $appointment->client_phone,
-                            'pdf_url' => $pdfUrl,
-                            'filename' => "Recibo_{$sale->id}.pdf",
-                            'caption' => "Recibo de servicio #{$appointment->id}"
-                        ]);
-                    }
+                    // 2. Send PDF Receipt
+                    // route() generates absolute URL based on APP_URL. Ensure APP_URL is correctly set.
+                    $pdfUrl = route('pos.sale.pdf', $sale->id);
+                    
+                    \Illuminate\Support\Facades\Http::timeout(8)->post('http://localhost:3000/send-pdf', [
+                        'phone' => $appointment->client_phone,
+                        'pdf_url' => $pdfUrl,
+                        'filename' => "Recibo_{$sale->id}.pdf",
+                        'caption' => "Recibo de servicio #{$appointment->id}"
+                    ]);
+                    
                 } catch (\Exception $botError) {
                     \Illuminate\Support\Facades\Log::error("Bot Receipt Sending Failed: " . $botError->getMessage());
                 }
