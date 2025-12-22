@@ -877,7 +877,7 @@
                             <p class="mb-2"><strong><i class="bi bi-calendar-event me-2"></i>Fecha:</strong> ${dateStr}</p>
                             <p class="mb-2"><strong><i class="bi bi-clock me-2"></i>Hora:</strong> ${timeStr}</p>
                             ${props.barber ? `<p class="mb-2"><strong><i class="bi bi-person me-2"></i>Barbero:</strong> ${props.barber}</p>` : ''}
-                            ${props.service ? `<p class="mb-2"><strong><i class="bi bi-scissors me-2"></i>Servicio:</strong> ${props.service} ($${props.price})</p>` : ''}
+                            ${props.service ? `<p class="mb-2"><strong><i class="bi bi-scissors me-2"></i>Servicio:</strong> ${props.service} (Base: ${formatMoney(props.base_price)})</p>` : ''}
                             
                             ${props.products && props.products.length > 0 ? `
                                 <div class="mb-2 ps-4 border-start border-3 border-secondary">
@@ -905,6 +905,9 @@
                             ${props.status === 'completed' ? 
                                 `<div class="mt-3 p-2 bg-success bg-opacity-10 rounded border border-success">
                                     <strong class="text-success"><i class="bi bi-check-circle-fill me-1"></i> Completada con éxito</strong>
+                                    <div class="mt-2 fs-5 fw-bold border-top border-secondary pt-2 text-dark">
+                                        Total Cobrado: ${formatMoney(props.final_price || props.price)}
+                                    </div>
                                     ${props.completed_by ? `<div class="mt-1 small text-dark"><i class="bi bi-person-check me-1"></i>Completada por: <strong>${props.completed_by}</strong></div>` : ''}
                                 </div>` : ''
                             }
