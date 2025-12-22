@@ -4,6 +4,56 @@
 @section('header', 'Agenda')
 
 @section('content')
+<style>
+    /* dots minimalistas for FullCalendar */
+    .fc-daygrid-event {
+        border: none !important;
+        background: transparent !important;
+        display: flex !important;
+        justify-content: center !important;
+        padding-top: 2px !important;
+    }
+    .fc-daygrid-event:hover { background: transparent !important; }
+    
+    .fc-daygrid-event-dot {
+        border: 4px solid var(--fc-event-bg-color, #3788d8);
+        border-radius: 50% !important;
+        width: 8px !important;
+        height: 8px !important;
+        margin: 0 1px !important;
+    }
+
+    .fc-event-title, .fc-event-time { display: none !important; }
+
+    /* Calendar Grid Minimalist */
+    .fc-theme-bootstrap5 .fc-scrollgrid { border: none !important; }
+    .fc-col-header-cell { background: transparent !important; border: none !important; padding: 10px 0 !important; font-size: 0.75rem; color: #adb5bd; text-transform: uppercase; }
+    .fc-daygrid-day { border: 1px solid #f8f9fa !important; }
+    .fc-daygrid-day-number { font-weight: 500; font-size: 0.9rem; color: #495057; padding: 8px !important; }
+    .fc-day-today { background: rgba(37, 99, 235, 0.03) !important; }
+    .fc-day-today .fc-daygrid-day-number { color: #2563eb; font-weight: 700; }
+    
+    /* Agenda Cards */
+    .agenda-card {
+        border: 1px solid #f1f3f5;
+        border-radius: 16px;
+        transition: all 0.2s ease;
+        border-left: 4px solid #dee2e6;
+    }
+    .agenda-card:hover { transform: translateY(-2px); shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color: #2563eb; }
+    .agenda-card.status-completed { border-left-color: #10b981; }
+    .agenda-card.status-pending { border-left-color: #f59e0b; }
+    .agenda-card.status-cancelled { border-left-color: #ef4444; }
+
+    .barber-avatar-sm {
+        width: 40px; height: 40px; border-radius: 12px; object-fit: cover;
+        background: #f8f9fa; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    /* Scrollbar */
+    #daily-agenda-container::-webkit-scrollbar { width: 4px; }
+    #daily-agenda-container::-webkit-scrollbar-thumb { background: #e9ecef; border-radius: 10px; }
+</style>
 <div class="d-flex flex-column h-100">
     <!-- Stats Row Toggle -->
     <div class="position-relative mb-3">
@@ -183,68 +233,78 @@
 
 
 
-    <!-- Calendar Container -->
-    <div class="card border-0 shadow-sm flex-grow-1 overflow-auto" style="min-height: 600px;">
-        <div class="card-body p-0 p-md-3 h-100 position-relative">
-            <!-- Custom View Selector -->
-            <div id="custom-view-selector" class="d-none">
-                <div class="d-flex gap-2 flex-wrap justify-content-end">
-                     <!-- Barber Filter (New) -->
-                     <!-- Barber Filter (New) -->
-                    @if(trim(auth()->user()->role) === 'admin')
-                    <select id="barberFilter" class="form-select form-select-sm shadow-sm border-0 bg-white" style="width: 180px; color: #3C4043; font-weight: 500;" onchange="refreshCalendar()">
-                        <option value="">Todos los Barberos</option>
-                        @foreach(\App\Models\Barber::where('is_active', true)->get() as $barber)
-                            <option value="{{ $barber->id }}">{{ $barber->name }}</option>
-                        @endforeach
-                    </select>
-                    @else
-                        <input type="hidden" id="barberFilter" value="{{ auth()->user()->barber?->id }}">
-                        <span class="text-primary fw-bold align-self-center me-3">Mi Agenda</span>
-                    @endif
+    <!-- Dynamic Agenda Layout -->
+    <div class="row g-4 flex-grow-1 mb-4">
+        <!-- Left Column: Minimalist Calendar -->
+        <div class="col-12 col-xl-8">
+            <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden bg-white">
+                <div class="card-body p-3 h-100 position-relative">
+                    <!-- Custom View Selector (Integrated) -->
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 px-2 pt-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <h5 class="fw-bold text-dark mb-0 d-none d-sm-block">Calendario</h5>
+                            @if(trim(auth()->user()->role) === 'admin')
+                                <select id="barberFilter" class="form-select form-select-sm border-0 bg-light rounded-pill px-3" style="width: 170px; font-weight: 500;" onchange="refreshCalendar()">
+                                    <option value="">Todos los Barberos</option>
+                                    @foreach(\App\Models\Barber::where('is_active', true)->get() as $barber)
+                                        <option value="{{ $barber->id }}">{{ $barber->name }}</option>
+                                    @endforeach
+                                </select>
+                            @else
+                                <input type="hidden" id="barberFilter" value="{{ auth()->user()->barber?->id }}">
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">Mi Agenda</span>
+                            @endif
+                        </div>
 
-                    </select>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm d-flex align-items-center gap-2" onclick="openBookingModal()">
+                                <i class="bi bi-plus-lg"></i> <span class="d-none d-md-inline">Nueva Cita</span>
+                            </button>
+                            <div class="dropdown">
+                                <button class="btn btn-light btn-sm rounded-pill px-3 fw-bold border-0 dropdown-toggle" type="button" id="calendarViewBtn" data-bs-toggle="dropdown">
+                                    <span>Mes</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-2">
+                                    <li><a class="dropdown-item rounded-3 py-2" href="#" data-view="dayGridMonth">Vista Mes</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" href="#" data-view="timeGridWeek">Vista Semana</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" href="#" data-view="timeGridDay">Vista Día</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><div class="dropdown-item rounded-3 py-2 pointer" onclick="toggleOption(event, 'completed')">Mostrar Completadas</div></li>
+                                    <li><div class="dropdown-item rounded-3 py-2 pointer" onclick="toggleOption(event, 'rejected')">Mostrar Canceladas</div></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
 
-                    <button class="btn btn-primary btn-sm rounded-pill px-3 fw-bold d-flex align-items-center gap-2 shadow-sm" onclick="openBookingModal()">
-                        <i class="bi bi-plus-lg"></i>
-                        <span class="d-none d-sm-inline">Apartar Cita</span>
-                    </button>
-                    <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle btn-sm fw-bold border-0 bg-transparent text-dark d-flex align-items-center gap-2" type="button" id="calendarViewBtn" data-bs-toggle="dropdown" aria-expanded="false" style="color: #3C4043 !important;">
-                        <span>Mes</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 p-2" aria-labelledby="calendarViewBtn" style="min-width: 240px;">
-                        <li><a class="dropdown-item d-flex justify-content-between align-items-center rounded-2 py-2" href="#" data-view="timeGridDay"><span>Día</span><span class="text-muted small">D</span></a></li>
-                        <li><a class="dropdown-item d-flex justify-content-between align-items-center rounded-2 py-2" href="#" data-view="timeGridWeek"><span>Semana</span><span class="text-muted small">W</span></a></li>
-                        <li><a class="dropdown-item d-flex justify-content-between align-items-center rounded-2 py-2" href="#" data-view="dayGridMonth"><span>Mes</span><span class="text-muted small">M</span></a></li>
-                        <li><a class="dropdown-item d-flex justify-content-between align-items-center rounded-2 py-2" href="#" data-view="listYear"><span>Año</span><span class="text-muted small">Y</span></a></li>
-                        <li><a class="dropdown-item d-flex justify-content-between align-items-center rounded-2 py-2" href="#" data-view="listWeek"><span>Agenda</span><span class="text-muted small">A</span></a></li>
-                        <li><a class="dropdown-item d-flex justify-content-between align-items-center rounded-2 py-2" href="#" data-view="fourDay"><span>4 días</span><span class="text-muted small">X</span></a></li>
-                        <li><hr class="dropdown-divider my-2"></li>
-                        <li>
-                            <div class="dropdown-item d-flex gap-2 align-items-center rounded-2 py-2" onclick="toggleOption(event, 'weekends')">
-                                <i class="bi bi-check-lg text-primary" id="check-weekends"></i>
-                                <span>Mostrar Fines de Semana</span>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="dropdown-item d-flex gap-2 align-items-center rounded-2 py-2" onclick="toggleOption(event, 'rejected')">
-                                <i class="bi bi-check-lg text-primary" id="check-rejected"></i>
-                                <span>Mostrar Citas Canceladas </span>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="dropdown-item d-flex gap-2 align-items-center rounded-2 py-2" onclick="toggleOption(event, 'completed')">
-                                <i class="bi bi-check-lg text-primary" id="check-completed"></i>
-                                <span>Mostrar Citas Completadas</span>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
+                    <div id="calendar" style="min-height: 500px;"></div>
                 </div>
             </div>
-            
-            <div id="calendar" class="h-100"></div>
+        </div>
+
+        <!-- Right Column: Daily Agenda (Upcoming) -->
+        <div class="col-12 col-xl-4">
+            <div class="card border-0 shadow-sm h-100 rounded-4 bg-white overflow-hidden">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-1">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0">Agenda del Día</h5>
+                            <p class="text-muted small mb-0" id="agenda-date-label">Hoy</p>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle text-primary">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4 pt-2">
+                    <div id="daily-agenda-container" class="d-flex flex-column gap-3" style="max-height: 600px; overflow-y: auto;">
+                        <!-- JS Loaded Content -->
+                        <div class="text-center py-5 opacity-50">
+                            <i class="bi bi-calendar2-event fs-1 d-block mb-2"></i>
+                            <p class="small">Selecciona un día en el calendario para ver detalles</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <!-- Rendered: {{ now() }} -->
@@ -789,25 +849,36 @@
                         defaultDate: calendarInstance.getDate(),
                         dateFormat: "Y-m-d", // value format
                         position: 'auto center',
-                        disableMobile: "true", // Force custom dropdown on mobile too if needed
+                        disableMobile: "true", 
                         onChange: function(selectedDates, dateStr, instance) {
                             calendarInstance.gotoDate(selectedDates[0]);
                         },
                         onOpen: function(selectedDates, dateStr, instance) {
-                            // Sync picker with current calendar date when opening
                             instance.setDate(calendarInstance.getDate());
                         }
                     });
                 }
+                
+                // 3. Auto-load today's agenda on first load
+                if (info.view.type === 'dayGridMonth') {
+                    renderDailyAgenda(calendarInstance.getDate());
+                }
             },
-            
+
+            dateClick: function(info) {
+                renderDailyAgenda(info.date);
+                // Mark active day visually?
+                document.querySelectorAll('.fc-daygrid-day').forEach(el => el.style.background = '');
+                info.dayEl.style.background = 'rgba(37, 99, 235, 0.05)';
+            },
+
             eventClick: function(info) {
-                showEventDetails(info.event);
+                window.showEventDetails(info.event);
             }
         });
-        
-        calendarInstance.render();
 
+        window.calendarInstance.render();
+    
         // Inject Custom Dropdown into FullCalendar Toolbar
         const toolbarRight = document.querySelector('.fc-toolbar-chunk:last-child');
         const selector = document.getElementById('custom-view-selector');
@@ -845,8 +916,94 @@
         }
     }
     
+    async function renderDailyAgenda(date) {
+        const container = document.getElementById('daily-agenda-container');
+        const label = document.getElementById('agenda-date-label');
+        if(!container) return;
+        
+        // Format Date for label
+        const options = { weekday: 'long', day: 'numeric', month: 'long' };
+        label.innerText = new Intl.DateTimeFormat('es-ES', options).format(date);
+
+        const dateStr = date.toISOString().split('T')[0];
+        const barberId = document.getElementById('barberFilter') ? document.getElementById('barberFilter').value : '';
+
+        container.innerHTML = '<div class="text-center py-5"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
+
+        axios.get(`/api/calendar/events?start=${dateStr}&end=${dateStr}&barber_id=${barberId}`)
+            .then(res => {
+                const events = res.data;
+                if (!events.length) {
+                    container.innerHTML = `
+                        <div class="text-center py-5 opacity-50 animate-fade-in">
+                            <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
+                            <p class="small">No hay citas para este día</p>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = '';
+                events.forEach(ev => {
+                    const statusClass = `status-${ev.extendedProps.status || 'pending'}`;
+                    const time = new Date(ev.start).toLocaleTimeString('es-ES', { hour: 'numeric', minute: '2-digit', hour12: true });
+                    
+                    const card = `
+                        <div class="agenda-card ${statusClass} p-3 bg-white animate-fade-in pointer" onclick="window.showEventDetails(${ev.id})">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="flex-shrink-0">
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center fw-bold text-primary border" style="width:40px;height:40px;font-size:0.8rem;">
+                                        ${ev.extendedProps.barber_name ? ev.extendedProps.barber_name.charAt(0) : 'B'}
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="fw-bold mb-0 text-dark">${ev.extendedProps.client_name || 'Sin nombre'}</h6>
+                                        <span class="badge bg-light text-dark border small">${time}</span>
+                                    </div>
+                                    <p class="text-muted small mb-0 mt-1">
+                                        <i class="bi bi-scissors me-1"></i> ${ev.title}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                container.innerHTML = '<p class="text-danger small text-center">Error al cargar agenda</p>';
+            });
+    }
+    
     // Global Event Details Viewer
-    window.showEventDetails = function(event) {
+    window.showEventDetails = function(input) {
+        let event = null;
+        
+        // If input is an ID, find in calendar or fetch
+        if (typeof input === 'number' || typeof input === 'string') {
+             event = calendarInstance.getEventById(input);
+             // If not in memory (e.g. filtered out), we'd need to fetch
+             if(!event) {
+                 Swal.fire({title:'Cargando...', didOpen: () => Swal.showLoading()});
+                 axios.get(`/appointments/${input}`).then(res => {
+                    // Recursive call with data
+                    window.showEventDetails(res.data);
+                 });
+                 return;
+             }
+        } else if (input.id && !input.extendedProps) {
+            // Raw data from API
+            event = {
+                id: input.id,
+                title: input.title,
+                start: new Date(input.start),
+                extendedProps: input.extendedProps || input
+            };
+        } else {
+            event = input;
+        }
+
         const props = event.extendedProps;
         
         // Format Date
