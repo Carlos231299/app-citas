@@ -55,16 +55,16 @@
     </div>
     @endif
 
-    <div class="row g-2 mb-4 animate-fade-in">
+        <div class="row g-3 mb-4 animate-fade-in">
         @php
-            $colClass = trim(auth()->user()->role) === 'admin' ? 'col-6 col-md-6 col-xl-3' : 'col-md-6';
+            $colClass = trim(auth()->user()->role) === 'admin' ? 'col-12 col-xl-5' : 'col-12 col-md-6';
         @endphp
 
-        <!-- Citas Hoy -->
+        <!-- 1. RESUMEN CITAS HOY (Unified) -->
         <div class="{{ $colClass }}">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-primary">
                 <div class="card-body p-3">
-                    <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
                             <h6 class="text-secondary text-uppercase fw-bold mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">Citas Hoy</h6>
                             <h2 class="mb-0 fw-bold text-dark display-6">{{ $stats['total_today'] }}</h2>
@@ -73,101 +73,90 @@
                             <i class="bi bi-calendar-check text-primary fs-3"></i>
                         </div>
                     </div>
+                    
+                    <!-- Breakdown -->
+                    <div class="row g-2 text-center">
+                        <div class="col-4">
+                            <div class="bg-success bg-opacity-10 p-2 rounded-3">
+                                <small class="d-block text-success fw-bold" style="font-size: 0.7rem;">COMPLETADAS</small>
+                                <span class="fw-bold text-dark">{{ $stats['completed_today'] }}</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="bg-warning bg-opacity-10 p-2 rounded-3">
+                                <small class="d-block text-warning fw-bold" style="font-size: 0.7rem;">PENDIENTES</small>
+                                <span class="fw-bold text-dark">{{ $stats['pending_today'] }}</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="bg-danger bg-opacity-10 p-2 rounded-3">
+                                <small class="d-block text-danger fw-bold" style="font-size: 0.7rem;">CANCELADAS</small>
+                                <span class="fw-bold text-dark">{{ $stats['cancelled_today'] }}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Ingresos (Admin Only) -->
+        <!-- 2. INGRESOS (Admin) -->
         @if(trim(auth()->user()->role) === 'admin')
-        <div class="col-6 col-md-6 col-xl-3">
+        <div class="col-12 col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-success">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <h6 class="text-secondary text-uppercase fw-bold mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">Ingresos</h6>
-                            <h2 class="mb-0 fw-bold text-dark display-6">${{ number_format($stats['revenue_today'], 0) }}</h2>
-                        </div>
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="text-secondary text-uppercase fw-bold mb-0" style="font-size: 0.8rem; letter-spacing: 0.5px;">Ingresos Hoy</h6>
                         <div class="bg-success bg-opacity-10 p-3 rounded-4">
                             <i class="bi bi-currency-dollar text-success fs-3"></i>
                         </div>
+                    </div>
+                    <div>
+                        <h2 class="mb-0 fw-bold text-dark display-6">${{ number_format($stats['revenue_today'], 0) }}</h2>
                     </div>
                 </div>
             </div>
         </div>
         @endif
 
-        <!-- Pendientes -->
-        <div class="{{ $colClass }}">
-            <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-warning">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <h6 class="text-secondary text-uppercase fw-bold mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">Pendientes</h6>
-                            <h2 class="mb-0 fw-bold text-dark display-6">{{ $stats['pending_today'] }}</h2>
-                        </div>
-                        <div class="bg-warning bg-opacity-10 p-3 rounded-4">
-                            <i class="bi bi-clock-history text-warning fs-3"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Barberos Disponibles -->
-        <!-- Barberos Disponibles (Admin Only) -->
+        <!-- 3. BARBEROS (Admin) -->
         @if(trim(auth()->user()->role) === 'admin')
-        <div class="col-6 col-md-6 col-xl-3">
+        <div class="col-12 col-md-6 col-xl-4">
             <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-info">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="bg-info bg-opacity-10 p-2 rounded-circle me-2">
-                            <i class="bi bi-people fw-bold text-info fs-5"></i>
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="text-secondary text-uppercase fw-bold mb-0" style="font-size: 0.8rem; letter-spacing: 0.5px;">Barberos Activos</h6>
+                        <div class="bg-info bg-opacity-10 p-3 rounded-4">
+                            <i class="bi bi-people text-info fs-3"></i>
                         </div>
-                        <h6 class="text-secondary small text-uppercase mb-0 fw-bold">Barberos Activos</h6>
                     </div>
-                    
-                    <h3 class="fw-bold text-dark mb-3">{{ $barbers->where('is_active', true)->count() }}</h3>
 
-                    <!-- Avatar List -->
-                    <div class="d-flex gap-1 overflow-visible" style="min-height: 45px;">
-                        @foreach($barbers as $barber)
+                    <div>
+                        <h3 class="mb-2 fw-bold text-dark">{{ $barbers->where('is_active', true)->count() }} <span class="text-muted fs-6 fw-normal">/ {{ $barbers->count() }}</span></h3>
+
+
+                    <div class="d-flex gap-1 overflow-visible">
+                         @foreach($barbers->take(5) as $barber)
                             @php
                                 $isActive = $barber->is_active;
-                                $isSpecial = $barber->special_mode;
+                                $isSpecial = $barber->special_mode ?? false;
                                 $rawAvatar = $barber->user->avatar;
-                                $isImage = $rawAvatar && (
-                                    str_starts_with($rawAvatar, 'users/') || 
-                                    str_ends_with(strtolower($rawAvatar), '.jpg') || 
-                                    str_ends_with(strtolower($rawAvatar), '.jpeg') || 
-                                    str_ends_with(strtolower($rawAvatar), '.png') || 
-                                    str_ends_with(strtolower($rawAvatar), '.webp')
-                                );
+                                $isPath = $rawAvatar && (str_contains($rawAvatar, '/') || str_contains($rawAvatar, '.'));
                                 $initials = substr($barber->name, 0, 1);
                             @endphp
 
                             <div class="position-relative" data-bs-toggle="tooltip" title="{{ $barber->name }} {{ $isActive ? '(Activo)' : ($isSpecial ? '(Horario Extra)' : '(Inactivo)') }}">
-                                @if($rawAvatar && $isImage)
-                                    <img src="{{ asset('storage/' . $rawAvatar) }}" alt="{{ $barber->name }}" class="rounded-circle border border-2 {{ $isActive ? 'border-success' : 'border-secondary' }}" style="width: 45px; height: 45px; object-fit: cover;">
+                                @if($isPath)
+                                    <img src="{{ asset('storage/' . $rawAvatar) }}" class="rounded-circle border border-2 {{ $isActive ? 'border-success' : 'border-secondary' }}" style="width: 35px; height: 35px; object-fit: cover;">
                                 @elseif($rawAvatar)
-                                    <!-- Emoji Avatar (User Style) -->
-                                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary fw-bold border border-primary-subtle transition-all hover-scale" style="width: 45px; height: 45px; font-size: 1.5rem;">
+                                    <div class="rounded-circle border border-2 {{ $isActive ? 'border-success' : 'border-secondary' }} bg-light d-flex align-items-center justify-content-center fw-bold text-dark fs-5" style="width: 35px; height: 35px;">
                                         {{ $rawAvatar }}
                                     </div>
                                 @else
-                                    <!-- Initials Fallback -->
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center border border-2 {{ $isActive ? 'border-success bg-success text-white' : 'border-secondary bg-secondary text-white' }}" style="width: 45px; height: 45px; font-weight: bold;">
+                                    <div class="rounded-circle border border-2 {{ $isActive ? 'border-success' : 'border-secondary' }} bg-light d-flex align-items-center justify-content-center fw-bold text-secondary" style="width: 35px; height: 35px;">
                                         {{ $initials }}
                                     </div>
                                 @endif
-
-                                <!-- Status Dot -->
-                                @if($isActive)
-                                    <span class="position-absolute bottom-0 start-100 translate-middle p-1 bg-success border border-light rounded-circle"></span>
-                                @elseif($isSpecial)
-                                    <span class="position-absolute bottom-0 start-100 translate-middle p-1 bg-warning border border-light rounded-circle"></span>
-                                @else
-                                    <span class="position-absolute bottom-0 start-100 translate-middle p-1 bg-secondary border border-light rounded-circle"></span>
-                                @endif
+                                <span class="position-absolute bottom-0 end-0 p-1 bg-{{ $isActive ? 'success' : 'secondary' }} border border-light rounded-circle" style="transform: scale(0.6);"></span>
                             </div>
                         @endforeach
                     </div>
@@ -176,7 +165,7 @@
         </div>
         @endif
     </div>
-    
+
     <!-- Calendar Container -->
     <div class="card border-0 shadow-sm flex-grow-1 overflow-auto" style="min-height: 600px;">
         <div class="card-body p-0 p-md-3 h-100 position-relative">
@@ -302,7 +291,12 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">TELÉFONO</label>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-bold text-muted mb-0">TELÉFONO</label>
+                        <button type="button" class="btn btn-sm text-primary fw-bold p-0 border-0" onclick="pickContact()" id="btnPickContact">
+                            <i class="bi bi-person-rolodex"></i> Abrir Contactos
+                        </button>
+                    </div>
                         <div class="input-group">
                             <span class="input-group-text bg-white border-end-0"><i class="bi bi-whatsapp"></i></span>
                             <select name="phone_prefix" class="form-select border-start-0 border-end-0 bg-light" style="max-width: 100px;" required>
@@ -488,6 +482,52 @@
                 btn.innerHTML = originalText;
             });
     }
+
+    // Contact Picker Logic (Mobile)
+    async function pickContact() {
+        const props = ['name', 'tel'];
+        const opts = { multiple: false };
+
+        if (!('contacts' in navigator && 'ContactsManager' in window)) {
+            Swal.fire('No soportado', 'Tu navegador no soporta el acceso a contactos.', 'warning');
+            return;
+        }
+
+        try {
+            const contacts = await navigator.contacts.select(props, opts);
+            if (contacts.length) {
+                const contact = contacts[0];
+                
+                // 1. Name
+                if (contact.name && contact.name.length) {
+                    document.querySelector('input[name="client_name"]').value = contact.name[0];
+                }
+                
+                // 2. Phone
+                if (contact.tel && contact.tel.length) {
+                    let raw = contact.tel[0];
+                    // Remove generic noise
+                    let num = raw.replace(/[^0-9]/g, '');
+                    
+                    // Handle +57 or 57 prefix (Assuming Colombia default)
+                    if(num.startsWith('57') && num.length > 10) {
+                        num = num.substring(2);
+                    }
+                    
+                    // Limit to expected length (optional but good for UX)
+                    if(num.length > 10) num = num.substring(num.length - 10);
+
+                    document.querySelector('input[name="phone_number"]').value = num;
+                }
+            }
+        } catch (ex) {
+            // User cancelled or error
+            console.log(ex);
+        }
+    }
+
+    // Show button if supported - REMOVED to show always for debugging
+    // document.addEventListener('DOMContentLoaded', () => { ... });
 </script>
 @endpush
 

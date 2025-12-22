@@ -285,6 +285,8 @@ class AppointmentController extends Controller
             $finalPrice = $service->extra_price;
         }
 
+        \Illuminate\Support\Facades\Log::info("💰 DEBUG PRICE: Time {$scheduledAt->format('H:i')} | Hour: $hour | Extra: " . ($isExtraTime?'YES':'NO') . " | Service Price: {$service->price} | Extra Price: {$service->extra_price} | FINAL: $finalPrice");
+
         $appointment = Appointment::create([
             'service_id' => $request->service_id,
             'barber_id' => $request->barber_id,
@@ -295,6 +297,12 @@ class AppointmentController extends Controller
             'status' => $status,
             'price' => $finalPrice
         ]);
+        
+        // Notify Admins
+        $admins = \App\Models\User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new \App\Notifications\NewAppointmentNotification($appointment));
+        }
 
         $whatsappUrl = null;
         
@@ -428,6 +436,8 @@ class AppointmentController extends Controller
             'total_today' => $todaysAppointments->count(),
             'revenue_today' => $todaysAppointments->where('status', 'completed')->sum('price'),
             'pending_today' => $todaysAppointments->where('status', 'scheduled')->count(),
+            'completed_today' => $todaysAppointments->where('status', 'completed')->count(),
+            'cancelled_today' => $todaysAppointments->where('status', 'cancelled')->count(),
             'active_barbers' => Barber::where('is_active', true)->count(),
             'pending_requests' => $pendingRequests->count() 
         ];
@@ -652,6 +662,12 @@ class AppointmentController extends Controller
         ]);
 
         // NOTIFY BARBER OF CANCELLATION
+        // Trigger System Notification
+        $admins = \App\Models\User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new \App\Notifications\AppointmentCancelledNotification($appointment));
+        }
+
         if ($appointment->barber && $appointment->barber->whatsapp_number) {
              try {
                  $msg = "❌ *Cita Cancelada por Cliente* ❌\n\n" .
@@ -727,7 +743,7 @@ class AppointmentController extends Controller
                         'status' => $appointment->status,
                         'client_phone' => $appointment->client_phone,
                         'custom_details' => $appointment->custom_details ?? 'Sin detalles adicionales',
-                        'price' => $appointment->service->price,
+                        'price' => $appointment->price,
                         'cancellation_reason' => $appointment->cancellation_reason
                     ]
                 ];

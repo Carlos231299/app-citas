@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('barbers', 'work_during_lunch')) {
-            Schema::table('barbers', function (Blueprint $table) {
-                $table->boolean('work_during_lunch')->default(false);
-            });
-        }
+        Schema::table('products', function (Blueprint $table) {
+            $table->integer('min_stock')->default(5)->after('stock');
+        });
     }
 
     /**
@@ -23,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('barbers', function (Blueprint $table) {
-            $table->dropColumn('work_during_lunch');
+        Schema::table('products', function (Blueprint $table) {
+            $table->dropColumn('min_stock');
         });
     }
 };

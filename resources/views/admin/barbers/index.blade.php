@@ -7,7 +7,7 @@
     <h2 class="fw-bold m-0" style="color: #333;">Barberos</h2>
     <div class="d-flex gap-2">
         @if(trim(auth()->user()->role) === 'admin')
-        <button class="btn btn-gold" data-bs-toggle="modal" data-bs-target="#createBarberModalNew">
+        <button class="btn btn-gold" onclick="openCreateModal()">
             <i class="bi bi-person-plus-fill"></i> Nuevo Barbero
         </button>
         @endif
@@ -110,12 +110,14 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">NOMBRE COMPLETO</label>
-                        <input type="text" name="name" class="form-control" required placeholder="Ej: Juan Pérez">
+                        <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required placeholder="Ej: Juan Pérez">
+                        @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">WHATSAPP (Opcional)</label>
-                        <input type="tel" name="whatsapp_number" class="form-control" placeholder="+57300..." 
+                        <input type="tel" name="whatsapp_number" class="form-control @error('whatsapp_number') is-invalid @enderror" value="{{ old('whatsapp_number') }}" placeholder="+57300..." 
                                oninput="this.value = this.value.replace(/[^0-9+]/g, '')">
+                        @error('whatsapp_number') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
                     <h6 class="text-primary fw-bold mb-3 border-bottom pb-2 mt-4">Cuenta de Acceso</h6>
@@ -125,11 +127,13 @@
                     
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">USUARIO DE ACCESO</label>
-                        <input type="text" name="username" class="form-control" required placeholder="Ej: juan.perez" pattern="[a-zA-Z0-9\._\-]+" title="Solo letras, números, puntos, guiones y guiones bajos.">
+                        <input type="text" name="username" class="form-control @error('username') is-invalid @enderror" value="{{ old('username') }}" required placeholder="Ej: juan.perez" pattern="[a-zA-Z0-9\._\-]+" title="Solo letras, números, puntos, guiones y guiones bajos.">
+                        @error('username') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">CORREO ELECTRÓNICO</label>
-                        <input type="email" name="email" class="form-control" required placeholder="usuario@barberia.com">
+                        <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required placeholder="usuario@barberia.com">
+                        @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">CONTRASEÑA</label>
@@ -199,9 +203,20 @@
 @push('scripts')
 <script>
     let editModal;
+    let createModal;
+
     document.addEventListener('DOMContentLoaded', () => {
         editModal = new bootstrap.Modal(document.getElementById('editBarberModal'));
+        createModal = new bootstrap.Modal(document.getElementById('createBarberModalNew'));
         
+        window.openCreateModal = function() {
+            createModal.show();
+        };
+
+        @if($errors->any())
+            createModal.show();
+        @endif
+
         // Dirty Check Logic
         const nameInput = document.getElementById('edit_name');
         const whatsappInput = document.getElementById('edit_whatsapp');

@@ -58,6 +58,12 @@
 
             {{-- Barbers: Visible ONLY to Admin (Barbers manage status in Profile now) --}}
             @if(trim(auth()->user()->role) === 'admin')
+            <a class="nav-link sidebar-link {{ request()->routeIs('products.*') ? 'active' : '' }}" href="{{ route('products.index') }}" title="Inventario">
+                <i class="bi bi-box-seam-fill"></i> <span class="sidebar-text">Inventario</span>
+            </a>
+            @endif
+
+            @if(trim(auth()->user()->role) === 'admin')
             <a class="nav-link sidebar-link {{ request()->routeIs('barbers.*') ? 'active' : '' }}" href="{{ route('barbers.index') }}" title="Gestionar Barberos">
                 <i class="bi bi-people-fill"></i> <span class="sidebar-text">Gestionar Barberos</span>
             </a>
@@ -86,7 +92,51 @@
                 </button>
                 <h2 class="h4 mb-0 fw-bold text-dark">@yield('header')</h2>
             </div>
-            <div class="dropdown">
+            <!-- Notifications & Profile -->
+            <div class="d-flex align-items-center gap-3">
+                <!-- Notifications -->
+                <div class="dropdown">
+                    <a href="#" class="position-relative text-secondary" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 1.5rem;">
+                        <i class="bi bi-bell"></i>
+                        @if(auth()->user()->unreadNotifications->count() > 0)
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.6rem;">
+                                {{ auth()->user()->unreadNotifications->count() }}
+                            </span>
+                        @endif
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-0" aria-labelledby="notifDropdown" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                        <li class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+                            <h6 class="mb-0 fw-bold">Notificaciones</h6>
+                            @if(auth()->user()->unreadNotifications->count() > 0)
+                                <button onclick="markAllRead()" class="btn btn-link p-0 text-decoration-none small" style="font-size: 0.8rem;">Marcar todo leído</button>
+                            @endif
+                        </li>
+                        @forelse(auth()->user()->unreadNotifications as $notification)
+                            <li>
+                                <a class="dropdown-item p-3 border-bottom" href="{{ $notification->data['url'] ?? '#' }}">
+                                    <div class="d-flex align-items-start gap-3">
+                                        <div class="bg-{{ $notification->data['color'] ?? 'primary' }} bg-opacity-10 rounded-circle p-2 text-{{ $notification->data['color'] ?? 'primary' }}">
+                                            <i class="{{ $notification->data['icon'] ?? 'bi-info-circle' }}"></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-1 fw-bold small text-dark">{{ $notification->data['title'] }}</p>
+                                            <p class="mb-1 text-secondary small text-wrap">{{ $notification->data['message'] }}</p>
+                                            <span class="text-muted" style="font-size: 0.7rem;">{{ $notification->created_at->diffForHumans() }}</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                        @empty
+                            <li class="p-4 text-center text-muted">
+                                <i class="bi bi-bell-slash fs-4 d-block mb-2 opacity-50"></i>
+                                <small>No tienes notificaciones nuevas</small>
+                            </li>
+                        @endforelse
+                    </ul>
+                </div>
+
+                <!-- Profile -->
+                <div class="dropdown">
                 <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle no-caret" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
                     <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary fw-bold border border-primary-subtle transition-all hover-scale" style="width: 45px; height: 45px; font-size: 1.5rem;">
                         @if(auth()->user()->avatar)
@@ -206,15 +256,15 @@
             });
         });
 
-        // Global Function for Logout
+        // Global Function for    <script>
         function confirmLogout() {
             Swal.fire({
                 title: '¿Cerrar Sesión?',
-                text: "¿Estás seguro que deseas salir del sistema?",
+                text: "¿Estás seguro de que quieres salir?",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#2563EB',
-                cancelButtonColor: '#94a3b8',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
                 confirmButtonText: 'Sí, salir',
                 cancelButtonText: 'Cancelar'
             }).then((result) => {
@@ -223,7 +273,20 @@
                 }
             })
         }
+
+        function markAllRead() {
+            fetch('{{ route("notifications.markRead") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();
+                }
+            });
+        }
     </script>
-    
 </body>
 </html>
