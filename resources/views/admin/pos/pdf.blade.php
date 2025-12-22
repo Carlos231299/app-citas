@@ -30,6 +30,14 @@
         <!-- <img src="{{ public_path('images/logo.png') }}" class="logo"> -->
         <h1>Barbería JR</h1>
         <div class="meta">Reporte de Ventas generado el {{ now()->format('d/m/Y h:i A') }}</div>
+        @if(request('date_from') || request('date_to'))
+            <div class="meta">
+                Periodo: 
+                {{ request('date_from') ? \Carbon\Carbon::parse(request('date_from'))->format('d/m/Y') : 'Inicio' }} 
+                - 
+                {{ request('date_to') ? \Carbon\Carbon::parse(request('date_to'))->format('d/m/Y') : 'Fin' }}
+            </div>
+        @endif
         <div class="meta">Generado por: {{ auth()->user()->name }}</div>
     </div>
 

@@ -5,11 +5,44 @@
 
 @section('content')
 <div class="card border-0 shadow-sm">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0 fw-bold text-dark">Historial de Transacciones</h5>
-        <a href="{{ route('pos.history.pdf') }}" class="btn btn-danger btn-sm text-white">
-            <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
-        </a>
+    <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0 fw-bold text-dark">Historial de Transacciones</h5>
+            <a href="{{ route('pos.history.pdf', request()->all()) }}" class="btn btn-danger btn-sm text-white shadow-sm">
+                <i class="bi bi-file-earmark-pdf"></i> Exportar PDF (Filtrado)
+            </a>
+        </div>
+
+        <!-- Filter Form -->
+        <form action="{{ route('pos.history') }}" method="GET" class="row g-2">
+            <div class="col-12 col-md-3">
+                <label class="small fw-bold text-muted mb-1">Desde</label>
+                <input type="date" name="date_from" class="form-control form-control-sm" value="{{ request('date_from') }}">
+            </div>
+            <div class="col-12 col-md-3">
+                <label class="small fw-bold text-muted mb-1">Hasta</label>
+                <input type="date" name="date_to" class="form-control form-control-sm" value="{{ request('date_to') }}">
+            </div>
+            <div class="col-12 col-md-3">
+                <label class="small fw-bold text-muted mb-1">Método de Pago</label>
+                <select name="payment_method" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                    <option value="efectivo" {{ request('payment_method') == 'efectivo' ? 'selected' : '' }}>Efectivo</option>
+                    <option value="tarjeta" {{ request('payment_method') == 'tarjeta' ? 'selected' : '' }}>Tarjeta</option>
+                    <option value="transferencia" {{ request('payment_method') == 'transferencia' ? 'selected' : '' }}>Transferencia</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-3 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
+                    <i class="bi bi-filter"></i> Filtrar
+                </button>
+                @if(request()->anyFilled(['date_from', 'date_to', 'payment_method']))
+                    <a href="{{ route('pos.history') }}" class="btn btn-light btn-sm border">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                @endif
+            </div>
+        </form>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">

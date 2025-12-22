@@ -86,21 +86,39 @@ class PosController extends Controller
         }
     }
 
-    public function history()
+    public function history(Request $request)
     {
-        $sales = \App\Models\Sale::with('user')->orderBy('created_at', 'desc')->paginate(20);
+        $sales = $this->applyFilters(\App\Models\Sale::with('user'), $request)
+                      ->orderBy('created_at', 'desc')
+                      ->paginate(20)
+                      ->withQueryString();
+
         return view('admin.pos.history', compact('sales'));
     }
 
-    public function exportPdf()
+    public function exportPdf(Request $request)
     {
-        $sales = \App\Models\Sale::with('user')->orderBy('created_at', 'desc')->get();
+        $sales = $this->applyFilters(\App\Models\Sale::with('user'), $request)
+                      ->orderBy('created_at', 'desc')
+                      ->get();
         
         $pdf = Pdf::loadView('admin.pos.pdf', compact('sales'));
-        
-        // Aesthetic paper size adjustments if needed, e.g. A4 landscape
         $pdf->setPaper('a4', 'landscape');
         
         return $pdf->download('reporte-ventas-' . now()->format('Y-m-d') . '.pdf');
+    }
+
+    private function applyFilters($query, $request)
+    {
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+        if ($request->filled('payment_method')) {
+            $query->where('payment_method', $request->payment_method);
+        }
+        return $query;
     }
 }
