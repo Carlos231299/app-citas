@@ -1258,38 +1258,162 @@
 
 
     // Actions
+    // POS System Logic (Updated)
+    let posCart = [];
+    const posModal = new bootstrap.Modal(document.getElementById('completeAppointmentModal'));
+
     window.completeAppointment = function(id, basePrice) {
-        Swal.fire({
-            title: 'Confirmar Completado',
-            text: '¿Deseas finalizar esta cita?',
-            input: 'number',
-            inputValue: basePrice,
-            inputLabel: 'Precio Final Cobrado',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, Completar',
-            cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#10B981',
-            inputValidator: (value) => {
-                if (!value) {
-                    return 'Debes ingresar el precio cobrado';
-                }
+        // Reset State
+        posCart = [];
+        document.getElementById('pos_appointment_id').value = id;
+        document.getElementById('pos_base_price').value = basePrice;
+        
+        let serviceName = "Servicio Cita #" + id;
+        if(window.calendarInstance) {
+            const event = window.calendarInstance.getEventById(id);
+            if(event && event.extendedProps.service) {
+                serviceName = event.extendedProps.service;
             }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                axios.patch(`/appointments/${id}/complete`, {
-                    confirmed_price: result.value
-                })
-                .then(response => {
-                    Swal.fire('¡Listo!', 'La cita ha sido marcada como completada.', 'success');
-                    // Reload
-                    setTimeout(() => location.reload(), 1000); 
-                })
-                .catch(error => {
-                    console.error(error);
-                    Swal.fire('Error', 'No se pudo actualizar la cita.', 'error');
-                });
+        }
+        document.getElementById('pos_service_name').value = serviceName;
+
+        const select = document.getElementById('pos_product_select');
+        select.innerHTML = '<option value="" selected disabled>Buscar producto...</option>';
+        
+        if (typeof serverData !== 'undefined' && serverData.products && serverData.products.length > 0) {
+            serverData.products.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.text = `${p.name} ($${p.price}) - Stock: ${p.stock}`;
+                opt.dataset.price = p.price;
+                opt.dataset.name = p.name;
+                opt.dataset.stock = p.stock;
+                if(p.stock <= 0) opt.disabled = true;
+                select.appendChild(opt);
+            });
+        }
+
+        renderPosCart();
+        posModal.show();
+    };
+
+    window.addPosProduct = function() {
+        const select = document.getElementById('pos_product_select');
+        const qtyInput = document.getElementById('pos_product_qty');
+        const productId = select.value;
+        const qty = parseInt(qtyInput.value);
+
+        if (!productId || qty < 1) return;
+
+        const option = select.options[select.selectedIndex];
+        const price = parseFloat(option.dataset.price);
+        const name = option.dataset.name;
+        const stock = parseInt(option.dataset.stock);
+
+        if (qty > stock) {
+            Swal.fire('Stock Insuficiente', `Solo quedan ${stock} unidades de ${name}`, 'warning');
+            return;
+        }
+
+        const existing = posCart.find(i => i.id === productId);
+        if (existing) {
+            if (existing.qty + qty > stock) {
+                Swal.fire('Stock Insuficiente', 'No puedes agregar más de lo disponible.', 'warning');
+                return;
             }
-        });
+            existing.qty += qty;
+        } else {
+            posCart.push({ id: productId, name: name, price: price, qty: qty });
+        }
+
+        select.value = "";
+        qtyInput.value = 1;
+        renderPosCart();
+    };
+
+    window.removePosProduct = function(index) {
+        posCart.splice(index, 1);
+        renderPosCart();
+    };
+
+    function renderPosCart() {
+        const tbody = document.getElementById('pos_cart_body');
+        const emptyMsg = document.getElementById('pos_empty_cart');
+        const totalSpan = document.getElementById('pos_products_total');
+        
+        tbody.innerHTML = '';
+        let productsTotal = 0;
+
+        if (posCart.length === 0) {
+            emptyMsg.classList.remove('d-none');
+        } else {
+            emptyMsg.classList.add('d-none');
+            posCart.forEach((item, index) => {
+                const subtotal = item.price * item.qty;
+                productsTotal += subtotal;
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="small fw-bold">${item.name}</td>
+                    <td class="small text-center">${item.qty}</td>
+                    <td class="small text-end">$${subtotal}</td>
+                    <td class="text-end">
+                        <button type="button" class="btn btn-sm text-danger p-0" onclick="removePosProduct(${index})">
+                            <i class="bi bi-x-circle-fill"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        totalSpan.textContent = '$' + productsTotal;
+        updatePosTotal(productsTotal);
+    }
+
+    function updatePosTotal(productsTotal = null) {
+        if (productsTotal === null) {
+             productsTotal = posCart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+        }
+        
+        const basePrice = parseFloat(document.getElementById('pos_base_price').value) || 0;
+        const grandTotal = basePrice + productsTotal;
+        
+        document.getElementById('pos_grand_total').textContent = '$' + grandTotal;
+    }
+
+    window.submitComplete = function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnCompletePos');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+
+        const appointmentId = document.getElementById('pos_appointment_id').value;
+        const confirmedPrice = parseFloat(document.getElementById('pos_base_price').value) || 0;
+
+        const payload = {
+            confirmed_price: confirmedPrice,
+            products: posCart.map(i => ({ product_id: i.id, quantity: i.qty }))
+        };
+
+        axios.patch(`/appointments/${appointmentId}/complete`, payload)
+            .then(response => {
+                posModal.hide();
+                Swal.fire({
+                    title: '¡Venta Exitosa!',
+                    text: 'Inventario actualizado y cita cerrada.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => location.reload());
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire('Error', 'No se pudo completar la transacción.', 'error');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
     };
 
     window.cancelAppointment = function(id) {
