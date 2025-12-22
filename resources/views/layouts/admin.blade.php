@@ -77,15 +77,21 @@
         /* Adjust main content to not have margin left since sidebar is hidden */
         .main-content {
             margin-left: 0 !important; /* Override explicit margin */
-            padding-left: 80px !important; /* Force space for the floating button */
-            padding-right: 15px;
-            padding-top: 15px; /* Ensure top spacing match */
+            padding: 20px; /* Standard consistent padding */
+            padding-left: 80px; /* Desktop: Space for button */
+            transition: padding-left 0.3s ease;
         }
         
-        /* Mobile Specific adjustments if needed */
+        /* Mobile Specific adjustments */
         @media (max-width: 768px) {
-            /* On very small screens, maybe reduce padding but ensure header clears? */
-            /* Actually, 80px is fine, keeps it consistent. */
+            .main-content {
+                padding-left: 15px !important; /* Revert to standard small padding on mobile */
+            }
+            
+            /* Only push the header text to avoid button overlap */
+            .main-content > header {
+                padding-left: 55px; /* Button width (45px) + gap */
+            }
         }
         
         /* Sidebar Hotspot (Left Edge) */
