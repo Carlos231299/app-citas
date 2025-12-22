@@ -1596,27 +1596,16 @@
                 let waUrl = `https://wa.me/${clientPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(waMessage)}`;
 
                 Swal.fire({
-                    title: '¡Venta Exitosa!',
-                    text: 'Inventario actualizado y cita cerrada.',
+                    title: '¡Cita Completada!',
+                    html: `El recibo se está enviando automáticamente por WhatsApp al cliente.<br><br>
+                           <small class="text-muted">Si el cliente no recibe el mensaje, verifica la conexión del bot.</small>`,
                     icon: 'success',
-                    showCancelButton: true,
-                    confirmButtonText: '<i class="bi bi-whatsapp me-1"></i> Enviar WhatsApp',
-                    cancelButtonText: 'Cerrar',
-                    denyButtonText: '<i class="bi bi-file-earmark-pdf me-1"></i> Ver PDF',
-                    showDenyButton: saleId ? true : false,
-                    confirmButtonColor: '#25D366',
-                    denyButtonColor: '#EF4444',
-                    reverseButtons: true
-                }).then((res) => {
-                    if (res.isConfirmed) {
-                        window.open(waUrl, '_blank');
-                        location.reload();
-                    } else if (res.isDenied) {
-                        window.open(`/pos/sale/${saleId}/pdf`, '_blank');
-                        location.reload();
-                    } else {
-                        location.reload();
-                    }
+                    timer: 4000,
+                    showConfirmButton: true,
+                    confirmButtonText: 'Entendido',
+                    customClass: { popup: 'rounded-4' }
+                }).then(() => {
+                    location.reload();
                 });
             })
             .catch(err => {

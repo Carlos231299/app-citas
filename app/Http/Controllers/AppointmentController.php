@@ -580,6 +580,47 @@ class AppointmentController extends Controller
             
             DB::commit();
 
+            // [NEW] NOTIFY CLIENT VIA WHATSAPP (BOT)
+            if ($appointment->client_phone) {
+                try {
+                    // 1. Send Text Summary
+                    $totalAmount = $appointment->confirmed_price ?? ($appointment->price + $productsTotal);
+                    $msg = "✅ *Cita Finalizada - Barbería JR* ✅\n\n" .
+                           "Hola *{$appointment->client_name}*,\n" .
+                           "Tu servicio ha finalizado con éxito.\n\n" .
+                           "💰 *Total:* " . '$ ' . number_format($totalAmount, 0) . "\n" .
+                           "🙏 ¡Gracias por tu preferencia!\n\n" .
+                           "Te adjuntamos tu recibo a continuación:";
+
+                    \Illuminate\Support\Facades\Http::timeout(3)->post('http://localhost:3000/send-message', [
+                        'phone' => $appointment->client_phone,
+                        'message' => $msg
+                    ]);
+
+                    // 2. Send PDF Receipt if Sale exists
+                    if ($sale) {
+                        // Use a URL accessible by the bot. 
+                        // If bot is local and server is remote, we should use the PUBLIC URL 
+                        // but since the bot is on Carlos's PC and has a tunnel, 
+                        // maybe localhost:8001 works or the public domain.
+                        $pdfUrl = route('pos.sale.pdf', $sale->id);
+                        
+                        // If we are in local development / tunnel context, we might need to adjust this URL 
+                        // so the BOT (local) can reach the PDF. 
+                        // Carlos suggested the bot knows what to do, similar to confirmations.
+                        
+                        \Illuminate\Support\Facades\Http::timeout(5)->post('http://localhost:3000/send-pdf', [
+                            'phone' => $appointment->client_phone,
+                            'pdf_url' => $pdfUrl,
+                            'filename' => "Recibo_{$sale->id}.pdf",
+                            'caption' => "Recibo de servicio #{$appointment->id}"
+                        ]);
+                    }
+                } catch (\Exception $botError) {
+                    \Illuminate\Support\Facades\Log::error("Bot Receipt Sending Failed: " . $botError->getMessage());
+                }
+            }
+
             return request()->wantsJson() 
                 ? response()->json([
                     'success' => true, 

@@ -334,6 +334,37 @@ app.post('/send-message', async (req, res) => {
     }
 });
 
+// --- SEND PDF RECEIPT ENDPOINT ---
+app.post('/send-pdf', async (req, res) => {
+    const { phone, pdf_url, filename, caption } = req.body;
+    console.log(`📄 Sending PDF to ${phone}: ${filename}`);
+
+    try {
+        if (!client) {
+            return res.status(503).json({ error: 'WhatsApp client not ready' });
+        }
+
+        const chatId = phone.includes("@c.us")
+            ? phone
+            : phone.replace(/\D/g, "") + "@c.us";
+
+        // Import MessageMedia from pkg (whatsapp-web.js)
+        const MessageMedia = pkg.MessageMedia;
+        const media = await MessageMedia.fromUrl(pdf_url);
+
+        await client.sendMessage(chatId, media, {
+            caption: caption || 'Tu recibo de Barbería JR',
+            sendMediaAsDocument: true
+        });
+
+        res.json({ success: true });
+
+    } catch (error) {
+        console.error('❌ Error sending PDF:', error);
+        res.status(500).json({ error: 'Failed', details: error.message });
+    }
+});
+
 // Reminder endpoint removed by request
 
 app.listen(3000, () => {
