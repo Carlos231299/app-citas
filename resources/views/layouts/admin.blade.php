@@ -61,9 +61,13 @@
             @if(trim(auth()->user()->role) === 'admin')
             
             <!-- POS & Inventory Group -->
-            <a class="nav-link sidebar-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#posSubmenu" role="button" aria-expanded="{{ request()->routeIs('products.*') || request()->routeIs('pos.*') ? 'true' : 'false' }}">
-                <span><i class="bi bi-shop me-2"></i> <span class="sidebar-text">POS / Inventario</span></span>
-                <i class="bi bi-chevron-down small transition-transform" style="font-size: 0.7rem;"></i>
+            <!-- POS & Inventory Group -->
+            <a class="nav-link sidebar-link" data-bs-toggle="collapse" href="#posSubmenu" role="button" aria-expanded="{{ request()->routeIs('products.*') || request()->routeIs('pos.*') ? 'true' : 'false' }}">
+                <i class="bi bi-shop"></i> 
+                <span class="sidebar-text d-flex justify-content-between align-items-center w-100 ms-2">
+                    <span>POS / Inventario</span>
+                    <i class="bi bi-chevron-down small transition-transform" style="font-size: 0.7rem;"></i>
+                </span>
             </a>
             <div class="collapse {{ request()->routeIs('products.*') || request()->routeIs('pos.*') ? 'show' : '' }}" id="posSubmenu">
                 <nav class="nav flex-column ps-3 border-start border-2 border-light ms-3 mb-2">
