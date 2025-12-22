@@ -566,12 +566,43 @@ class AppointmentController extends Controller
         // 3. Reset Status
         $appointment->update([
             'status' => 'scheduled',
-            'confirmed_price' => null // Clear final price
+            'confirmed_price' => null,
+            'completed_by' => null
         ]);
 
         return request()->wantsJson() 
             ? response()->json(['message' => 'Reabierta'])
             : redirect()->back()->with('success', 'Cita reabierta y stock restaurado.');
+    }
+
+    public function destroy(Appointment $appointment)
+    {
+        // Permission Check: Admin Only for Deletion (safest) or Owner Barber
+        if (trim(auth()->user()->role) !== 'admin') {
+             return request()->wantsJson() 
+                 ? response()->json(['message' => 'No autorizado. Solo admin puede eliminar.'], 403)
+                 : abort(403, 'No autorizado.');
+        }
+
+        // 1. If Completed, Restore Stock
+        if ($appointment->status === 'completed') {
+            $appointment->load('products');
+            foreach ($appointment->products as $existingProduct) {
+                // Restore logic 
+                $existingProduct->stock += $existingProduct->pivot->quantity;
+                $existingProduct->save();
+            }
+        }
+
+        // 2. Detach everything
+        $appointment->products()->detach();
+        
+        // 3. Delete
+        $appointment->delete();
+
+        return request()->wantsJson() 
+            ? response()->json(['message' => 'Eliminada'])
+            : redirect()->back()->with('success', 'Cita eliminada permanentemente.');
     }
 
     // Admin: Cancel

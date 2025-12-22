@@ -914,22 +914,32 @@
                         </div>
                         <div class="d-flex justify-content-between gap-2 mt-4">
                             ${props.status !== 'completed' ? `
-                                <button onclick="completeAppointment(${event.id}, ${props.price})" class="btn btn-success flex-grow-1 fw-bold">
-                                    <i class="bi bi-check-lg me-1"></i> Completar
-                                </button>
-                                <button onclick="window.calendarInstance.getEventById(${event.id}).remove()" class="btn btn-primary flex-grow-1 fw-bold">
-                                    <i class="bi bi-pencil-fill me-1"></i> Editar
-                                </button>
-                                <button onclick="cancelAppointment(${event.id})" class="btn btn-warning flex-grow-1 fw-bold text-white">
-                                    <i class="bi bi-x-circle me-1"></i> Cancelar
-                                </button>
+                                <div class="d-flex gap-1 flex-wrap">
+                                    <button onclick="completeAppointment(${event.id}, ${props.price})" class="btn btn-success flex-grow-1 fw-bold">
+                                        <i class="bi bi-check-lg me-1"></i> Completar
+                                    </button>
+                                    <button onclick="window.calendarInstance.getEventById(${event.id}).remove()" class="btn btn-primary flex-grow-1 fw-bold">
+                                        <i class="bi bi-pencil-fill me-1"></i> Editar
+                                    </button>
+                                    <button onclick="cancelAppointment(${event.id})" class="btn btn-warning flex-grow-1 fw-bold text-white">
+                                        <i class="bi bi-x-circle me-1"></i> Cancelar
+                                    </button>
+                                    <button onclick="deleteAppointment(${event.id})" class="btn btn-outline-danger flex-grow-0" title="Eliminar permanentemente">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </div>
                             ` : `
-                                <button onclick="reopenAppointment(${event.id})" class="btn btn-primary flex-grow-1 fw-bold">
-                                    <i class="bi bi-arrow-repeat me-1"></i> Volver a Abrir
-                                </button>
-                                <button onclick="Swal.close()" class="btn btn-secondary flex-grow-1 fw-bold">
-                                    <i class="bi bi-x mx-1"></i> Cerrar
-                                </button>
+                                <div class="d-flex gap-2">
+                                    <button onclick="reopenAppointment(${event.id})" class="btn btn-primary flex-grow-1 fw-bold">
+                                        <i class="bi bi-arrow-repeat me-1"></i> Volver a Abrir
+                                    </button>
+                                    <button onclick="deleteAppointment(${event.id})" class="btn btn-outline-danger flex-grow-0" title="Eliminar permanentemente">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                    <button onclick="Swal.close()" class="btn btn-secondary flex-grow-0 fw-bold">
+                                        <i class="bi bi-x mx-1"></i>
+                                    </button>
+                                </div>
                             `}
                         </div>
                     `,
@@ -1462,6 +1472,30 @@
                 .catch(error => {
                     console.error(error);
                     Swal.fire('Error', 'No se pudo reabrir la cita.', 'error');
+                });
+            }
+        });
+    };
+
+    window.deleteAppointment = function(id) {
+        Swal.fire({
+            title: '¿Eliminar Permanentemente?',
+            text: 'Esta acción NO se puede deshacer. Si la cita estaba completada, el stock de productos se restaurará automáticamente.',
+            icon: 'error',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, Eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#dc3545'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.delete(`/appointments/${id}`)
+                .then(response => {
+                    Swal.fire('¡Eliminada!', 'La cita ha sido eliminada por completo.', 'success');
+                    setTimeout(() => location.reload(), 1000); // Reload to reflect stats
+                })
+                .catch(error => {
+                    const msg = error.response?.data?.message || 'No se pudo eliminar.';
+                    Swal.fire('Error', msg, 'error');
                 });
             }
         });
