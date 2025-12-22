@@ -777,180 +777,7 @@
             },
             
             eventClick: function(info) {
-                const event = info.event;
-                const props = event.extendedProps;
-                
-                // Format Date
-                const dateOptions = { weekday: 'long', day: 'numeric', month: 'long' };
-                const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
-                
-                const dateStr = event.start.toLocaleDateString('es-ES', dateOptions);
-                const timeStr = event.allDay ? 'Todo el día' : event.start.toLocaleTimeString('es-ES', timeOptions);
-                
-                // Determine Styles based on Type
-                let headerContent = '';
-                let bgStyle = '';
-                let titleColor = '#1f1f1f';
-                
-                if (props.type === 'holiday') {
-                    // Holiday Style (like the image)
-                    bgStyle = 'background-color: #F8FAFE; background-image: url("https://www.gstatic.com/classroom/themes/img_birthday.jpg"); background-size: cover; background-position: center;';
-                    // Fallback gradient if image fails or for cleaner look:
-                    // bgStyle = 'background: linear-gradient(135deg, #FFD1DC 0%, #C1E1C1 100%);'; 
-                } else {
-                    // Appointment Style
-                    const statusColors = {
-                        'completed': 'linear-gradient(135deg, #34D399 0%, #059669 100%)',
-                        'cancelled': 'linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)',
-                        'scheduled': 'linear-gradient(135deg, #6366F1 0%, #3B82F6 100%)'
-                    };
-                    bgStyle = `background: ${statusColors[props.status] || statusColors['scheduled']}`;
-                    titleColor = '#ffffff'; // White text on dark gradients
-                }
-
-                // STANDARD SWEETALERT 2 DESIGN
-                let statusBadge = '';
-                if (props.status && props.type !== 'holiday') {
-                    const colors = { 
-                        'scheduled': 'primary', 
-                        'completed': 'success', 
-                        'cancelled': 'danger' 
-                    };
-                    const labels = { 
-                        'scheduled': 'Programada', 
-                        'completed': 'Completada', 
-                        'cancelled': 'Cancelada' 
-                    };
-                    const color = colors[props.status] || 'secondary';
-                    const label = labels[props.status] || props.status;
-                    statusBadge = `<span class="badge bg-${color}">${label}</span>`;
-                }
-
-                // Action Buttons (Standard Bootstrap)
-                // Action Buttons (Standard Bootstrap)
-                let actionButtons = '';
-                if (props.type === 'appointment' && props.status === 'scheduled') {
-                    // Visibility Logic: "Complete" button only appears if 20 mins have passed
-                    const now = new Date();
-                    const diffMs = now - event.start;
-                    const diffMinutes = diffMs / (1000 * 60);
-                    
-                    let completeBtn = '';
-                    if (diffMinutes >= 20) {
-                        completeBtn = `
-                            <button onclick="completeAppointment(${event.id}, ${props.price})" class="btn btn-success px-4">
-                                <i class="bi bi-check-circle-fill me-1"></i> Completar
-                            </button>
-                        `;
-                    }
-
-                    actionButtons = `
-                        <div class="d-flex justify-content-center gap-2 mt-4 flex-wrap">
-                            ${completeBtn}
-                            <button onclick="editAppointment(${event.id})" class="btn btn-primary px-4">
-                                <i class="bi bi-pencil-fill me-1"></i> Editar
-                            </button>
-                            <button onclick="cancelAppointment(${event.id})" class="btn btn-warning px-4 text-white">
-                                <i class="bi bi-slash-circle me-1"></i> Cancelar
-                            </button>
-                            <button onclick="deleteAppointment(${event.id})" class="btn btn-danger px-4">
-                                <i class="bi bi-trash-fill me-1"></i> Eliminar
-                            </button>
-                        </div>
-                    `;
-                } else if (props.type === 'appointment') {
-                     // For Cancelled/Completed/Request - Show Delete Button
-                     actionButtons = `
-                        <div class="d-flex justify-content-center gap-2 mt-4 flex-wrap">
-                            <button onclick="deleteAppointment(${event.id})" class="btn btn-danger px-4">
-                                <i class="bi bi-trash-fill me-1"></i> Eliminar Definitivamente
-                            </button>
-                        </div>
-                    `;
-                }
-
-
-                Swal.fire({
-                    title: event.title,
-                    html: `
-                        <div class="text-start fs-6">
-                            <p class="mb-2"><strong><i class="bi bi-calendar-event me-2"></i>Fecha:</strong> ${dateStr}</p>
-                            <p class="mb-2"><strong><i class="bi bi-clock me-2"></i>Hora:</strong> ${timeStr}</p>
-                            ${props.barber ? `<p class="mb-2"><strong><i class="bi bi-person me-2"></i>Barbero:</strong> ${props.barber}</p>` : ''}
-                            ${props.service ? `<p class="mb-2"><strong><i class="bi bi-scissors me-2"></i>Servicio:</strong> ${props.service} (Base: ${formatMoney(props.base_price)})</p>` : ''}
-                            
-                            ${props.products && props.products.length > 0 ? `
-                                <div class="mb-2 ps-4 border-start border-3 border-secondary">
-                                    <small class="text-muted d-block fw-bold">Productos Adicionales:</small>
-                                    ${props.products.map(p => `
-                                        <div class="d-flex justify-content-between small">
-                                            <span>${p.qty}x ${p.name}</span>
-                                            <span class="fw-bold">${formatMoney(p.price * p.qty)}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
-
-                            ${props.client_phone ? `<p class="mb-2"><strong><i class="bi bi-whatsapp me-2"></i>Teléfono:</strong> ${props.client_phone}</p>` : ''}
-                            <p class="mb-2"><strong><i class="bi bi-info-circle me-2"></i>Estado:</strong> ${statusBadge}</p>
-                            ${props.custom_details ? `<p class="mb-0 text-muted small mt-3"><em>${props.custom_details}</em></p>` : ''}
-
-                            ${props.status === 'cancelled' ? 
-                                `<div class="mt-3 p-2 bg-danger bg-opacity-10 rounded border border-danger">
-                                    <strong class="text-danger d-block">Motivo de Cancelación:</strong> 
-                                    <span class="text-dark small">${props.cancellation_reason || 'No especificado'}</span>
-                                </div>` : ''
-                            }
-
-                            ${props.status === 'completed' ? 
-                                `<div class="mt-3 p-2 bg-success bg-opacity-10 rounded border border-success">
-                                    <strong class="text-success"><i class="bi bi-check-circle-fill me-1"></i> Completada con éxito</strong>
-                                    <div class="mt-2 fs-5 fw-bold border-top border-secondary pt-2 text-dark">
-                                        Total Cobrado: ${formatMoney(props.final_price || props.price)}
-                                    </div>
-                                    ${props.completed_by ? `<div class="mt-1 small text-dark"><i class="bi bi-person-check me-1"></i>Completada por: <strong>${props.completed_by}</strong></div>` : ''}
-                                </div>` : ''
-                            }
-                        </div>
-                        <div class="d-flex justify-content-center mt-4 w-100">
-                            ${props.status !== 'completed' ? `
-                                <div class="d-flex justify-content-center gap-1 flex-wrap w-100">
-                                    <button onclick="completeAppointment(${event.id}, ${props.price})" class="btn btn-success flex-grow-1 fw-bold">
-                                        <i class="bi bi-check-lg me-1"></i> Completar
-                                    </button>
-                                    <button onclick="window.calendarInstance.getEventById(${event.id}).remove()" class="btn btn-primary flex-grow-1 fw-bold">
-                                        <i class="bi bi-pencil-fill me-1"></i> Editar
-                                    </button>
-                                    <button onclick="cancelAppointment(${event.id})" class="btn btn-warning flex-grow-1 fw-bold text-white">
-                                        <i class="bi bi-x-circle me-1"></i> Cancelar
-                                    </button>
-                                    <button onclick="deleteAppointment(${event.id})" class="btn btn-outline-danger flex-grow-0" title="Eliminar permanentemente">
-                                        <i class="bi bi-trash-fill"></i>
-                                    </button>
-                                </div>
-                            ` : `
-                                <div class="d-flex justify-content-center gap-2 w-100">
-                                    <button onclick="reopenAppointment(${event.id})" class="btn btn-primary flex-grow-1 fw-bold">
-                                        <i class="bi bi-arrow-repeat me-1"></i> Volver a Abrir
-                                    </button>
-                                    <button onclick="deleteAppointment(${event.id})" class="btn btn-outline-danger flex-grow-0" title="Eliminar permanentemente">
-                                        <i class="bi bi-trash-fill"></i>
-                                    </button>
-                                    <button onclick="Swal.close()" class="btn btn-secondary flex-grow-0 fw-bold">
-                                        <i class="bi bi-x mx-1"></i>
-                                    </button>
-                                </div>
-                            `}
-                        </div>
-                    `,
-                    icon: 'info',
-                    showConfirmButton: false,
-                    showCloseButton: true,
-                    showCancelButton: false,
-                    customClass: {
-                        popup: 'rounded-4 shadow' // Simple rounded corners
-                    }
-                });
+                showEventDetails(info.event);
             }
         });
         
@@ -975,6 +802,138 @@
                 });
             });
         }
+
+        // Check for Notification Auto-Open
+        const openApptId = "{{ request('open_appointment') }}";
+        if(openApptId) {
+            const evt = calendarInstance.getEventById(openApptId);
+            if(evt) {
+                calendarInstance.gotoDate(evt.start);
+                setTimeout(() => showEventDetails(evt), 500); // Small delay to ensure render
+            }
+        }
+    }
+    }
+    
+    // Global Event Details Viewer
+    window.showEventDetails = function(event) {
+        const props = event.extendedProps;
+        
+        // Format Date
+        const dateOptions = { weekday: 'long', day: 'numeric', month: 'long' };
+        const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
+        
+        const dateStr = event.start.toLocaleDateString('es-ES', dateOptions);
+        const timeStr = event.allDay ? 'Todo el día' : event.start.toLocaleTimeString('es-ES', timeOptions);
+        
+        // Determine Styles based on Type
+        let bgStyle = '';
+        
+        if (props.type === 'holiday') {
+            // Holiday Style
+            bgStyle = 'background-color: #F8FAFE; background-image: url("https://www.gstatic.com/classroom/themes/img_birthday.jpg"); background-size: cover; background-position: center;';
+        } else {
+            // Appointment Style
+            const statusColors = {
+                'completed': 'linear-gradient(135deg, #34D399 0%, #059669 100%)',
+                'cancelled': 'linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)',
+                'scheduled': 'linear-gradient(135deg, #6366F1 0%, #3B82F6 100%)'
+            };
+            bgStyle = `background: ${statusColors[props.status] || statusColors['scheduled']}`;
+        }
+
+        // STANDARD SWEETALERT 2 DESIGN
+        let statusBadge = '';
+        if (props.status && props.type !== 'holiday') {
+            const colors = { 'scheduled': 'primary', 'completed': 'success', 'cancelled': 'danger' };
+            const labels = { 'scheduled': 'Programada', 'completed': 'Completada', 'cancelled': 'Cancelada' };
+            const color = colors[props.status] || 'secondary';
+            const label = labels[props.status] || props.status;
+            statusBadge = `<span class="badge bg-${color}">${label}</span>`;
+        }
+        
+        Swal.fire({
+            title: event.title,
+            html: `
+                <div class="text-start fs-6">
+                    <p class="mb-2"><strong><i class="bi bi-calendar-event me-2"></i>Fecha:</strong> ${dateStr}</p>
+                    <p class="mb-2"><strong><i class="bi bi-clock me-2"></i>Hora:</strong> ${timeStr}</p>
+                    ${props.barber ? `<p class="mb-2"><strong><i class="bi bi-person me-2"></i>Barbero:</strong> ${props.barber}</p>` : ''}
+                    ${props.service ? `<p class="mb-2"><strong><i class="bi bi-scissors me-2"></i>Servicio:</strong> ${props.service} (Base: ${formatMoney(props.base_price)})</p>` : ''}
+                    
+                    ${props.products && props.products.length > 0 ? `
+                        <div class="mb-2 ps-4 border-start border-3 border-secondary">
+                            <small class="text-muted d-block fw-bold">Productos Adicionales:</small>
+                            ${props.products.map(p => `
+                                <div class="d-flex justify-content-between small">
+                                    <span>${p.qty}x ${p.name}</span>
+                                    <span class="fw-bold">${formatMoney(p.price * p.qty)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+
+                    ${props.client_phone ? `<p class="mb-2"><strong><i class="bi bi-whatsapp me-2"></i>Teléfono:</strong> ${props.client_phone}</p>` : ''}
+                    <p class="mb-2"><strong><i class="bi bi-info-circle me-2"></i>Estado:</strong> ${statusBadge}</p>
+                    ${props.custom_details ? `<p class="mb-0 text-muted small mt-3"><em>${props.custom_details}</em></p>` : ''}
+
+                    ${props.status === 'cancelled' ? 
+                        `<div class="mt-3 p-2 bg-danger bg-opacity-10 rounded border border-danger">
+                            <strong class="text-danger d-block">Motivo de Cancelación:</strong> 
+                            <span class="text-dark small">${props.cancellation_reason || 'No especificado'}</span>
+                        </div>` : ''
+                    }
+
+                    ${props.status === 'completed' ? 
+                        `<div class="mt-3 p-2 bg-success bg-opacity-10 rounded border border-success">
+                            <strong class="text-success"><i class="bi bi-check-circle-fill me-1"></i> Completada con éxito</strong>
+                            <div class="mt-2 fs-5 fw-bold border-top border-secondary pt-2 text-dark">
+                                Total Cobrado: ${formatMoney(props.final_price || props.price)}
+                            </div>
+                            ${props.completed_by ? `<div class="mt-1 small text-dark"><i class="bi bi-person-check me-1"></i>Completada por: <strong>${props.completed_by}</strong></div>` : ''}
+                        </div>` : ''
+                    }
+                </div>
+                <div class="d-flex justify-content-center mt-4 w-100">
+                    ${props.status !== 'completed' ? `
+                        <div class="d-flex justify-content-center gap-1 flex-wrap w-100">
+                            <button onclick="completeAppointment(${event.id}, ${props.price})" class="btn btn-success flex-grow-1 fw-bold">
+                                <i class="bi bi-check-lg me-1"></i> Completar
+                            </button>
+                            <button onclick="window.calendarInstance.getEventById(${event.id}).remove()" class="btn btn-primary flex-grow-1 fw-bold">
+                                <i class="bi bi-pencil-fill me-1"></i> Editar
+                            </button>
+                            <button onclick="cancelAppointment(${event.id})" class="btn btn-warning flex-grow-1 fw-bold text-white">
+                                <i class="bi bi-x-circle me-1"></i> Cancelar
+                            </button>
+                            <button onclick="deleteAppointment(${event.id})" class="btn btn-outline-danger flex-grow-0" title="Eliminar permanentemente">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                        </div>
+                    ` : `
+                        <div class="d-flex justify-content-center gap-2 w-100">
+                            <button onclick="reopenAppointment(${event.id})" class="btn btn-primary flex-grow-1 fw-bold">
+                                <i class="bi bi-arrow-repeat me-1"></i> Volver a Abrir
+                            </button>
+                            <button onclick="deleteAppointment(${event.id})" class="btn btn-outline-danger flex-grow-0" title="Eliminar permanentemente">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                            <button onclick="Swal.close()" class="btn btn-secondary flex-grow-0 fw-bold">
+                                <i class="bi bi-x mx-1"></i>
+                            </button>
+                        </div>
+                    `}
+                </div>
+            `,
+            icon: 'info',
+            showConfirmButton: false,
+            showCloseButton: true,
+            showCancelButton: false,
+            customClass: {
+                popup: 'rounded-4 shadow'
+            }
+        });
+    };
     }
 
     // Inject Server Data for JS

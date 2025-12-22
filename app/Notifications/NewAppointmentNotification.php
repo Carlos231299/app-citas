@@ -26,10 +26,12 @@ class NewAppointmentNotification extends Notification
     {
         return [
             'title' => 'Nueva Cita: ' . $this->appointment->client_name,
-            'message' => "Fecha: " . $this->appointment->appointment_date . " - " . $this->appointment->appointment_time,
+            'message' => 'Fecha: ' . $this->appointment->scheduled_at->format('d/m/Y h:i A'),
             'icon' => 'bi-calendar-check',
             'color' => 'success',
-            'url' => route('dashboard')
+            'url' => route('dashboard', ['open_appointment' => $this->appointment->id]),
+            'action_type' => 'appointment',
+            'action_id' => $this->appointment->id
         ];
     }
 }

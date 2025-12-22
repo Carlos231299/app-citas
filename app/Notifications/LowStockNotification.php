@@ -26,10 +26,12 @@ class LowStockNotification extends Notification
     {
         return [
             'title' => 'Stock Bajo: ' . $this->product->name,
-            'message' => "Quedan {$this->product->stock} unidades (Mínimo: {$this->product->min_stock}).",
+            'message' => "Quedan solo {$this->product->stock} unidades.",
             'icon' => 'bi-exclamation-triangle',
             'color' => 'danger',
-            'url' => route('products.index', ['category_id' => $this->product->category_id])
+            'url' => route('products.index', ['highlight_product' => $this->product->id]),
+            'action_type' => 'product',
+            'action_id' => $this->product->id
         ];
     }
 }
