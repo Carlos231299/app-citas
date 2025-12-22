@@ -444,8 +444,9 @@ class AppointmentController extends Controller
 
         $services = Service::orderBy('sort_order')->get();
         $barbers = Barber::all();
+        $products = \App\Models\Product::where('stock', '>', 0)->orderBy('name')->get();
 
-        return view('admin.dashboard', compact('stats', 'services', 'barbers', 'pendingRequests'));
+        return view('admin.dashboard', compact('stats', 'services', 'barbers', 'pendingRequests', 'products'));
     }
 
     // Admin: Update Appointment
@@ -495,6 +496,23 @@ class AppointmentController extends Controller
         }
 
         $appointment->update($data);
+
+        // Handle Products (POS)
+        if ($request->has('products') && is_array($request->products)) {
+            foreach ($request->products as $item) {
+                $product = \App\Models\Product::find($item['product_id']);
+                if ($product && $product->stock >= $item['quantity']) {
+                    // Attach to pivot
+                    $appointment->products()->attach($product->id, [
+                        'quantity' => $item['quantity'],
+                        'price' => $product->price // Snapshot price
+                    ]);
+                    // Deduct stock
+                    $product->stock -= $item['quantity'];
+                    $product->save();
+                }
+            }
+        }
 
         return request()->wantsJson() 
             ? response()->json(['message' => 'Completada'])

@@ -233,6 +233,110 @@
     <!-- Rendered: {{ now() }} -->
 </div>
 
+<!-- Complete Appointment Modal (POS) -->
+<div class="modal fade" id="completeAppointmentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg"> <!-- Large modal for POS -->
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-success text-white border-bottom-0 pb-3"> <!-- Green header -->
+                <div>
+                    <h5 class="modal-title fw-bold"><i class="bi bi-cart-check-fill me-2"></i>Completar Cita & Venta</h5>
+                    <p class="mb-0 text-white-50 small">Confirma el servicio y agrega productos</p>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body bg-light">
+                <form id="completeAppointmentForm" onsubmit='submitComplete(event)'>
+                    <input type="hidden" name="appointment_id" id="pos_appointment_id">
+                    
+                    <div class="row g-4">
+                        <!-- Left: Service & Totals -->
+                        <div class="col-md-5">
+                            <div class="card border-0 shadow-sm rounded-4 h-100">
+                                <div class="card-body">
+                                    <h6 class="fw-bold text-secondary mb-3">RESUMEN</h6>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-muted">SERVICIO</label>
+                                        <input type="text" id="pos_service_name" class="form-control-plaintext fw-bold text-dark fs-5 py-0" readonly>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-muted">PRECIO SERVICIO</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white border-end-0">$</span>
+                                            <input type="number" id="pos_base_price" class="form-control border-start-0 fw-bold" onchange="updatePosTotal()">
+                                        </div>
+                                    </div>
+
+                                    <hr class="border-secondary border-opacity-10">
+
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-secondary">Productos:</span>
+                                        <span class="fw-bold" id="pos_products_total">$0</span>
+                                    </div>
+
+                                    <div class="alert alert-success border-0 shadow-sm mb-0">
+                                        <label class="small fw-bold text-success-emphasis d-block mb-1">TOTAL A COBRAR</label>
+                                        <span class="fs-2 fw-bold text-success" id="pos_grand_total">$0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Product Selector -->
+                        <div class="col-md-7">
+                            <div class="card border-0 shadow-sm rounded-4 h-100">
+                                <div class="card-body">
+                                    <h6 class="fw-bold text-secondary mb-3">AGREGAR PRODUCTOS</h6>
+                                    
+                                    <div class="input-group mb-3">
+                                        <select id="pos_product_select" class="form-select">
+                                            <option value="" selected disabled>Buscar producto...</option>
+                                            <!-- Populated via JS -->
+                                        </select>
+                                        <input type="number" id="pos_product_qty" class="form-control" value="1" min="1" style="max-width: 80px;">
+                                        <button type="button" class="btn btn-primary" onclick="addPosProduct()">
+                                            <i class="bi bi-plus-lg"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Cart Table -->
+                                    <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="bg-light sticky-top">
+                                                <tr>
+                                                    <th class="small text-muted border-0">Producto</th>
+                                                    <th class="small text-muted border-0 text-center">Cant.</th>
+                                                    <th class="small text-muted border-0 text-end">Subtotal</th>
+                                                    <th class="border-0"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="pos_cart_body">
+                                                <!-- Cart Items -->
+                                            </tbody>
+                                        </table>
+                                        <div id="pos_empty_cart" class="text-center py-4 text-muted small">
+                                            <i class="bi bi-basket fs-4 d-block mb-2"></i>
+                                            Sin productos agregados
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" id="btnCompletePos" class="btn btn-success btn-lg fw-bold rounded-pill shadow">
+                            <i class="bi bi-check-lg me-2"></i> Finalizar y Cobrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Admin Booking Modal -->
 <div class="modal fade" id="adminBookingModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
@@ -830,7 +934,8 @@
     // Inject Server Data for JS
     const serverData = {
         services: @json($services),
-        barbers: @json($barbers)
+        barbers: @json($barbers),
+        products: @json($products ?? [])
     };
 
     // Filter Toggle Logic

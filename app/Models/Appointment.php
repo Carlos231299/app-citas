@@ -25,6 +25,11 @@ class Appointment extends Model
         return $this->belongsTo(Service::class);
     }
 
+    public function products()
+    {
+        return $this->belongsToMany(Product::class)->withPivot('quantity', 'price')->withTimestamps();
+    }
+
     public function getStatusLabelAttribute()
     {
         return match($this->status) {
