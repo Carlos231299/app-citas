@@ -920,7 +920,7 @@
                                     <i class="bi bi-x-circle me-1"></i> Cancelar
                                 </button>
                             ` : `
-                                <button onclick="completeAppointment(${event.id}, ${props.price})" class="btn btn-primary flex-grow-1 fw-bold">
+                                <button onclick="reopenAppointment(${event.id})" class="btn btn-primary flex-grow-1 fw-bold">
                                     <i class="bi bi-arrow-repeat me-1"></i> Volver a Abrir
                                 </button>
                                 <button onclick="Swal.close()" class="btn btn-secondary flex-grow-1 fw-bold">
