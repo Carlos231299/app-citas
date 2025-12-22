@@ -269,6 +269,7 @@ app.post('/send-message', async (req, res) => {
 app.post('/send-pdf', async (req, res) => {
     try {
         const { phone, pdf_url, filename } = req.body;
+        console.log(`📄 Sending PDF to ${phone}: ${filename}`);
         const chatId = phone.includes("@c.us") ? phone : phone.replace(/\D/g, "") + "@c.us";
         const MessageMedia = pkg.MessageMedia;
         const media = await MessageMedia.fromUrl(pdf_url, { unsafeMime: true });

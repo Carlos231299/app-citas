@@ -18,18 +18,12 @@ start "TUNEL SERVIDOR -> BOT (NO CERRAR)" cmd /k "echo Conectando tunel inverso.
 echo [3/3] Iniciando Servidor y Tunel...
 start "SERVIDOR REMOTO + TUNEL (NO CERRAR)" cmd /k ssh -t -i pruebas.pem -o StrictHostKeyChecking=no -L 8001:localhost:8000 ubuntu@50.18.72.244 "sudo fuser -k 8000/tcp || true; cd /var/www/html/app-citas && php artisan serve --host=127.0.0.1 --port=8000"
 
-:: 4. Abrir Navegador (Unificado)
-echo Esperando estabilidad de red (10 segundos)...
-timeout /t 10 >nul
-echo Abriendo Dashboard en una sola ventana...
-start chrome --new-window "http://localhost:3000" "http://localhost:8001"
 
 echo.
 echo ==========================================
-echo    TODO LISTO - BARBERIA JR
+echo    SISTEMA LISTO - BARBERIA JR
 echo ==========================================
-echo 1. Bot Local: http://localhost:3000
-echo 2. Web App: http://localhost:8001
+echo Bot Iniciado. WhatsApp Web abierto.
 echo.
 echo NO CIERRES LAS VENTANAS NEGRAS. MINIMIZALAS.
 echo Cerrando lanzador en 3 segundos...

@@ -603,8 +603,8 @@ class AppointmentController extends Controller
 
             // [NEW] NOTIFY CLIENT VIA WHATSAPP (BOT)
             if ($appointment->client_phone) {
+                // 1. Send Text Summary
                 try {
-                    // 1. Send Text Summary
                     $msg = "✅ *¡Cita Finalizada con Éxito!* ✅\n\n" .
                            "Hola *{$appointment->client_name}*, qué gusto saludarte. ✂️✨\n" .
                            "Tu servicio en *Barbería JR* ha sido procesado.\n\n" .
@@ -613,12 +613,16 @@ class AppointmentController extends Controller
                            "¡Esperamos verte pronto por aquí! Recuerda que puedes agendar tu próxima cita cuando desees en la plataforma: https://citasbarberiajr.online. 😉\n\n" .
                            "Te adjuntamos tu recibo digital:";
 
-                    \Illuminate\Support\Facades\Http::timeout(3)->post('http://localhost:3000/send-message', [
+                    \Illuminate\Support\Facades\Http::timeout(15)->post('http://localhost:3000/send-message', [
                         'phone' => $appointment->client_phone,
                         'message' => $msg
                     ]);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Bot Text Message Failed: " . $e->getMessage());
+                }
 
-                    // 2. Send PDF Receipt
+                // 2. Send PDF Receipt
+                try {
                     // Generate a temporary signed URL valid for 30 minutes
                     $pdfUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
                         'pos.sale.pdf', 
@@ -630,14 +634,13 @@ class AppointmentController extends Controller
                     $safeClientName = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '', $appointment->client_name);
                     $filename = "Recibo - {$safeClientName} - " . now()->format('d-m-Y H-i') . ".pdf";
                     
-                    \Illuminate\Support\Facades\Http::timeout(10)->post('http://localhost:3000/send-pdf', [
+                    \Illuminate\Support\Facades\Http::timeout(30)->post('http://localhost:3000/send-pdf', [
                         'phone' => $appointment->client_phone,
                         'pdf_url' => $pdfUrl,
                         'filename' => $filename
                     ]);
-                    
                 } catch (\Exception $botError) {
-                    \Illuminate\Support\Facades\Log::error("Bot Receipt Sending Failed: " . $botError->getMessage());
+                    \Illuminate\Support\Facades\Log::error("Bot PDF Receipt Failed: " . $botError->getMessage());
                 }
             }
 
