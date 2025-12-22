@@ -91,4 +91,16 @@ class PosController extends Controller
         $sales = \App\Models\Sale::with('user')->orderBy('created_at', 'desc')->paginate(20);
         return view('admin.pos.history', compact('sales'));
     }
+
+    public function exportPdf()
+    {
+        $sales = \App\Models\Sale::with('user')->orderBy('created_at', 'desc')->get();
+        
+        $pdf = Pdf::loadView('admin.pos.pdf', compact('sales'));
+        
+        // Aesthetic paper size adjustments if needed, e.g. A4 landscape
+        $pdf->setPaper('a4', 'landscape');
+        
+        return $pdf->download('reporte-ventas-' . now()->format('Y-m-d') . '.pdf');
+    }
 }
