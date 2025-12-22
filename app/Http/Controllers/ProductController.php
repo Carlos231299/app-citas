@@ -36,7 +36,7 @@ class ProductController extends Controller
             'stock' => 'required|integer|min:0',
             'min_stock' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id', // Changed validation
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|max:10240', // 10MB
         ]);
 
         $data = $request->all(); // Image handled below
