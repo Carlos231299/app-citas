@@ -77,7 +77,7 @@
         /* Adjust main content to not have margin left since sidebar is hidden */
         .main-content {
             margin-left: 0 !important; /* Override explicit margin */
-            padding-left: 80px; /* Always space for the floating button */
+            padding-left: 80px !important; /* Force space for the floating button */
             padding-right: 15px;
             padding-top: 15px; /* Ensure top spacing match */
         }
