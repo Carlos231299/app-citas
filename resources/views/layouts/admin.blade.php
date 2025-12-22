@@ -35,9 +35,15 @@
     <!-- Sidebar (Default Collapsed) -->
     <div class="sidebar collapsed" id="sidebar">
         <div class="px-3 py-3 mb-4 border-bottom d-flex align-items-center justify-content-between">
-            <div class="overflow-hidden sidebar-header-text">
-                <h4 class="fw-bold text-primary mb-0 text-nowrap">Barbería JR</h4>
-                <small class="text-secondary text-nowrap">Panel de Gestión</small>
+            <div class="d-flex align-items-center gap-2 overflow-hidden">
+                {{-- Logo always visible --}}
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                
+                {{-- Text hidden when collapsed (using sidebar-text class) --}}
+                <div class="sidebar-text d-flex flex-column">
+                    <h4 class="fw-bold text-primary mb-0 text-nowrap" style="font-size: 1.1rem;">Barbería JR</h4>
+                    <small class="text-secondary text-nowrap" style="font-size: 0.75rem;">Panel de Gestión</small>
+                </div>
             </div>
             <button class="btn bg-white border shadow-sm text-primary rounded-circle" id="sidebarToggle" style="width: 40px; height: 40px; align-items: center; justify-content: center;">
                 <i class="bi bi-list fs-5"></i>
