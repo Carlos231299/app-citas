@@ -1258,14 +1258,73 @@
 
 
     // Actions
-    // POS System Logic (Updated)
+    // --- POS & COMPLETION SYSTEM ---
+
+    // 1. Currency Formatter ($ 10,000)
+    const currencyFmt = new Intl.NumberFormat('en-US', {
+        style: 'decimal',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    });
+
+    function formatMoney(amount) {
+        return '$ ' + currencyFmt.format(amount);
+    }
+
+    // 2. Main Entry Point
+    window.completeAppointment = function(id, basePrice) {
+        Swal.close(); // Close event details
+
+        Swal.fire({
+            title: '¿Incluir Productos?',
+            text: '¿El cliente compró productos adicionales?',
+            icon: 'question',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: '<i class="bi bi-cart-plus me-1"></i> Sí, Agregar',
+            denyButtonText: '<i class="bi bi-scissors me-1"></i> No, Solo Servicio',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#0d6efd', // Primary
+            denyButtonColor: '#6c757d', // Secondary
+        }).then((result) => {
+            if (result.isConfirmed) {
+                openPosModal(id, basePrice);
+            } else if (result.isDenied) {
+                quickComplete(id, basePrice);
+            }
+        });
+    };
+
+    // 3. Quick Complete (Old Logic)
+    function quickComplete(id, basePrice) {
+        Swal.fire({
+            title: 'Finalizar Servicio',
+            text: 'Confirma el precio final del servicio',
+            input: 'number',
+            inputValue: basePrice,
+            inputLabel: 'Precio Total',
+            showCancelButton: true,
+            confirmButtonText: 'Finalizar',
+            confirmButtonColor: '#10B981', // Success
+            inputValidator: (value) => {
+                if (!value) return 'Debes escribir el precio';
+            }
+        }).then((res) => {
+            if (res.isConfirmed) {
+                axios.patch(`/appointments/${id}/complete`, { confirmed_price: res.value })
+                    .then(() => {
+                        Swal.fire('¡Listo!', 'Cita completada.', 'success').then(() => location.reload());
+                    })
+                    .catch(() => Swal.fire('Error', 'No se pudo completar.', 'error'));
+            }
+        });
+    }
+
+    // 4. POS Modal Logic
     let posCart = [];
     const posModal = new bootstrap.Modal(document.getElementById('completeAppointmentModal'));
 
-    window.completeAppointment = function(id, basePrice) {
-        // Close any open SweetAlert (Event Details)
-        Swal.close();
-
+    function openPosModal(id, basePrice) {
         // Reset State
         posCart = [];
         document.getElementById('pos_appointment_id').value = id;
@@ -1287,7 +1346,8 @@
             serverData.products.forEach(p => {
                 const opt = document.createElement('option');
                 opt.value = p.id;
-                opt.text = `${p.name} ($${p.price}) - Stock: ${p.stock}`;
+                // Format: Name ($ 10,000) - Stock: 5
+                opt.text = `${p.name} (${formatMoney(p.price)}) - Stock: ${p.stock}`;
                 opt.dataset.price = p.price;
                 opt.dataset.name = p.name;
                 opt.dataset.stock = p.stock;
@@ -1298,7 +1358,7 @@
 
         renderPosCart();
         posModal.show();
-    };
+    }
 
     window.addPosProduct = function() {
         const select = document.getElementById('pos_product_select');
@@ -1314,14 +1374,14 @@
         const stock = parseInt(option.dataset.stock);
 
         if (qty > stock) {
-            Swal.fire('Stock Insuficiente', `Solo quedan ${stock} unidades de ${name}`, 'warning');
+            Swal.fire('Stock Insuficiente', `Solo quedan ${stock} unidades`, 'warning');
             return;
         }
 
         const existing = posCart.find(i => i.id === productId);
         if (existing) {
             if (existing.qty + qty > stock) {
-                Swal.fire('Stock Insuficiente', 'No puedes agregar más de lo disponible.', 'warning');
+                Swal.fire('Stock Insuficiente', 'No puedes exceder el stock.', 'warning');
                 return;
             }
             existing.qty += qty;
@@ -1359,7 +1419,7 @@
                 tr.innerHTML = `
                     <td class="small fw-bold">${item.name}</td>
                     <td class="small text-center">${item.qty}</td>
-                    <td class="small text-end">$${subtotal}</td>
+                    <td class="small text-end">${formatMoney(subtotal)}</td>
                     <td class="text-end">
                         <button type="button" class="btn btn-sm text-danger p-0" onclick="removePosProduct(${index})">
                             <i class="bi bi-x-circle-fill"></i>
@@ -1370,7 +1430,7 @@
             });
         }
 
-        totalSpan.textContent = '$' + productsTotal;
+        totalSpan.textContent = formatMoney(productsTotal);
         updatePosTotal(productsTotal);
     }
 
@@ -1382,7 +1442,7 @@
         const basePrice = parseFloat(document.getElementById('pos_base_price').value) || 0;
         const grandTotal = basePrice + productsTotal;
         
-        document.getElementById('pos_grand_total').textContent = '$' + grandTotal;
+        document.getElementById('pos_grand_total').textContent = formatMoney(grandTotal);
     }
 
     window.submitComplete = function(e) {
