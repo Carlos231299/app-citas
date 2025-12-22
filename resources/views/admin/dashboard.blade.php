@@ -1586,7 +1586,8 @@
             })
             .catch(err => {
                 console.error(err);
-                Swal.fire('Error', 'No se pudo completar la transacción.', 'error');
+                const msg = err.response?.data?.message || 'Error desconocido al procesar.';
+                Swal.fire('Error', msg, 'error');
                 btn.disabled = false;
                 btn.innerHTML = originalText;
             });

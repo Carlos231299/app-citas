@@ -497,48 +497,63 @@ class AppointmentController extends Controller
             $data['confirmed_price'] = $request->confirmed_price;
         }
 
-        // [NEW] Record who completed the appointment
-        $data['completed_by'] = auth()->id();
+        try {
+            DB::beginTransaction();
 
-        $appointment->update($data);
+            // [NEW] Record who completed the appointment
+            $data['completed_by'] = auth()->id();
+            $appointment->update($data);
 
-    // Handle Products (POS) - Full Sync with Stock Restoration
-    
-    // 0. Ensure relationships are loaded
-    $appointment->load('products');
+            // Handle Products (POS) - Full Sync with Stock Restoration
+            
+            // 0. Ensure relationships are loaded
+            $appointment->load('products');
 
-    // 1. Restore stock for previously attached products
-    foreach ($appointment->products as $existingProduct) {
-        $existingProduct->stock += $existingProduct->pivot->quantity;
-        $existingProduct->save();
-    }
-    
-    // 2. Clear current attachments
-    $appointment->products()->detach();
+            // 1. Restore stock for previously attached products
+            foreach ($appointment->products as $existingProduct) {
+                $existingProduct->stock += $existingProduct->pivot->quantity;
+                $existingProduct->save();
+            }
+            
+            // 2. Clear current attachments
+            $appointment->products()->detach();
 
-    // 3. Process new list
-    if ($request->has('products') && is_array($request->products)) {
-        foreach ($request->products as $item) {
-            $product = \App\Models\Product::find($item['product_id']);
-            if ($product) {
-                 // Check stock (simplified race condition check)
-                 if ($product->stock >= $item['quantity']) {
+            // 3. Process new list
+            if ($request->has('products') && is_array($request->products)) {
+                foreach ($request->products as $item) {
+                    $product = \App\Models\Product::find($item['product_id']);
+                    
+                    if (!$product) continue;
+
+                    if ($product->stock < $item['quantity']) {
+                        throw new \Exception("Stock insuficiente para: " . $product->name);
+                    }
+
                     // Attach to pivot
                     $appointment->products()->attach($product->id, [
                         'quantity' => $item['quantity'],
                         'price' => $product->price // Snapshot price
                     ]);
+
                     // Deduct stock
                     $product->stock -= $item['quantity'];
                     $product->save();
-                 }
+                }
             }
-        }
-    }
+            
+            DB::commit();
 
-    return request()->wantsJson() 
-        ? response()->json(['message' => 'Completada'])
-        : redirect()->back()->with('success', 'Cita completada');
+            return request()->wantsJson() 
+                ? response()->json(['message' => 'Completada exitosamente'])
+                : redirect()->back()->with('success', 'Cita completada');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Illuminate\Support\Facades\Log::error('Complete Error: ' . $e->getMessage());
+            return request()->wantsJson() 
+                ? response()->json(['message' => 'Error: ' . $e->getMessage()], 500)
+                : redirect()->back()->with('error', 'Error al completar cita: ' . $e->getMessage());
+        }
     }
 
     // [NEW] Re-open Finished Appointment (Rollback)
