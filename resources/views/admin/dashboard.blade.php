@@ -1263,6 +1263,9 @@
     const posModal = new bootstrap.Modal(document.getElementById('completeAppointmentModal'));
 
     window.completeAppointment = function(id, basePrice) {
+        // Close any open SweetAlert (Event Details)
+        Swal.close();
+
         // Reset State
         posCart = [];
         document.getElementById('pos_appointment_id').value = id;
