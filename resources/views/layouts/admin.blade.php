@@ -85,7 +85,7 @@
                     <a class="nav-link text-secondary py-1 {{ request()->routeIs('products.*') ? 'fw-bold text-primary' : '' }}" href="{{ route('products.index') }}">
                         <span class="sidebar-text">Inventario</span>
                     </a>
-                    <a class="nav-link text-secondary py-1 {{ request()->routeIs('reports.*') ? 'fw-bold text-primary' : '' }}" href="{{ route('reports.index') }}">
+                    <a class="nav-link text-secondary py-1 {{ request()->routeIs('pos.history') ? 'fw-bold text-primary' : '' }}" href="{{ route('pos.history') }}">
                         <span class="sidebar-text">Reportes</span>
                     </a>
                 </nav>
@@ -96,6 +96,12 @@
             @if(trim(auth()->user()->role) === 'admin')
             <a class="nav-link sidebar-link {{ request()->routeIs('barbers.*') ? 'active' : '' }}" href="{{ route('barbers.index') }}" title="Gestionar Barberos">
                 <i class="bi bi-people-fill"></i> <span class="sidebar-text">Gestionar Barberos</span>
+            </a>
+            @endif
+
+            @if(auth()->user()->role === 'admin')
+            <a class="nav-link sidebar-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') }}" title="Reportes">
+                <i class="bi bi-file-earmark-bar-graph-fill"></i> <span class="sidebar-text">Reportes</span>
             </a>
             @endif
             
