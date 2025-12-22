@@ -104,272 +104,196 @@ client.on("disconnected", (reason) => {
 ========================= */
 
 client.on("message", async (message) => {
-    // Basic Logging
-    // console.log("Received:", message.body, "From:", message.from);
+    try {
+        const chatId = message.from;
+        const body = message.body.trim();
+        const lowerBody = body.toLowerCase();
 
-    const chatId = message.from;
-    const body = message.body.trim();
-    const lowerBody = body.toLowerCase();
-
-    // 1. PRIORITY: Check if User is in Cancellation State (Waiting for Reason)
-    // This MUST be first to capture any input as a reason.
-    if (cancellationStates.has(chatId)) {
-        const state = cancellationStates.get(chatId)!;
-
-        // Clear the timeout as the user has responded
-        clearTimeout(state.timeoutId);
-
-        // Timeout check (Edge case if timeout just fired)
-        if (Date.now() - state.timestamp > 10 * 60 * 1000) {
+        // 1. PRIORITY: Check if User is in Cancellation State
+        if (cancellationStates.has(chatId)) {
+            const state = cancellationStates.get(chatId)!;
+            clearTimeout(state.timeoutId);
             cancellationStates.delete(chatId);
-            await client.sendMessage(chatId, "⏳ Se ha agotado el tiempo para la cancelación. Por favor inicia el proceso nuevamente si lo deseas.");
+
+            try {
+                const serverUrl = 'http://localhost:8001/api/bot/cancel';
+                const response = await axios.post(serverUrl, {
+                    phone: chatId.replace('@c.us', ''),
+                    reason: body
+                });
+
+                if (response.data.success) {
+                    await client.sendMessage(chatId, "✅ Tu cita ha sido cancelada correctamente.");
+                } else {
+                    await client.sendMessage(chatId, "❌ No encontramos una cita próxima para cancelar o ocurrió un error.");
+                }
+            } catch (error: any) {
+                console.error('API Error:', error);
+                await client.sendMessage(chatId, "❌ Error de conexión al procesar tu solicitud.");
+            }
             return;
         }
 
-        // Process Reason
-        console.log(`Processing Cancellation Reason from ${chatId}: ${body}`);
-
-        try {
-            // Tunnel URL (Local 8001 -> Remote 8000)
-            const serverUrl = 'http://localhost:8001/api/bot/cancel';
-
-            const response = await axios.post(serverUrl, {
-                phone: chatId.replace('@c.us', ''),
-                reason: body
-            });
-
-            const data = response.data;
-
-            if (data.success) {
-                await client.sendMessage(chatId, "✅ Tu cita ha sido cancelada correctamente.");
-            } else {
-                await client.sendMessage(chatId, "❌ No encontramos una cita próxima para cancelar o ya ocurrió un error.");
-            }
-        } catch (error: any) {
-            console.error('API Error:', error);
-            await client.sendMessage(chatId, "❌ Error de conexión al procesar tu solicitud.");
-        }
-
-        // Clear State
-        cancellationStates.delete(chatId);
-        return; // CRITICAL: Exit function to prevent default handler
-    }
-
-    // 2. Cancellation Trigger
-    // Triggers: "2", "no", "cancelar", "cancel"
-    const cancelKeywords = ["2", "no", "cancelar", "cancel"];
-    if (cancelKeywords.includes(lowerBody)) {
-        console.log(`User ${chatId} started cancellation flow`);
-
-        // Timeout Logic: Check in 60 seconds if state still exists
-        const timeoutId = setTimeout(async () => {
-            if (cancellationStates.has(chatId)) {
-                const currentState = cancellationStates.get(chatId)!;
-                if (currentState.step === 'WAITING_REASON') {
-                    // Auto-Cancel Logic
-                    console.log(`⏰ Auto-cancelling ${chatId} due to timeout.`);
+        // 2. Cancellation Trigger
+        const cancelKeywords = ["2", "no", "cancelar", "cancel"];
+        if (cancelKeywords.includes(lowerBody)) {
+            const timeoutId = setTimeout(async () => {
+                if (cancellationStates.has(chatId)) {
                     try {
                         const serverUrl = 'http://localhost:8001/api/bot/cancel';
-                        /* using axios */
                         const response = await axios.post(serverUrl, {
                             phone: chatId.replace('@c.us', ''),
                             reason: "No dió motivos (Timeout 1min)"
                         });
-
                         if (response.data.success) {
-                            const appt = appointments.get(chatId);
-                            const clientName = appt ? appt.name : "Cliente";
-
-                            await client.sendMessage(chatId, `Hola ${clientName}, tu cita ha sido cancelada por falta de respuesta.`);
+                            await client.sendMessage(chatId, `Hola, tu cita ha sido cancelada por falta de respuesta.`);
                         }
                     } catch (err) {
                         console.error("Auto-cancel failed", err);
                     }
                     cancellationStates.delete(chatId);
                 }
-            }
-        }, 60000); // 1 minute
+            }, 60000);
 
-        cancellationStates.set(chatId, { step: 'WAITING_REASON', timestamp: Date.now(), timeoutId: timeoutId });
+            cancellationStates.set(chatId, { step: 'WAITING_REASON', timestamp: Date.now(), timeoutId: timeoutId });
+            await client.sendMessage(chatId, "Lamentamos esto. 😟\n\nPor favor indícanos brevemente el *motivo de la cancelación* para procesarla:");
+            return;
+        }
 
-        await client.sendMessage(chatId, "Lamentamos esto. 😟\n\nPor favor indícanos brevemente el *motivo de la cancelación* para procesarla:");
-        return;
+        const currentState = chatState.get(chatId);
+        if (!currentState || currentState !== "WAITING_CONFIRMATION") return;
+
+        const confirmKeywords = ["1", "si", "sí", "confirmar", "confirm", "ok"];
+        const text = normalize(message.body);
+
+        if (confirmKeywords.some((w) => text === w || text.includes(w))) {
+            const appt = appointments.get(chatId);
+            chatState.set(chatId, "IDLE");
+            appointments.delete(chatId);
+
+            await message.reply(
+                `✅ *Cita confirmada*\n\n` +
+                `👤 ${appt?.name}\n` +
+                `📅 ${appt?.date}\n` +
+                `⏰ ${appt?.time}\n` +
+                `📍 ${appt?.place}\n\n` +
+                `¡Te esperamos!`
+            );
+            return;
+        }
+
+        await message.reply("Por favor responde:\n1️⃣ Confirmar\n2️⃣ Cancelar");
+
+    } catch (handlerError) {
+        console.error("Error in message handler:", handlerError);
     }
-
-    // 3. IGNORE if in Request Mode (or Context Check)
-    // The previous logic had: if (chatState.get(chatId) !== "WAITING_CONFIRMATION") return;
-    // We should keep this for the Confirmation Flow, BUT carefully.
-
-    // Logic: If NO state (IDLE or Undefined) -> Ignore
-    // If WAITING_CONFIRMATION -> Process "1" or Default
-    const currentState = chatState.get(chatId);
-    if (!currentState || currentState !== "WAITING_CONFIRMATION") {
-        return; // Ignore random messages
-    }
-
-    // 4. Confirmation Trigger
-    const confirmKeywords = ["1", "si", "sí", "confirmar", "confirm", "ok"];
-    const text = normalize(message.body); // Use normalized for confirmation check just in case
-
-    if (confirmKeywords.some((w) => text === w || text.includes(w))) {
-        const appt = appointments.get(chatId);
-
-        chatState.set(chatId, "IDLE");
-        appointments.delete(chatId);
-
-        await message.reply(
-            `✅ *Cita confirmada*\n\n` +
-            `👤 ${appt?.name}\n` +
-            `📅 ${appt?.date}\n` +
-            `⏰ ${appt?.time}\n` +
-            `📍 ${appt?.place}\n\n` +
-            `¡Te esperamos!`
-        );
-        return;
-    }
-
-    // 5. Default Handler (Only for WAITING_CONFIRMATION state)
-    // ⚠️ respuesta inválida
-    await message.reply(
-        "Por favor responde:\n1️⃣ Confirmar\n2️⃣ Cancelar"
-    );
 });
 
 /* =========================
-   SINGLE ENDPOINT
-========================= */
+   ENDPOINTS
+ ========================= */
+
+// 🏠 DASHBOARD
+app.get('/', (req, res) => {
+    res.send(`
+        <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Control Bot - Barbería JR</title>
+                <style>
+                    body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+                    .card { background: #1e293b; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; max-width: 400px; width: 90%; }
+                    h1 { color: #38bdf8; margin-bottom: 0.5rem; }
+                    .status { display: inline-block; padding: 0.5rem 1rem; border-radius: 2rem; background: #059669; font-weight: bold; margin: 1rem 0; }
+                    p { color: #94a3b8; line-height: 1.6; }
+                    .btn { display: inline-block; margin-top: 1.5rem; background: #38bdf8; color: #0f172a; padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-decoration: none; font-weight: bold; transition: opacity 0.2s; }
+                    .btn:hover { opacity: 0.9; }
+                </style>
+            </head>
+            <body>
+                <div class="card">
+                    <h1>✂️ Barbería JR</h1>
+                    <p>Sistema Automatico de WhatsApp</p>
+                    <div class="status">● BOT ONLINE</div>
+                    <p>El bot está escuchando solicitudes y procesando confirmaciones en tiempo real.</p>
+                    <a href="http://localhost:8001" target="_blank" class="btn">Abrir Panel de Citas</a>
+                    <p style="font-size: 10px; margin-top: 2rem;">© 2025 Barbería JR - Tu estilo, nuestra pasión.</p>
+                </div>
+            </body>
+        </html>
+    `);
+});
 
 app.post("/appointment", async (req, res) => {
-    const { phone, name, date, time, place, barber_name, service_name, is_request, display_price } = req.body;
-
-    console.log("🐛 DEBUG BOT: is_request received =", is_request, "Type:", typeof is_request);
-
-    if (!phone || !name || !date || !time) {
-        return res.status(400).json({
-            error: "Faltan datos obligatorios (phone, name, date, time)",
-        });
-    }
-
-    const chatId = phone.includes("@c.us")
-        ? phone
-        : phone.replace(/\D/g, "") + "@c.us";
-
-    // Save Context
-    appointments.set(chatId, { name, date, time, place: place || 'Barbería JR', barber_name, service_name, is_request });
-
-    // Logic: Request vs Confirmed
-    if (is_request) {
-        // Mode: REQUEST (Other Service)
-        // User: "un mensaje donde diga que la cita está en espera de confirmación para ser apartada"
-        chatState.set(chatId, "IDLE"); // No interactive flow for this one (or maybe yes?)
-        // Let's keep it simple: Just notify.
-
-        await client.sendMessage(
-            chatId,
-            `Hola *${name}* 👋\n\n` +
-            `Hemos recibido tu solicitud para:\n` +
-            `💇‍♂️ *Servicio:* ${service_name || 'Otro Servicio'}\n` +
-            `💈 *Barbero:* ${barber_name}\n` +
-            `📅 *Fecha:* ${date} a las ${time}\n\n` +
-            `⚠️ *Estado:* Tu cita está en *ESPERA DE CONFIRMACIÓN* para ser apartada.\n` +
-            `Nos pondremos en contacto contigo pronto para definir los detalles.`
-        );
-
-    } else {
-        // Mode: CONFIRMED
-        // User: "debe mandar también el barbero en el mensaje"
-        chatState.set(chatId, "WAITING_CONFIRMATION"); // Enable interactive confirmation
-
-        // Dynamic Price Value
-        const priceText = display_price || 'Por confirmar';
-
-        await client.sendMessage(
-            chatId,
-            `Hola *${name}* 👋\n\n` +
-            `✅ Tu cita ha sido *CONFIRMADA* en Barbería JR.\n\n` +
-            `📋 *Detalles:*\n` +
-            `💇‍♂️ *Servicio:* ${service_name}\n` +
-            `💈 *Barbero:* ${barber_name}\n` +
-            `📅 *Fecha:* ${date}\n` +
-            `⏰ *Hora:* ${time}\n` +
-            `💰 *Precio:* ${priceText}\n\n` +
-            `Por favor confirma tu asistencia respondiendo:\n` +
-            `1️⃣ Confirmar\n` +
-            `2️⃣ Cancelar`
-        );
-    }
-
-    res.json({ success: true, status: is_request ? 'request_sent' : 'confirmation_sent' });
-});
-
-/* =========================
-   START
-========================= */
-
-client.initialize();
-
-
-// --- REMINDER ENDPOINT ---
-
-// --- GENERIC SEND MESSAGE ENDPOINT ---
-app.post('/send-message', async (req, res) => {
-    const { phone, message } = req.body;
-    console.log(`📨 Sending Generic Message to ${phone}`);
-
     try {
-        if (!client) {
-            return res.status(503).json({ error: 'WhatsApp client not ready' });
+        const { phone, name, date, time, place, barber_name, service_name, is_request, display_price } = req.body;
+
+        if (!phone || !name || !date || !time) {
+            return res.status(400).json({ error: "Faltan datos obligatorios" });
         }
 
-        const chatId = phone.includes("@c.us")
-            ? phone
-            : phone.replace(/\D/g, "") + "@c.us";
+        const chatId = phone.includes("@c.us") ? phone : phone.replace(/\D/g, "") + "@c.us";
+        appointments.set(chatId, { name, date, time, place: place || 'Barbería JR', barber_name, service_name, is_request });
 
-        await client.sendMessage(chatId, message);
+        if (is_request) {
+            chatState.set(chatId, "IDLE");
+            await client.sendMessage(chatId,
+                `Hola *${name}* 👋\n\n Hemos recibido tu solicitud para:\n 💇‍♂️ *Servicio:* ${service_name || 'Otro Servicio'}\n 💈 *Barbero:* ${barber_name}\n 📅 *Fecha:* ${date} a las ${time}\n\n ⚠️ *Estado:* Tu cita está en *ESPERA DE CONFIRMACIÓN* para ser apartada.\n Nos pondremos en contacto contigo pronto.`
+            );
+        } else {
+            chatState.set(chatId, "WAITING_CONFIRMATION");
+            const priceText = display_price || 'Por confirmar';
+            await client.sendMessage(chatId,
+                `Hola *${name}* 👋\n\n ✅ Tu cita ha sido *CONFIRMADA* en Barbería JR.\n\n 📋 *Detalles:*\n 💇‍♂️ *Servicio:* ${service_name}\n 💈 *Barbero:* ${barber_name}\n 📅 *Fecha:* ${date}\n ⏰ *Hora:* ${time}\n 💰 *Precio:* ${priceText}\n\n Por favor confirma tu asistencia respondiendo:\n 1️⃣ Confirmar\n 2️⃣ Cancelar`
+            );
+        }
         res.json({ success: true });
-
     } catch (error: any) {
-        console.error('❌ Error sending generic message:', error);
-        res.status(500).json({ error: 'Failed' });
-    }
-});
-
-// --- SEND PDF RECEIPT ENDPOINT ---
-app.post('/send-pdf', async (req, res) => {
-    const { phone, pdf_url, filename, caption } = req.body;
-    console.log(`📄 Sending PDF to ${phone}: ${filename}`);
-
-    try {
-        if (!client) {
-            return res.status(503).json({ error: 'WhatsApp client not ready' });
-        }
-
-        const chatId = phone.includes("@c.us")
-            ? phone
-            : phone.replace(/\D/g, "") + "@c.us";
-
-        // Import MessageMedia from pkg (whatsapp-web.js)
-        const MessageMedia = pkg.MessageMedia;
-        const media = await MessageMedia.fromUrl(pdf_url, { unsafeMime: true });
-
-        // Set the custom filename if provided
-        if (filename) {
-            media.filename = filename;
-        }
-
-        await client.sendMessage(chatId, media, {
-            sendMediaAsDocument: true
-        });
-
-        res.json({ success: true });
-
-    } catch (error: any) {
-        console.error('❌ Error sending PDF:', error);
+        console.error('❌ Error in /appointment endpoint:', error.message);
         res.status(500).json({ error: 'Failed', details: error.message });
     }
 });
 
-// Reminder endpoint removed by request
+app.post('/send-message', async (req, res) => {
+    try {
+        const { phone, message } = req.body;
+        const chatId = phone.includes("@c.us") ? phone : phone.replace(/\D/g, "") + "@c.us";
+        await client.sendMessage(chatId, message);
+        res.json({ success: true });
+    } catch (error: any) {
+        console.error('❌ Error sending message:', error.message);
+        res.status(500).json({ error: 'Failed', details: error.message });
+    }
+});
+
+app.post('/send-pdf', async (req, res) => {
+    try {
+        const { phone, pdf_url, filename } = req.body;
+        const chatId = phone.includes("@c.us") ? phone : phone.replace(/\D/g, "") + "@c.us";
+        const MessageMedia = pkg.MessageMedia;
+        const media = await MessageMedia.fromUrl(pdf_url, { unsafeMime: true });
+        if (filename) media.filename = filename;
+        await client.sendMessage(chatId, media, { sendMediaAsDocument: true });
+        res.json({ success: true });
+    } catch (error: any) {
+        console.error('❌ Error sending PDF:', error.message);
+        res.status(500).json({ error: 'Failed', details: error.message });
+    }
+});
+
+/* =========================
+   START + ERROR PROTECTION
+ ========================= */
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('⚠️ Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('⚠️ Uncaught Exception:', err);
+});
+
+client.initialize().catch(err => console.error("Initialization error:", err));
 
 app.listen(3000, () => {
     console.log("🚀 Server running on http://localhost:3000");

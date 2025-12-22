@@ -605,12 +605,13 @@ class AppointmentController extends Controller
             if ($appointment->client_phone) {
                 try {
                     // 1. Send Text Summary
-                    $msg = "✅ *Cita Finalizada - Barbería JR* ✅\n\n" .
-                           "Hola *{$appointment->client_name}*,\n" .
-                           "Tu servicio ha finalizado con éxito.\n\n" .
+                    $msg = "✅ *¡Cita Finalizada con Éxito!* ✅\n\n" .
+                           "Hola *{$appointment->client_name}*, qué gusto saludarte. ✂️✨\n" .
+                           "Tu servicio en *Barbería JR* ha sido procesado.\n\n" .
                            "💰 *Total:* " . '$ ' . number_format($grandTotal, 0) . "\n" .
-                           "🙏 ¡Gracias por tu preferencia!\n\n" .
-                           "Te adjuntamos tu recibo a continuación:";
+                           "🙏 ¡Gracias por confiar en nosotros para cuidar tu estilo!\n\n" .
+                           "¡Esperamos verte pronto por aquí! Recuerda que puedes agendar tu próxima cita cuando desees en la plataforma: https://citasbarberiajr.online. 😉\n\n" .
+                           "Te adjuntamos tu recibo digital:";
 
                     \Illuminate\Support\Facades\Http::timeout(3)->post('http://localhost:3000/send-message', [
                         'phone' => $appointment->client_phone,
