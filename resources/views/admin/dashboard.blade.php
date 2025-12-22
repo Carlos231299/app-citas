@@ -285,6 +285,15 @@
                                         </div>
                                     </div>
 
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-muted">MÉTODO DE PAGO</label>
+                                        <select id="pos_payment_method" class="form-select border-2 shadow-sm" required>
+                                            <option value="efectivo" selected>Efectivo</option>
+                                            <option value="tarjeta">Tarjeta</option>
+                                            <option value="transferencia">Transferencia</option>
+                                        </select>
+                                    </div>
+
                                     <hr class="border-secondary border-opacity-10">
 
                                     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -1548,8 +1557,10 @@
         // Final Price = Service + Products
         const finalPrice = basePrice + productsTotal;
 
+        const paymentMethod = document.getElementById('pos_payment_method').value;
         const payload = {
             confirmed_price: finalPrice, // Send Grand Total
+            payment_method: paymentMethod, // [NEW] Added payment method
             products: posCart.map(i => ({ product_id: i.id, quantity: i.qty }))
         };
 
