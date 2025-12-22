@@ -57,8 +57,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th class="ps-4">ID</th>
-                        <th>Fecha</th>
+                        <th class="ps-4">Fecha</th>
                         <th>Cliente</th>
                         <th>Vendedor</th>
                         <th>Método</th>
@@ -69,8 +68,7 @@
                 <tbody>
                     @forelse($sales as $sale)
                     <tr>
-                        <td class="ps-4 fw-bold">#{{ $sale->id }}</td>
-                        <td>{{ $sale->created_at->format('d M Y - h:i A') }}</td>
+                        <td class="ps-4 text-muted small">{{ $sale->created_at->format('d M Y - h:i A') }}</td>
                         <td class="fw-bold">{{ $sale->client_name ?? 'POS Client' }}</td>
                         <td>
                             @if($sale->user)
@@ -102,7 +100,7 @@
                     </tr>
                     <!-- Items Row -->
                     <tr>
-                        <td colspan="9" class="p-0 border-0">
+                        <td colspan="6" class="p-0 border-0">
                             <div class="collapse bg-light" id="saleDetails{{ $sale->id }}">
                                 <div class="p-3">
                                     <h6 class="fw-bold small text-muted mb-2 text-uppercase">Productos Vendidos:</h6>

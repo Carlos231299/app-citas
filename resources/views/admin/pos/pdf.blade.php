@@ -7,14 +7,14 @@
         body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 12px; color: #333; }
         .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #ddd; padding-bottom: 20px; }
         .logo { width: 80px; height: auto; margin-bottom: 10px; }
-        h1 { margin: 0; color: #d4a017; /* Gold primary */ text-transform: uppercase; letter-spacing: 1px; }
+        h1 { margin: 0; color: #1e3a8a; /* Dark Blue institutional */ text-transform: uppercase; letter-spacing: 1px; }
         .meta { margin-top: 5px; color: #666; font-size: 10px; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: #f8f9fa; text-transform: uppercase; font-size: 10px; padding: 10px; border-bottom: 2px solid #ddd; text-align: left; }
+        th { background: #f8f9fa; text-transform: uppercase; font-size: 10px; padding: 10px; border-bottom: 2px solid #1e3a8a; text-align: left; }
         td { padding: 10px; border-bottom: 1px solid #eee; }
         
-        .total-row td { border-top: 2px solid #333; font-weight: bold; font-size: 14px; background: #fff; }
+        .total-row td { border-top: 2px solid #1e3a8a; font-weight: bold; font-size: 14px; background: #fff; }
         .badge { padding: 3px 6px; border-radius: 4px; font-size: 9px; text-transform: capitalize; }
         .bg-cash { background: #e8f5e9; color: #2e7d32; }
         .bg-card { background: #e3f2fd; color: #1565c0; }
@@ -26,8 +26,6 @@
 <body>
 
     <div class="header">
-        <!-- Assuming logo path needs to be standard path/base64 for dompdf to read it locally or avoid if issues -->
-        <!-- <img src="{{ public_path('images/logo.png') }}" class="logo"> -->
         <h1>Barbería JR</h1>
         <div class="meta">Reporte de Ventas generado el {{ now()->format('d/m/Y h:i A') }}</div>
         @if(request('date_from') || request('date_to'))
@@ -44,7 +42,6 @@
     <table>
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Fecha</th>
                 <th>Vendedor</th>
                 <th>Método</th>
@@ -56,7 +53,6 @@
             @foreach($sales as $sale)
             @php $grandTotal += $sale->total; @endphp
             <tr>
-                <td>#{{ $sale->id }}</td>
                 <td>{{ $sale->created_at->format('d/m/Y - h:i A') }}</td>
                 <td>{{ $sale->user ? $sale->user->name : 'N/A' }}</td>
                 <td>
@@ -69,7 +65,7 @@
             @endforeach
             
             <tr class="total-row">
-                <td colspan="4" style="text-align: right;">GRAN TOTAL:</td>
+                <td colspan="3" style="text-align: right;">GRAN TOTAL:</td>
                 <td style="text-align: right;">${{ number_format($grandTotal, 0) }}</td>
             </tr>
         </tbody>
