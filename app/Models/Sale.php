@@ -11,6 +11,7 @@ class Sale extends Model
 
     protected $fillable = [
         'user_id',
+        'client_name',
         'total',
         'payment_method',
         'items', // JSON column

@@ -521,18 +521,6 @@ class AppointmentController extends Controller
 
             // 3. Process new list
             $itemsData = [];
-            // Add service as the first item
-            $itemsData[] = [
-                'product_id' => null,
-                'product_name' => "Servicio: " . $appointment->service->name,
-                'price' => $request->confirmed_price - (isset($request->products) ? collect($request->products)->sum(function($p) {
-                    $prod = \App\Models\Product::find($p['product_id']);
-                    return $prod ? ($prod->price * $p['quantity']) : 0;
-                }) : 0),
-                'quantity' => 1,
-                'subtotal' => 0 // Calculated later or simplified
-            ];
-            // Re-calculate service subtotal for itemsData accurately
             $productsTotal = 0;
 
             if ($request->has('products') && is_array($request->products)) {
@@ -568,17 +556,17 @@ class AppointmentController extends Controller
                 }
             }
 
-            // Update service item with correct subtotal
-            $itemsData[0]['subtotal'] = $request->confirmed_price - $productsTotal;
-
-            // [NEW] Create Sale Record for Reporting
-            \App\Models\Sale::create([
-                'user_id' => auth()->id(),
-                'total' => $request->confirmed_price,
-                'payment_method' => $request->payment_method ?? 'efectivo',
-                'items' => $itemsData, // It is casted to array in Sale model
-                'completed_at' => now()
-            ]);
+            // [NEW] Only create a Sale Record if products were actually sold
+            if ($productsTotal > 0) {
+                \App\Models\Sale::create([
+                    'user_id' => auth()->id(),
+                    'client_name' => $appointment->client_name, // Track who was sold to
+                    'total' => $productsTotal, // Total reflects ONLY products now
+                    'payment_method' => $request->payment_method ?? 'efectivo',
+                    'items' => $itemsData,
+                    'completed_at' => now()
+                ]);
+            }
             
             DB::commit();
 

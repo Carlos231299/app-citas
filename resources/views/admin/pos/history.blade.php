@@ -59,6 +59,7 @@
                     <tr>
                         <th class="ps-4">ID</th>
                         <th>Fecha</th>
+                        <th>Cliente</th>
                         <th>Vendedor</th>
                         <th>Método</th>
                         <th>Total</th>
@@ -70,6 +71,7 @@
                     <tr>
                         <td class="ps-4 fw-bold">#{{ $sale->id }}</td>
                         <td>{{ $sale->created_at->format('d M Y - h:i A') }}</td>
+                        <td class="fw-bold">{{ $sale->client_name ?? 'POS Client' }}</td>
                         <td>
                             @if($sale->user)
                                 <span class="badge bg-secondary bg-opacity-10 text-secondary">
@@ -95,10 +97,10 @@
                     </tr>
                     <!-- Items Row -->
                     <tr>
-                        <td colspan="6" class="p-0 border-0">
+                        <td colspan="9" class="p-0 border-0">
                             <div class="collapse bg-light" id="saleDetails{{ $sale->id }}">
                                 <div class="p-3">
-                                    <h6 class="fw-bold small text-muted mb-2">PRODUCTOS VENDIDOS:</h6>
+                                    <h6 class="fw-bold small text-muted mb-2 text-uppercase">Productos Vendidos:</h6>
                                     <ul class="list-group list-group-flush shadow-sm rounded-3">
                                         @php
                                             $items = is_string($sale->items) ? json_decode($sale->items, true) : $sale->items;
@@ -107,9 +109,9 @@
                                         <li class="list-group-item d-flex justify-content-between align-items-center bg-white">
                                             <div>
                                                 <span class="fw-bold text-dark">{{ $item['product_name'] ?? 'Producto' }}</span>
-                                                <small class="d-block text-muted">Cant: {{ $item['quantity'] }} x ${{ number_format($item['price'], 0) }}</small>
+                                                <small class="d-block text-muted">Cant: {{ $item['quantity'] }} x ${{ number_format($item['price'] ?? 0, 0) }}</small>
                                             </div>
-                                            <span class="fw-bold text-dark">${{ number_format($item['subtotal'], 0) }}</span>
+                                            <span class="fw-bold text-dark">${{ number_format($item['subtotal'] ?? 0, 0) }}</span>
                                         </li>
                                         @endforeach
                                     </ul>
