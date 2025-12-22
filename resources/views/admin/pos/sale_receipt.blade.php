@@ -2,92 +2,128 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Comprobante de Venta #{{ $sale->id }}</title>
+    <title>Factura #{{ $sale->id }}</title>
     <style>
         @page { size: 80mm 200mm; margin: 0; }
         body { 
             font-family: 'Helvetica', 'Arial', sans-serif; 
-            font-size: 10px; 
-            color: #333; 
+            font-size: 11px; 
+            color: #1a1a1a; 
             margin: 0; 
-            padding: 10px;
+            padding: 15px;
             width: 70mm;
+            line-height: 1.4;
         }
-        .header { text-align: center; margin-bottom: 15px; border-bottom: 1px dashed #ddd; padding-bottom: 10px; }
-        .logo { font-size: 16px; font-weight: bold; color: #1e3a8a; margin-bottom: 2px; }
-        .sub-header { font-size: 8px; color: #666; }
-        .title { font-size: 12px; font-weight: bold; margin: 10px 0; border-top: 1px dashed #ddd; border-bottom: 1px dashed #ddd; padding: 5px 0; text-align: center; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .logo-img { width: 60px; height: auto; margin-bottom: 10px; border-radius: 10px; }
+        .business-name { font-size: 18px; font-weight: bold; color: #1e3a8a; letter-spacing: 1px; margin-bottom: 2px; }
+        .business-tagline { font-size: 9px; color: #6b7280; font-style: italic; }
         
-        .info-table { width: 100%; margin-bottom: 10px; font-size: 9px; }
-        .info-table td { padding: 2px 0; }
+        .title-box { 
+            background-color: #f8fafc; 
+            border-top: 2px solid #1e3a8a; 
+            border-bottom: 2px solid #1e3a8a; 
+            padding: 8px 0; 
+            margin: 15px 0; 
+            text-align: center; 
+        }
+        .title { font-size: 12px; font-weight: bold; color: #1e3a8a; text-transform: uppercase; }
         
-        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-        .items-table th { text-align: left; border-bottom: 1px solid #333; padding: 5px 0; font-size: 8px; text-transform: uppercase; }
-        .items-table td { padding: 5px 0; border-bottom: 1px solid #eee; }
+        .info-section { margin-bottom: 20px; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid #f1f5f9; padding-bottom: 2px; }
+        .info-label { font-weight: bold; color: #4b5563; font-size: 9px; }
+        .info-value { text-align: right; color: #111827; }
         
-        .total-section { border-top: 2px solid #333; padding-top: 10px; text-align: right; }
-        .total-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
-        .grand-total { font-size: 14px; font-weight: bold; color: #1e3a8a; }
+        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .items-table th { 
+            text-align: left; 
+            background: #1e3a8a; 
+            color: white; 
+            padding: 6px 4px; 
+            font-size: 9px; 
+            text-transform: uppercase; 
+        }
+        .items-table td { 
+            padding: 8px 4px; 
+            border-bottom: 1px solid #e5e7eb; 
+            vertical-align: middle;
+        }
         
-        .footer { text-align: center; margin-top: 20px; font-size: 8px; color: #888; border-top: 1px dashed #ddd; padding-top: 10px; }
+        .total-container { 
+            background: #1e3a8a; 
+            color: white; 
+            padding: 10px; 
+            border-radius: 4px; 
+            text-align: right; 
+            margin-top: 10px;
+        }
+        .total-label { font-size: 10px; opacity: 0.9; }
+        .total-amount { font-size: 16px; font-weight: bold; }
+        
+        .footer { text-align: center; margin-top: 30px; font-size: 9px; color: #9ca3af; border-top: 1px dashed #e5e7eb; padding-top: 15px; }
         .text-right { text-align: right; }
         .fw-bold { font-weight: bold; }
+        .text-blue { color: #1e3a8a; }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="logo">BARBERÍA JR</div>
-        <div class="sub-header">Experiencia y Estilo</div>
-        <div class="sub-header">Gracias por tu preferencia</div>
+        @php
+            $logoPath = public_path('images/logo.png');
+            $logoBase64 = '';
+            if (file_exists($logoPath)) {
+                $logoData = file_get_contents($logoPath);
+                $logoBase64 = 'data:image/png;base64,' . base64_encode($logoData);
+            }
+        @endphp
+        
+        @if($logoBase64)
+            <img src="{{ $logoBase64 }}" class="logo-img" alt="Logo">
+        @endif
+        
+        <div class="business-name">BARBERÍA JR</div>
+        <div class="business-tagline">Excelencia en cada corte • Estilo Único</div>
     </div>
 
-    <div class="title">COMPROBANTE DE PAGO #{{ str_pad($sale->id, 5, '0', STR_PAD_LEFT) }}</div>
+    <div class="title-box">
+        <div class="title">Recibo de Pago #{{ str_pad($sale->id, 5, '0', STR_PAD_LEFT) }}</div>
+    </div>
 
-    <table class="info-table">
-        <tr>
-            <td class="fw-bold">Fecha:</td>
-            <td class="text-right">{{ $sale->created_at->format('d/m/Y h:i A') }}</td>
-        </tr>
-        <tr>
-            <td class="fw-bold">Cliente:</td>
-            <td class="text-right">{{ $sale->client_name ?? 'Cliente Genérico' }}</td>
-        </tr>
-        <tr>
-            <td class="fw-bold">Atendido por:</td>
-            <td class="text-right">{{ $sale->user->name ?? 'Sistema' }}</td>
-        </tr>
-        <tr>
-            <td class="fw-bold">Método:</td>
-            <td class="text-right text-capitalize">{{ $sale->payment_method }}</td>
-        </tr>
-    </table>
+    <div class="info-section">
+        <div class="info-row"><span class="info-label">FECHA:</span> <span class="info-value">{{ $sale->created_at->format('d/m/Y h:i A') }}</span></div>
+        <div class="info-row"><span class="info-label">CLIENTE:</span> <span class="info-value fw-bold text-blue">{{ $sale->client_name }}</span></div>
+        <div class="info-row"><span class="info-label">BARBERO:</span> <span class="info-value">{{ $sale->appointment->barber->name ?? 'Sistema' }}</span></div>
+        <div class="info-row"><span class="info-label">PAGO:</span> <span class="info-value text-capitalize">{{ $sale->payment_method }}</span></div>
+    </div>
 
     <table class="items-table">
         <thead>
             <tr>
-                <th style="width: 60%;">Descripción</th>
+                <th style="width: 55%;">Descripción</th>
                 <th class="text-right" style="width: 15%;">Cant.</th>
-                <th class="text-right" style="width: 25%;">Subtotal</th>
+                <th class="text-right" style="width: 30%;">Subtotal</th>
             </tr>
         </thead>
         <tbody>
             @foreach($sale->items as $item)
             <tr>
-                <td>{{ $item['product_name'] }}</td>
+                <td style="font-size: 10px;">{{ $item['product_name'] }}</td>
                 <td class="text-right">{{ $item['quantity'] }}</td>
-                <td class="text-right">${{ number_format($item['subtotal'], 0) }}</td>
+                <td class="text-right fw-bold">${{ number_format($item['subtotal'], 0) }}</td>
             </tr>
             @endforeach
         </tbody>
     </table>
 
-    <div class="total-section">
-        <div class="grand-total">TOTAL: ${{ number_format($sale->total, 0) }}</div>
+    <div class="total-container">
+        <div class="total-label">VALOR TOTAL PAGADO</div>
+        <div class="total-amount">${{ number_format($sale->total, 0) }}</div>
     </div>
 
     <div class="footer">
-        <p>Este es un comprobante digital de compra.</p>
-        <p>JR BARBERÍA &copy; {{ date('Y') }}</p>
+        <p class="fw-bold">¡Gracias por elegirnos!</p>
+        <p>Este es un comprobante electrónico oficial de la Barbería JR.</p>
+        <p>&copy; {{ date('Y') }} Barbería JR - San Jerónimo</p>
     </div>
 </body>
 </html>

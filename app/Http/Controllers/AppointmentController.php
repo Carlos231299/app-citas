@@ -571,25 +571,27 @@ class AppointmentController extends Controller
                 $serviceLabel .= " ({$appointment->custom_details})";
             }
             
-            $finalServicePrice = $request->confirmed_price ?? $appointment->price;
+            // Logic: The user wants "Base: $15,000" and "Total: $40,000" (where 25k is products)
+            // So the 'price' for the service item in the invoice should be the service part.
+            $servicePartPrice = $request->confirmed_price ?? $appointment->price;
             
             $allInvoiceItems = array_merge([
                 [
                     'product_id' => null, // Indicated it's a service
                     'product_name' => $serviceLabel . " (Servicio)",
-                    'price' => $finalServicePrice,
+                    'price' => $servicePartPrice,
                     'quantity' => 1,
-                    'subtotal' => $finalServicePrice
+                    'subtotal' => $servicePartPrice
                 ]
             ], $itemsData);
 
-            $grandTotal = $finalServicePrice + $productsTotal;
+            $grandTotal = $servicePartPrice + $productsTotal;
 
             $sale = \App\Models\Sale::create([
                 'user_id' => auth()->id(),
                 'client_name' => $appointment->client_name,
                 'appointment_id' => $appointment->id,
-                'total' => $grandTotal, // Grand total (Service + Products)
+                'total' => $grandTotal, // Grand total (Service Part + Products)
                 'payment_method' => $request->payment_method ?? 'efectivo',
                 'items' => $allInvoiceItems,
                 'completed_at' => now()
