@@ -64,9 +64,11 @@
             <!-- POS & Inventory Group -->
             <a class="nav-link sidebar-link" data-bs-toggle="collapse" href="#posSubmenu" role="button" aria-expanded="{{ request()->routeIs('products.*') || request()->routeIs('pos.*') ? 'true' : 'false' }}">
                 <i class="bi bi-shop"></i> 
-                <span class="sidebar-text d-flex justify-content-between align-items-center w-100 ms-2">
-                    <span>POS / Inventario</span>
-                    <i class="bi bi-chevron-down small transition-transform" style="font-size: 0.7rem;"></i>
+                <span class="sidebar-text ms-2 w-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>POS / Inventario</span>
+                        <i class="bi bi-chevron-down small transition-transform" style="font-size: 0.7rem;"></i>
+                    </div>
                 </span>
             </a>
             <div class="collapse {{ request()->routeIs('products.*') || request()->routeIs('pos.*') ? 'show' : '' }}" id="posSubmenu">
