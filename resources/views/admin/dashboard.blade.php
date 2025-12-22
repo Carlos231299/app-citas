@@ -892,13 +892,29 @@
                             ${props.status === 'completed' ? 
                                 `<div class="mt-3 p-2 bg-success bg-opacity-10 rounded border border-success">
                                     <strong class="text-success"><i class="bi bi-check-circle-fill me-1"></i> Completada con éxito</strong>
-                                    <button onclick="completeAppointment(${event.id}, ${props.price})" class="btn btn-sm btn-outline-success w-100 mt-2">
-                                        <i class="bi bi-pencil-square me-1"></i> Editar Venta / Agregar Productos
-                                    </button>
                                 </div>` : ''
                             }
                         </div>
-                        ${actionButtons}
+                        <div class="d-flex justify-content-between gap-2 mt-4">
+                            ${props.status !== 'completed' ? `
+                                <button onclick="completeAppointment(${event.id}, ${props.price})" class="btn btn-success flex-grow-1 fw-bold">
+                                    <i class="bi bi-check-lg me-1"></i> Completar
+                                </button>
+                                <button onclick="window.calendarInstance.getEventById(${event.id}).remove()" class="btn btn-primary flex-grow-1 fw-bold">
+                                    <i class="bi bi-pencil-fill me-1"></i> Editar
+                                </button>
+                                <button onclick="cancelAppointment(${event.id})" class="btn btn-warning flex-grow-1 fw-bold text-white">
+                                    <i class="bi bi-x-circle me-1"></i> Cancelar
+                                </button>
+                            ` : `
+                                <button onclick="completeAppointment(${event.id}, ${props.price})" class="btn btn-primary flex-grow-1 fw-bold">
+                                    <i class="bi bi-pencil-fill me-1"></i> Editar
+                                </button>
+                                <button onclick="Swal.close()" class="btn btn-secondary flex-grow-1 fw-bold">
+                                    <i class="bi bi-x mx-1"></i> Cerrar
+                                </button>
+                            `}
+                        </div>
                     `,
                     icon: 'info',
                     showConfirmButton: false,
