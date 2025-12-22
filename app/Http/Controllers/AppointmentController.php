@@ -721,7 +721,7 @@ class AppointmentController extends Controller
 
         // 1. Fetch Regular Appointments
         // 1. Fetch Regular Appointments
-        $query = Appointment::with(['service', 'barber'])
+        $query = Appointment::with(['service', 'barber', 'products'])
             ->whereBetween('scheduled_at', [$start, $end])
             ->where('status', '!=', 'request');
 
@@ -762,7 +762,15 @@ class AppointmentController extends Controller
                         'client_phone' => $appointment->client_phone,
                         'custom_details' => $appointment->custom_details ?? 'Sin detalles adicionales',
                         'price' => $appointment->price,
-                        'cancellation_reason' => $appointment->cancellation_reason
+                        'cancellation_reason' => $appointment->cancellation_reason,
+                        'products' => $appointment->products->map(function($prod) {
+                            return [
+                                'id' => $prod->id,
+                                'name' => $prod->name,
+                                'price' => $prod->pivot->price,
+                                'qty' => $prod->pivot->quantity
+                            ];
+                        })
                     ]
                 ];
             });
