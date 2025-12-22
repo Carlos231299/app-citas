@@ -93,7 +93,9 @@ class PosController extends Controller
                       ->paginate(20)
                       ->withQueryString();
 
-        return view('admin.pos.history', compact('sales'));
+        $products = Product::orderBy('name')->get();
+
+        return view('admin.pos.history', compact('sales', 'products'));
     }
 
     public function exportPdf(Request $request)
@@ -118,6 +120,10 @@ class PosController extends Controller
         }
         if ($request->filled('payment_method')) {
             $query->where('payment_method', $request->payment_method);
+        }
+        if ($request->filled('product_id')) {
+            // Search inside JSON items column
+            $query->whereJsonContains('items', [['product_id' => (int)$request->product_id]]);
         }
         return $query;
     }

@@ -24,19 +24,26 @@
                 <input type="date" name="date_to" class="form-control form-control-sm" value="{{ request('date_to') }}">
             </div>
             <div class="col-12 col-md-3">
-                <label class="small fw-bold text-muted mb-1">Método de Pago</label>
                 <select name="payment_method" class="form-select form-select-sm">
-                    <option value="">Todos</option>
+                    <option value="">Todos los Métodos</option>
                     <option value="efectivo" {{ request('payment_method') == 'efectivo' ? 'selected' : '' }}>Efectivo</option>
-                    <option value="tarjeta" {{ request('payment_method') == 'tarjeta' ? 'selected' : '' }}>Tarjeta</option>
                     <option value="transferencia" {{ request('payment_method') == 'transferencia' ? 'selected' : '' }}>Transferencia</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-3">
+                <label class="small fw-bold text-muted mb-1">Producto</label>
+                <select name="product_id" class="form-select form-select-sm">
+                    <option value="">Todos los Productos</option>
+                    @foreach($products as $p)
+                        <option value="{{ $p->id }}" {{ request('product_id') == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="col-12 col-md-3 d-flex align-items-end gap-2">
                 <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
                     <i class="bi bi-filter"></i> Filtrar
                 </button>
-                @if(request()->anyFilled(['date_from', 'date_to', 'payment_method']))
+                @if(request()->anyFilled(['date_from', 'date_to', 'payment_method', 'product_id']))
                     <a href="{{ route('pos.history') }}" class="btn btn-light btn-sm border">
                         <i class="bi bi-x-circle"></i>
                     </a>

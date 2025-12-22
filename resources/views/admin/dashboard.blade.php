@@ -289,7 +289,6 @@
                                         <label class="form-label small fw-bold text-muted">MÉTODO DE PAGO</label>
                                         <select id="pos_payment_method" class="form-select border-2 shadow-sm" required>
                                             <option value="efectivo" selected>Efectivo</option>
-                                            <option value="tarjeta">Tarjeta</option>
                                             <option value="transferencia">Transferencia</option>
                                         </select>
                                     </div>

@@ -78,10 +78,10 @@
                 <div class="mb-3">
                      <label class="small fw-bold text-secondary mb-1">MÉTODO DE PAGO</label>
                      <div class="d-flex gap-2">
-                         <input type="radio" class="btn-check" name="payment_method" id="pay_cash" value="Efectivo" checked autocomplete="off">
+                         <input type="radio" class="btn-check" name="payment_method" id="pay_cash" value="efectivo" checked autocomplete="off">
                          <label class="btn btn-outline-primary flex-grow-1" for="pay_cash"><i class="bi bi-cash me-1"></i> Efectivo</label>
 
-                         <input type="radio" class="btn-check" name="payment_method" id="pay_card" value="Tarjeta/Transferencia" autocomplete="off">
+                         <input type="radio" class="btn-check" name="payment_method" id="pay_card" value="transferencia" autocomplete="off">
                          <label class="btn btn-outline-primary flex-grow-1" for="pay_card"><i class="bi bi-credit-card me-1"></i> Transf.</label>
                      </div>
                 </div>
