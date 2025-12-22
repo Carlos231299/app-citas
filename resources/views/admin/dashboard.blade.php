@@ -2043,17 +2043,39 @@
         })
     }
 
-    // Collapse Icon Logic
+    // Collapse Icon & Persistence Logic
     document.addEventListener('DOMContentLoaded', function() {
         const collapseElement = document.getElementById('statsCollapse');
         const iconElement = document.getElementById('statsCollapseIcon');
-        
+        const STORAGE_KEY = 'dashboardStatsCollapsed'; // 'true' = collapsed (hidden), 'false' = expanded (shown)
+
         if(collapseElement && iconElement) {
+            // 1. Check localStorage on load
+            const isCollapsed = localStorage.getItem(STORAGE_KEY) === 'true';
+
+            if (isCollapsed) {
+                // Remove 'show' class to collapse it immediately
+                collapseElement.classList.remove('show');
+                // Set icon to down
+                iconElement.classList.replace('bi-chevron-up', 'bi-chevron-down');
+            } else {
+                // Ensure 'show' class is present
+                if (!collapseElement.classList.contains('show')) {
+                    collapseElement.classList.add('show');
+                }
+                // Set icon to up
+                iconElement.classList.replace('bi-chevron-down', 'bi-chevron-up');
+            }
+
+            // 2. Listen for events to update localStorage
             collapseElement.addEventListener('show.bs.collapse', function () {
                 iconElement.classList.replace('bi-chevron-down', 'bi-chevron-up');
+                localStorage.setItem(STORAGE_KEY, 'false'); // Shown
             });
+            
             collapseElement.addEventListener('hide.bs.collapse', function () {
                 iconElement.classList.replace('bi-chevron-up', 'bi-chevron-down');
+                localStorage.setItem(STORAGE_KEY, 'true'); // Hidden
             });
         }
     });
