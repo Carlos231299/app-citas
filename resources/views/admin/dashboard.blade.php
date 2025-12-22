@@ -16,11 +16,21 @@
     .fc-daygrid-event:hover { background: transparent !important; }
     
     .fc-daygrid-event-dot {
-        border: 4px solid var(--fc-event-bg-color, #3788d8);
+        background-color: var(--fc-event-bg-color, #3788d8) !important;
+        border: none !important;
         border-radius: 50% !important;
-        width: 8px !important;
-        height: 8px !important;
-        margin: 0 1px !important;
+        width: 6px !important;
+        height: 6px !important;
+        margin: 1px !important;
+    }
+
+    .fc-daygrid-day-events {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        padding: 2px !important;
+        max-height: 40px !important;
+        overflow: hidden !important;
     }
 
     .fc-event-title, .fc-event-time { display: none !important; }
@@ -930,7 +940,7 @@
 
         container.innerHTML = '<div class="text-center py-5"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
 
-        axios.get(`/api/calendar/events?start=${dateStr}&end=${dateStr}&barber_id=${barberId}`)
+        axios.get(`/calendar/events?start=${dateStr}&end=${dateStr}&barber_id=${barberId}`)
             .then(res => {
                 const events = res.data;
                 if (!events.length) {
