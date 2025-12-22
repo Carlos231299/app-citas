@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/update-status', [ProfileController::class, 'updateStatus'])->name('profile.updateStatus');
     Route::post('/notifications/mark-read', [App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.markRead');
+    Route::post('/notifications/{id}/mark-read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
 
     Route::get('/dashboard', [AppointmentController::class, 'index'])->name('dashboard');
     Route::get('/calendar', [AppointmentController::class, 'calendar'])->name('calendar');

@@ -11,4 +11,13 @@ class NotificationController extends Controller
         auth()->user()->unreadNotifications->markAsRead();
         return response()->json(['success' => true]);
     }
+
+    public function markAsRead($id)
+    {
+        $notification = auth()->user()->notifications()->find($id);
+        if($notification) {
+            $notification->markAsRead();
+        }
+        return response()->json(['success' => true]);
+    }
 }

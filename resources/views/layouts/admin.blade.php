@@ -134,7 +134,7 @@
                         </li>
                         @forelse(auth()->user()->unreadNotifications as $notification)
                             <li>
-                                <a class="dropdown-item p-3 border-bottom" href="{{ $notification->data['url'] ?? '#' }}">
+                                <a class="dropdown-item p-3 border-bottom" href="#" onclick="markAsRead(event, '{{ $notification->id }}', '{{ $notification->data['url'] ?? '#' }}')">
                                     <div class="d-flex align-items-start gap-3">
                                         <div class="bg-{{ $notification->data['color'] ?? 'primary' }} bg-opacity-10 rounded-circle p-2 text-{{ $notification->data['color'] ?? 'primary' }}">
                                             <i class="{{ $notification->data['icon'] ?? 'bi-info-circle' }}"></i>
@@ -307,6 +307,28 @@
                     location.reload();
                 }
             });
+        }
+
+        function markAsRead(event, id, url) {
+            if(event) event.preventDefault(); // Stop default link behavior
+            
+            // Optimistic UI could go here (hide 'li'), but since we redirect, the reload handles it.
+            // If url is '#', we might want to stay on page and remove the item.
+            // But usually there is a destination.
+            
+            axios.post(`/notifications/${id}/mark-read`)
+                .then(res => {
+                    if (url && url !== '#') {
+                        window.location.href = url;
+                    } else {
+                        // Just remove from list if no URL
+                         location.reload();
+                    }
+                })
+                .catch(err => {
+                    console.error('Error marking as read', err);
+                    if (url && url !== '#') window.location.href = url; // Redirect anyway
+                });
         }
     </script>
 </body>
