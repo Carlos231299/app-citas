@@ -1439,6 +1439,30 @@
         renderPosCart();
     };
 
+    window.reopenAppointment = function(id) {
+        Swal.fire({
+            title: '¿Reabrir Cita?',
+            text: 'La cita volverá a "Programada". Los productos se devolverán al stock y se quitarán de la venta.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, Reabrir',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#0d6efd'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.patch(`/appointments/${id}/reopen`)
+                .then(response => {
+                    Swal.fire('¡Reabierta!', 'La cita está programada nuevamente.', 'success');
+                    setTimeout(() => location.reload(), 1000); 
+                })
+                .catch(error => {
+                    console.error(error);
+                    Swal.fire('Error', 'No se pudo reabrir la cita.', 'error');
+                });
+            }
+        });
+    };
+
     window.removePosProduct = function(index) {
         posCart.splice(index, 1);
         renderPosCart();
