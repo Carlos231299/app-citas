@@ -498,6 +498,10 @@ class AppointmentController extends Controller
     $appointment->update($data);
 
     // Handle Products (POS) - Full Sync with Stock Restoration
+    
+    // 0. Ensure relationships are loaded
+    $appointment->load('products');
+
     // 1. Restore stock for previously attached products
     foreach ($appointment->products as $existingProduct) {
         $existingProduct->stock += $existingProduct->pivot->quantity;
