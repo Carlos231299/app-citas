@@ -14,23 +14,24 @@
         </div>
 
         <!-- Filter Form -->
-        <form action="{{ route('pos.history') }}" method="GET" class="row g-2">
-            <div class="col-12 col-md-3">
+        <form action="{{ route('pos.history') }}" method="GET" class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
                 <label class="small fw-bold text-muted mb-1">Desde</label>
                 <input type="date" name="date_from" class="form-control form-control-sm" value="{{ request('date_from') }}">
             </div>
-            <div class="col-12 col-md-3">
+            <div class="col-6 col-md-2">
                 <label class="small fw-bold text-muted mb-1">Hasta</label>
                 <input type="date" name="date_to" class="form-control form-control-sm" value="{{ request('date_to') }}">
             </div>
-            <div class="col-12 col-md-3">
+            <div class="col-6 col-md-2">
+                <label class="small fw-bold text-muted mb-1">Método</label>
                 <select name="payment_method" class="form-select form-select-sm">
                     <option value="">Todos los Métodos</option>
                     <option value="efectivo" {{ request('payment_method') == 'efectivo' ? 'selected' : '' }}>Efectivo</option>
                     <option value="transferencia" {{ request('payment_method') == 'transferencia' ? 'selected' : '' }}>Transferencia</option>
                 </select>
             </div>
-            <div class="col-12 col-md-3">
+            <div class="col-6 col-md-4">
                 <label class="small fw-bold text-muted mb-1">Producto</label>
                 <select name="product_id" class="form-select form-select-sm">
                     <option value="">Todos los Productos</option>
@@ -39,13 +40,13 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-12 col-md-3 d-flex align-items-end gap-2">
-                <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
+            <div class="col-12 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm flex-grow-1 fw-bold">
                     <i class="bi bi-filter"></i> Filtrar
                 </button>
                 @if(request()->anyFilled(['date_from', 'date_to', 'payment_method', 'product_id']))
-                    <a href="{{ route('pos.history') }}" class="btn btn-light btn-sm border">
-                        <i class="bi bi-x-circle"></i>
+                    <a href="{{ route('pos.history') }}" class="btn btn-light btn-sm border" title="Limpiar Filtros">
+                        <i class="bi bi-x-lg"></i>
                     </a>
                 @endif
             </div>
