@@ -912,9 +912,9 @@
                                 </div>` : ''
                             }
                         </div>
-                        <div class="d-flex justify-content-between gap-2 mt-4">
+                        <div class="d-flex justify-content-center mt-4 w-100">
                             ${props.status !== 'completed' ? `
-                                <div class="d-flex gap-1 flex-wrap">
+                                <div class="d-flex justify-content-center gap-1 flex-wrap w-100">
                                     <button onclick="completeAppointment(${event.id}, ${props.price})" class="btn btn-success flex-grow-1 fw-bold">
                                         <i class="bi bi-check-lg me-1"></i> Completar
                                     </button>
@@ -929,7 +929,7 @@
                                     </button>
                                 </div>
                             ` : `
-                                <div class="d-flex gap-2">
+                                <div class="d-flex justify-content-center gap-2 w-100">
                                     <button onclick="reopenAppointment(${event.id})" class="btn btn-primary flex-grow-1 fw-bold">
                                         <i class="bi bi-arrow-repeat me-1"></i> Volver a Abrir
                                     </button>
