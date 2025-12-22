@@ -557,11 +557,12 @@ class AppointmentController extends Controller
             }
 
             // [NEW] Only create a Sale Record if products were actually sold
+            $sale = null;
             if ($productsTotal > 0) {
                 // Ensure no duplicate sales for this appointment if re-completed
                 \App\Models\Sale::where('appointment_id', $appointment->id)->delete();
 
-                \App\Models\Sale::create([
+                $sale = \App\Models\Sale::create([
                     'user_id' => auth()->id(),
                     'client_name' => $appointment->client_name, // Track who was sold to
                     'appointment_id' => $appointment->id, // [LINK]
@@ -575,7 +576,12 @@ class AppointmentController extends Controller
             DB::commit();
 
             return request()->wantsJson() 
-                ? response()->json(['message' => 'Completada exitosamente'])
+                ? response()->json([
+                    'success' => true, 
+                    'message' => 'Cita completada con éxito.',
+                    'sale' => $sale,
+                    'client_phone' => $appointment->client_phone
+                ])
                 : redirect()->back()->with('success', 'Cita completada');
 
         } catch (\Exception $e) {

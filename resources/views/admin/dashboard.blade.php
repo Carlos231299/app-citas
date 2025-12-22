@@ -930,7 +930,7 @@
                             <button onclick="completeAppointment(${event.id}, ${props.price})" class="btn btn-success flex-grow-1 fw-bold">
                                 <i class="bi bi-check-lg me-1"></i> Completar
                             </button>
-                            <button onclick="window.calendarInstance.getEventById(${event.id}).remove()" class="btn btn-primary flex-grow-1 fw-bold">
+                            <button onclick="editAppointment(${event.id})" class="btn btn-primary flex-grow-1 fw-bold">
                                 <i class="bi bi-pencil-fill me-1"></i> Editar
                             </button>
                             <button onclick="cancelAppointment(${event.id})" class="btn btn-warning flex-grow-1 fw-bold text-white">
@@ -1566,13 +1566,39 @@
         axios.patch(`/appointments/${appointmentId}/complete`, payload)
             .then(response => {
                 posModal.hide();
+                
+                const sale = response.data.sale;
+                const saleId = sale ? sale.id : null;
+                const clientPhone = response.data.client_phone || "";
+                
+                // Formatted WhatsApp Message
+                let productsSummary = posCart.map(i => `• ${i.qty}x ${i.name} ($${currencyFmt.format(i.price * i.qty)})`).join('\n');
+                let waMessage = `*Barbería JR - Tu Comprobante* ✂️\n\nHola *${sale ? sale.client_name : 'Cliente'}*, gracias por tu visita. Aquí tienes el detalle:\n\n${productsSummary}\n\n*Total: $${currencyFmt.format(finalPrice)}*\n*Método: ${paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1)}*`;
+                let waUrl = `https://wa.me/${clientPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(waMessage)}`;
+
                 Swal.fire({
                     title: '¡Venta Exitosa!',
                     text: 'Inventario actualizado y cita cerrada.',
                     icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false
-                }).then(() => location.reload());
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="bi bi-whatsapp me-1"></i> Enviar WhatsApp',
+                    cancelButtonText: 'Cerrar',
+                    denyButtonText: '<i class="bi bi-file-earmark-pdf me-1"></i> Ver PDF',
+                    showDenyButton: saleId ? true : false,
+                    confirmButtonColor: '#25D366',
+                    denyButtonColor: '#EF4444',
+                    reverseButtons: true
+                }).then((res) => {
+                    if (res.isConfirmed) {
+                        window.open(waUrl, '_blank');
+                        location.reload();
+                    } else if (res.isDenied) {
+                        window.open(`/pos/sale/${saleId}/pdf`, '_blank');
+                        location.reload();
+                    } else {
+                        location.reload();
+                    }
+                });
             })
             .catch(err => {
                 console.error(err);

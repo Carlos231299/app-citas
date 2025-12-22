@@ -104,10 +104,21 @@ class PosController extends Controller
                       ->orderBy('created_at', 'desc')
                       ->get();
         
-        $pdf = Pdf::loadView('admin.pos.pdf', compact('sales'));
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.pos.pdf', compact('sales'));
         $pdf->setPaper('a4', 'landscape');
         
         return $pdf->download('reporte-ventas-' . now()->format('Y-m-d') . '.pdf');
+    }
+
+    public function exportSinglePdf(\App\Models\Sale $sale)
+    {
+        $sale->load('user');
+        
+        // Items are already casted to array in model
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.pos.sale_receipt', compact('sale'));
+        
+        // Stream or Download (Stream is usually better for mobile WhatsApp flow)
+        return $pdf->stream('recibo-' . $sale->id . '.pdf');
     }
 
     public function destroy(Sale $sale)
