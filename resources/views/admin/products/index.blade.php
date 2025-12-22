@@ -4,6 +4,23 @@
 @section('header', 'Gestión de Inventario')
 
 @section('content')
+@if($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm rounded-4 mb-4" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
+            <div>
+                <strong>¡Ups! Algo salió mal.</strong>
+                <ul class="mb-0 small">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
     <!-- Filters (Dynamic) -->
     <ul class="nav nav-pills shadow-sm bg-white rounded-pill p-1" id="pills-tab" role="tablist">
@@ -288,6 +305,13 @@
                 setTimeout(() => { tabBtn.click(); }, 100);
             }
         }
+
+        @if($errors->any())
+            // Re-open Create Modal if it was a create attempt (checked by absence of PUT method hidden field, simpler assumption: usually create)
+            // Or better, check session triggers. For now, just show error at top is enough feedback, 
+            // but let's try to reopen if we can detect which one.
+            // Simplified: The alert at the top is sufficient for now to debug WHY it fails.
+        @endif
     });
 </script>
 @endpush
