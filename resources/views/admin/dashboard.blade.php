@@ -3,74 +3,257 @@
 @section('title', 'Dashboard - Barbería JR')
 @section('header', 'Agenda')
 
-@section('header_widgets')
-<div class="d-flex align-items-stretch gap-3 h-100">
-    <!-- 1. Citas Hoy (Compact) -->
-    <div class="card border-0 shadow-sm flex-fill" style="min-width: 250px;">
-        <div class="card-body p-2 d-flex align-items-center justify-content-between">
-            <div>
-                <small class="text-uppercase text-secondary fw-bold" style="font-size: 0.65rem;">Citas Hoy</small>
-                <div class="d-flex align-items-baseline gap-2">
-                    <h3 class="mb-0 fw-bold text-dark">{{ $stats['total_today'] }}</h3>
-                    <div class="d-flex gap-1">
-                        <span class="badge bg-success bg-opacity-10 text-success" style="font-size: 0.6rem;">{{ $stats['completed_today'] }}</span>
-                        <span class="badge bg-warning bg-opacity-10 text-warning" style="font-size: 0.6rem;">{{ $stats['pending_today'] }}</span>
+@section('content')
+<div class="d-flex flex-column h-100">
+    <!-- Stats Row Toggle -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <h5 class="fw-bold text-dark mb-0">Resumen del Día</h5>
+            <span class="badge bg-primary bg-opacity-10 text-primary small">{{ now()->format('d M') }}</span>
+        </div>
+        <button class="btn btn-sm btn-white border shadow-sm rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;" data-bs-toggle="collapse" data-bs-target="#statsCollapse" aria-expanded="true" aria-controls="statsCollapse" title="Mostrar/Ocultar Resumen">
+            <i class="bi bi-chevron-up transition-transform" id="statsCollapseIcon"></i>
+        </button>
+    </div>
+
+    <!-- Collapsible Stats Row -->
+    <div class="collapse show mb-4" id="statsCollapse">
+        <div class="row g-3 animate-fade-in">
+        @php
+            $colClass = trim(auth()->user()->role) === 'admin' ? 'col-12 col-xl-5' : 'col-12 col-md-6';
+        @endphp
+
+        <!-- 1. Citas Hoy (Full) -->
+        <div class="{{ $colClass }}">
+            <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-primary">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h6 class="text-secondary text-uppercase fw-bold mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">Citas Hoy</h6>
+                            <h2 class="mb-0 fw-bold text-dark display-6">{{ $stats['total_today'] }}</h2>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-4">
+                            <i class="bi bi-calendar-check text-primary fs-3"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Breakdown -->
+                    <div class="row g-2 text-center">
+                        <div class="col-4">
+                            <div class="bg-success bg-opacity-10 p-2 rounded-3">
+                                <small class="d-block text-success fw-bold" style="font-size: 0.7rem;">COMPLETADAS</small>
+                                <span class="fw-bold text-dark">{{ $stats['completed_today'] }}</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="bg-warning bg-opacity-10 p-2 rounded-3">
+                                <small class="d-block text-warning fw-bold" style="font-size: 0.7rem;">PENDIENTES</small>
+                                <span class="fw-bold text-dark">{{ $stats['pending_today'] }}</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="bg-danger bg-opacity-10 p-2 rounded-3">
+                                <small class="d-block text-danger fw-bold" style="font-size: 0.7rem;">CANCELADAS</small>
+                                <span class="fw-bold text-dark">{{ $stats['cancelled_today'] }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="bg-primary bg-opacity-10 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
-                <i class="bi bi-calendar-check text-primary"></i>
+        </div>
+
+        <!-- 2. Ingresos (Admin) -->
+        @if(trim(auth()->user()->role) === 'admin')
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-success">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="text-secondary text-uppercase fw-bold mb-0" style="font-size: 0.8rem; letter-spacing: 0.5px;">Ingresos Hoy</h6>
+                        <div class="bg-success bg-opacity-10 p-3 rounded-4">
+                            <i class="bi bi-currency-dollar text-success fs-3"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="mb-0 fw-bold text-dark display-6">${{ number_format($stats['revenue_today'], 0) }}</h2>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+        @endif
 
-    @if(trim(auth()->user()->role) === 'admin')
-    <!-- 2. Ingresos (Compact) -->
-    <div class="card border-0 shadow-sm flex-fill" style="min-width: 200px;">
-        <div class="card-body p-2 d-flex align-items-center justify-content-between">
-            <div>
-                <small class="text-uppercase text-secondary fw-bold" style="font-size: 0.65rem;">Ingresos</small>
-                <h3 class="mb-0 fw-bold text-dark text-nowrap">${{ number_format($stats['revenue_today'], 0) }}</h3>
-            </div>
-            <div class="bg-success bg-opacity-10 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
-                <i class="bi bi-currency-dollar text-success"></i>
+        <!-- 3. Barberos (Admin) -->
+        @if(trim(auth()->user()->role) === 'admin')
+        <div class="col-12 col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-info">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="text-secondary text-uppercase fw-bold mb-0" style="font-size: 0.8rem; letter-spacing: 0.5px;">Barberos Activos</h6>
+                        <div class="bg-info bg-opacity-10 p-3 rounded-4">
+                            <i class="bi bi-people text-info fs-3"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="mb-2 fw-bold text-dark">{{ $barbers->where('is_active', true)->count() }} <span class="text-muted fs-6 fw-normal">/ {{ $barbers->count() }}</span></h3>
+                    </div>
+
+                    <div class="d-flex gap-1 overflow-visible">
+                        @foreach($barbers->take(5) as $barber)
+                            @php
+                                $isActive = $barber->is_active;
+                                $isSpecial = $barber->special_mode ?? false;
+                                $rawAvatar = $barber->user->avatar;
+                                $isPath = $rawAvatar && (str_contains($rawAvatar, '/') || str_contains($rawAvatar, '.'));
+                                $initials = substr($barber->name, 0, 1);
+                            @endphp
+
+                            <div class="position-relative" data-bs-toggle="tooltip" title="{{ $barber->name }} {{ $isActive ? '(Activo)' : ($isSpecial ? '(Horario Extra)' : '(Inactivo)') }}">
+                                @if($isPath)
+                                    <img src="{{ asset('storage/' . $rawAvatar) }}" class="rounded-circle border border-2 {{ $isActive ? 'border-success' : 'border-secondary' }}" style="width: 35px; height: 35px; object-fit: cover;">
+                                @elseif($rawAvatar)
+                                    <div class="rounded-circle border border-2 {{ $isActive ? 'border-success' : 'border-secondary' }} bg-light d-flex align-items-center justify-content-center fw-bold text-dark fs-5" style="width: 35px; height: 35px;">
+                                        {{ $rawAvatar }}
+                                    </div>
+                                @else
+                                    <div class="rounded-circle border border-2 {{ $isActive ? 'border-success' : 'border-secondary' }} bg-light d-flex align-items-center justify-content-center fw-bold text-secondary" style="width: 35px; height: 35px;">
+                                        {{ $initials }}
+                                    </div>
+                                @endif
+                                <span class="position-absolute bottom-0 end-0 p-1 bg-{{ $isActive ? 'success' : 'secondary' }} border border-light rounded-circle" style="transform: scale(0.6);"></span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-
-    <!-- 3. Barberos (Compact) -->
-    <div class="card border-0 shadow-sm flex-fill" style="min-width: 200px;">
-        <div class="card-body p-2 d-flex align-items-center justify-content-between">
-            <div>
-                 <small class="text-uppercase text-secondary fw-bold" style="font-size: 0.65rem;">Barberos</small>
-                 <div class="d-flex align-items-center fw-bold text-dark">
-                     {{ $barbers->where('is_active', true)->count() }} <span class="text-muted small fw-normal ms-1">/ {{ $barbers->count() }}</span>
-                 </div>
-            </div>
-            
-            <div class="d-flex ps-2 overflow-hidden">
-                @foreach($barbers->take(3) as $barber)
-                     @php 
-                        $raw = $barber->user->avatar;
-                        $path = $raw && (str_contains($raw, '/') || str_contains($raw, '.')) ? asset('storage/'.$raw) : null;
-                     @endphp
-                     @if($path)
-                        <img src="{{ $path }}" class="rounded-circle border border-white" style="width: 24px; height: 24px; margin-left: -8px; object-fit: cover;">
-                     @else
-                        <div class="rounded-circle bg-secondary text-white border border-white d-flex align-items-center justify-content-center small" style="width: 24px; height: 24px; margin-left: -8px; font-size: 0.6rem;">{{ substr($barber->name, 0, 1) }}</div>
-                     @endif
-                @endforeach
-            </div>
+        @endif
         </div>
     </div>
-    @endif
-</div>
-@endsection
+    <!-- Stats Row Toggle -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <h5 class="fw-bold text-dark mb-0">Resumen del Día</h5>
+            <span class="badge bg-primary bg-opacity-10 text-primary small">{{ now()->format('d M') }}</span>
+        </div>
+        <button class="btn btn-sm btn-white border shadow-sm rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;" data-bs-toggle="collapse" data-bs-target="#statsCollapse" aria-expanded="true" aria-controls="statsCollapse" title="Mostrar/Ocultar Resumen">
+            <i class="bi bi-chevron-up transition-transform" id="statsCollapseIcon"></i>
+        </button>
+    </div>
 
-@section('content')
-<div class="d-flex flex-column h-100">
-    <!-- Stats Row (Mobile Only) -->
-    <!-- Stats Row (Mobile Only) -->
+    <!-- Collapsible Stats Row -->
+    <div class="collapse show mb-4" id="statsCollapse">
+        <div class="row g-3 animate-fade-in">
+        @php
+            $colClass = trim(auth()->user()->role) === 'admin' ? 'col-12 col-xl-5' : 'col-12 col-md-6';
+        @endphp
+
+        <!-- 1. Citas Hoy (Full) -->
+        <div class="{{ $colClass }}">
+            <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-primary">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h6 class="text-secondary text-uppercase fw-bold mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">Citas Hoy</h6>
+                            <h2 class="mb-0 fw-bold text-dark display-6">{{ $stats['total_today'] }}</h2>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-4">
+                            <i class="bi bi-calendar-check text-primary fs-3"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Breakdown -->
+                    <div class="row g-2 text-center">
+                        <div class="col-4">
+                            <div class="bg-success bg-opacity-10 p-2 rounded-3">
+                                <small class="d-block text-success fw-bold" style="font-size: 0.7rem;">COMPLETADAS</small>
+                                <span class="fw-bold text-dark">{{ $stats['completed_today'] }}</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="bg-warning bg-opacity-10 p-2 rounded-3">
+                                <small class="d-block text-warning fw-bold" style="font-size: 0.7rem;">PENDIENTES</small>
+                                <span class="fw-bold text-dark">{{ $stats['pending_today'] }}</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="bg-danger bg-opacity-10 p-2 rounded-3">
+                                <small class="d-block text-danger fw-bold" style="font-size: 0.7rem;">CANCELADAS</small>
+                                <span class="fw-bold text-dark">{{ $stats['cancelled_today'] }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Ingresos (Admin) -->
+        @if(trim(auth()->user()->role) === 'admin')
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-success">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="text-secondary text-uppercase fw-bold mb-0" style="font-size: 0.8rem; letter-spacing: 0.5px;">Ingresos Hoy</h6>
+                        <div class="bg-success bg-opacity-10 p-3 rounded-4">
+                            <i class="bi bi-currency-dollar text-success fs-3"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="mb-0 fw-bold text-dark display-6">${{ number_format($stats['revenue_today'], 0) }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <!-- 3. Barberos (Admin) -->
+        @if(trim(auth()->user()->role) === 'admin')
+        <div class="col-12 col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-info">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="text-secondary text-uppercase fw-bold mb-0" style="font-size: 0.8rem; letter-spacing: 0.5px;">Barberos Activos</h6>
+                        <div class="bg-info bg-opacity-10 p-3 rounded-4">
+                            <i class="bi bi-people text-info fs-3"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="mb-2 fw-bold text-dark">{{ $barbers->where('is_active', true)->count() }} <span class="text-muted fs-6 fw-normal">/ {{ $barbers->count() }}</span></h3>
+                    </div>
+
+                    <div class="d-flex gap-1 overflow-visible">
+                        @foreach($barbers->take(5) as $barber)
+                            @php
+                                $isActive = $barber->is_active;
+                                $isSpecial = $barber->special_mode ?? false;
+                                $rawAvatar = $barber->user->avatar;
+                                $isPath = $rawAvatar && (str_contains($rawAvatar, '/') || str_contains($rawAvatar, '.'));
+                                $initials = substr($barber->name, 0, 1);
+                            @endphp
+
+                            <div class="position-relative" data-bs-toggle="tooltip" title="{{ $barber->name }} {{ $isActive ? '(Activo)' : ($isSpecial ? '(Horario Extra)' : '(Inactivo)') }}">
+                                @if($isPath)
+                                    <img src="{{ asset('storage/' . $rawAvatar) }}" class="rounded-circle border border-2 {{ $isActive ? 'border-success' : 'border-secondary' }}" style="width: 35px; height: 35px; object-fit: cover;">
+                                @elseif($rawAvatar)
+                                    <div class="rounded-circle border border-2 {{ $isActive ? 'border-success' : 'border-secondary' }} bg-light d-flex align-items-center justify-content-center fw-bold text-dark fs-5" style="width: 35px; height: 35px;">
+                                        {{ $rawAvatar }}
+                                    </div>
+                                @else
+                                    <div class="rounded-circle border border-2 {{ $isActive ? 'border-success' : 'border-secondary' }} bg-light d-flex align-items-center justify-content-center fw-bold text-secondary" style="width: 35px; height: 35px;">
+                                        {{ $initials }}
+                                    </div>
+                                @endif
+                                <span class="position-absolute bottom-0 end-0 p-1 bg-{{ $isActive ? 'success' : 'secondary' }} border border-light rounded-circle" style="transform: scale(0.6);"></span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+        </div>
+    </div>
+    
     @if(isset($pendingRequests) && $pendingRequests->count() > 0)
     <div class="alert alert-info border-0 shadow-sm mb-4 d-flex align-items-center" role="alert">
         <div class="flex-grow-1">
@@ -119,76 +302,7 @@
     </div>
     @endif
 
-        <div class="row g-3 mb-4 animate-fade-in d-xl-none">
-        @php
-            $colClass = trim(auth()->user()->role) === 'admin' ? 'col-12 col-xl-5' : 'col-12 col-md-6';
-        @endphp
 
-        <!-- 1. RESUMEN CITAS HOY (Unified) -->
-        <div class="{{ $colClass }}">
-            <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-primary">
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div>
-                            <h6 class="text-secondary text-uppercase fw-bold mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">Citas Hoy</h6>
-                            <h2 class="mb-0 fw-bold text-dark display-6">{{ $stats['total_today'] }}</h2>
-                        </div>
-                        <div class="bg-primary bg-opacity-10 p-3 rounded-4">
-                            <i class="bi bi-calendar-check text-primary fs-3"></i>
-                        </div>
-                    </div>
-                    
-                    <!-- Breakdown -->
-                    <div class="row g-2 text-center">
-                        <div class="col-4">
-                            <div class="bg-success bg-opacity-10 p-2 rounded-3">
-                                <small class="d-block text-success fw-bold" style="font-size: 0.7rem;">COMPLETADAS</small>
-                                <span class="fw-bold text-dark">{{ $stats['completed_today'] }}</span>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="bg-warning bg-opacity-10 p-2 rounded-3">
-                                <small class="d-block text-warning fw-bold" style="font-size: 0.7rem;">PENDIENTES</small>
-                                <span class="fw-bold text-dark">{{ $stats['pending_today'] }}</span>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="bg-danger bg-opacity-10 p-2 rounded-3">
-                                <small class="d-block text-danger fw-bold" style="font-size: 0.7rem;">CANCELADAS</small>
-                                <span class="fw-bold text-dark">{{ $stats['cancelled_today'] }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 2. INGRESOS (Admin) -->
-        @if(trim(auth()->user()->role) === 'admin')
-        <div class="col-12 col-md-6 col-xl-3">
-            <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-success">
-                <div class="card-body p-3 d-flex flex-column justify-content-between">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <h6 class="text-secondary text-uppercase fw-bold mb-0" style="font-size: 0.8rem; letter-spacing: 0.5px;">Ingresos Hoy</h6>
-                        <div class="bg-success bg-opacity-10 p-3 rounded-4">
-                            <i class="bi bi-currency-dollar text-success fs-3"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <h2 class="mb-0 fw-bold text-dark display-6">${{ number_format($stats['revenue_today'], 0) }}</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endif
-
-        <!-- 3. BARBEROS (Admin) -->
-        @if(trim(auth()->user()->role) === 'admin')
-        <div class="col-12 col-md-6 col-xl-4">
-            <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-info">
-                <div class="card-body p-3 d-flex flex-column justify-content-between">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <h6 class="text-secondary text-uppercase fw-bold mb-0" style="font-size: 0.8rem; letter-spacing: 0.5px;">Barberos Activos</h6>
                         <div class="bg-info bg-opacity-10 p-3 rounded-4">
                             <i class="bi bi-people text-info fs-3"></i>
                         </div>
