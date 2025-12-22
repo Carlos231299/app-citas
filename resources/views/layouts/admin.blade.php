@@ -85,6 +85,9 @@
                     <a class="nav-link text-secondary py-1 {{ request()->routeIs('products.*') ? 'fw-bold text-primary' : '' }}" href="{{ route('products.index') }}">
                         <span class="sidebar-text">Inventario</span>
                     </a>
+                    <a class="nav-link text-secondary py-1 {{ request()->routeIs('reports.*') ? 'fw-bold text-primary' : '' }}" href="{{ route('reports.index') }}">
+                        <span class="sidebar-text">Reportes</span>
+                    </a>
                 </nav>
             </div>
 
@@ -96,11 +99,7 @@
             </a>
             @endif
             
-            @if(auth()->user()->role === 'admin')
-            <a class="nav-link sidebar-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') }}" title="Reportes">
-                <i class="bi bi-file-earmark-bar-graph-fill"></i> <span class="sidebar-text">Reportes</span>
-            </a>
-            @endif
+
             
             <!-- Hidden Logout Form for Header Dropdown -->
             <form action="{{ route('logout') }}" method="POST" id="logout-form" class="d-none">
