@@ -65,7 +65,7 @@ Route::delete('/appointments/{appointment}', [AppointmentController::class, 'des
     Route::post('/pos/store', [App\Http\Controllers\PosController::class, 'store'])->name('pos.store');
     Route::get('/pos/history', [App\Http\Controllers\PosController::class, 'history'])->name('pos.history');
     Route::get('/pos/history/export-pdf', [App\Http\Controllers\PosController::class, 'exportPdf'])->name('pos.history.pdf');
-    Route::get('/pos/sale/{sale}/pdf', [App\Http\Controllers\PosController::class, 'exportSinglePdf'])->name('pos.sale.pdf');
+    Route::get('/pos/sale/{sale}/pdf', [App\Http\Controllers\PosController::class, 'exportSinglePdf'])->name('pos.sale.pdf')->withoutMiddleware(['auth'])->middleware(['signed']);
     Route::delete('/pos/{sale}', [App\Http\Controllers\PosController::class, 'destroy'])->name('pos.destroy');
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');

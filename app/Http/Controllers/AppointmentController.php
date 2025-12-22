@@ -614,14 +614,21 @@ class AppointmentController extends Controller
                     ]);
 
                     // 2. Send PDF Receipt
-                    // route() generates absolute URL based on APP_URL. Ensure APP_URL is correctly set.
-                    $pdfUrl = route('pos.sale.pdf', $sale->id);
+                    // Generate a temporary signed URL valid for 30 minutes
+                    $pdfUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                        'pos.sale.pdf', 
+                        now()->addMinutes(30), 
+                        ['sale' => $sale->id]
+                    );
+
+                    // Dynamic Filename
+                    $safeClientName = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '', $appointment->client_name);
+                    $filename = "Recibo - {$safeClientName} - " . now()->format('d-m-Y H-i') . ".pdf";
                     
-                    \Illuminate\Support\Facades\Http::timeout(8)->post('http://localhost:3000/send-pdf', [
+                    \Illuminate\Support\Facades\Http::timeout(10)->post('http://localhost:3000/send-pdf', [
                         'phone' => $appointment->client_phone,
                         'pdf_url' => $pdfUrl,
-                        'filename' => "Recibo_{$sale->id}.pdf",
-                        'caption' => "Recibo de servicio #{$appointment->id}"
+                        'filename' => $filename
                     ]);
                     
                 } catch (\Exception $botError) {

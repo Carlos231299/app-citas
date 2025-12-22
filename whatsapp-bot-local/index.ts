@@ -350,10 +350,14 @@ app.post('/send-pdf', async (req, res) => {
 
         // Import MessageMedia from pkg (whatsapp-web.js)
         const MessageMedia = pkg.MessageMedia;
-        const media = await MessageMedia.fromUrl(pdf_url);
+        const media = await MessageMedia.fromUrl(pdf_url, { unsafeMime: true });
+
+        // Set the custom filename if provided
+        if (filename) {
+            media.filename = filename;
+        }
 
         await client.sendMessage(chatId, media, {
-            caption: caption || 'Tu recibo de Barbería JR',
             sendMediaAsDocument: true
         });
 
