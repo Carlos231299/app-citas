@@ -237,7 +237,7 @@
 <div class="modal fade" id="completeAppointmentModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg"> <!-- Large modal for POS -->
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-            <div class="modal-header bg-success text-white border-bottom-0 pb-3"> <!-- Green header -->
+            <div class="modal-header bg-primary text-white border-bottom-0 pb-3"> <!-- Blue header -->
                 <div>
                     <h5 class="modal-title fw-bold"><i class="bi bi-cart-check-fill me-2"></i>Completar Cita & Venta</h5>
                     <p class="mb-0 text-white-50 small">Confirma el servicio y agrega productos</p>
@@ -275,9 +275,9 @@
                                         <span class="fw-bold" id="pos_products_total">$0</span>
                                     </div>
 
-                                    <div class="alert alert-success border-0 shadow-sm mb-0">
-                                        <label class="small fw-bold text-success-emphasis d-block mb-1">TOTAL A COBRAR</label>
-                                        <span class="fs-2 fw-bold text-success" id="pos_grand_total">$0</span>
+                                    <div class="alert alert-primary border-0 shadow-sm mb-0">
+                                        <label class="small fw-bold text-primary-emphasis d-block mb-1">TOTAL A COBRAR</label>
+                                        <span class="fs-2 fw-bold text-primary" id="pos_grand_total">$0</span>
                                     </div>
                                 </div>
                             </div>
@@ -327,7 +327,7 @@
                     </div>
 
                     <div class="d-grid mt-4">
-                        <button type="submit" id="btnCompletePos" class="btn btn-success btn-lg fw-bold rounded-pill shadow">
+                        <button type="submit" id="btnCompletePos" class="btn btn-primary btn-lg fw-bold rounded-pill shadow">
                             <i class="bi bi-check-lg me-2"></i> Finalizar y Cobrar
                         </button>
                     </div>
