@@ -816,7 +816,9 @@ class AppointmentController extends Controller
                         'status' => $appointment->status,
                         'client_phone' => $appointment->client_phone,
                         'custom_details' => $appointment->custom_details ?? 'Sin detalles adicionales',
-                        'price' => $appointment->price,
+                        'price' => $appointment->confirmed_price ?? $appointment->price,
+                        'base_price' => $appointment->price, 
+                        'final_price' => $appointment->confirmed_price,
                         'cancellation_reason' => $appointment->cancellation_reason,
                         'products' => $appointment->products->map(function($prod) {
                             return [
