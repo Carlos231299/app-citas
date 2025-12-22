@@ -3,10 +3,74 @@
 @section('title', 'Dashboard - Barbería JR')
 @section('header', 'Agenda')
 
+@section('header_widgets')
+<div class="d-flex align-items-stretch gap-3 h-100">
+    <!-- 1. Citas Hoy (Compact) -->
+    <div class="card border-0 shadow-sm flex-fill" style="min-width: 250px;">
+        <div class="card-body p-2 d-flex align-items-center justify-content-between">
+            <div>
+                <small class="text-uppercase text-secondary fw-bold" style="font-size: 0.65rem;">Citas Hoy</small>
+                <div class="d-flex align-items-baseline gap-2">
+                    <h3 class="mb-0 fw-bold text-dark">{{ $stats['total_today'] }}</h3>
+                    <div class="d-flex gap-1">
+                        <span class="badge bg-success bg-opacity-10 text-success" style="font-size: 0.6rem;">{{ $stats['completed_today'] }}</span>
+                        <span class="badge bg-warning bg-opacity-10 text-warning" style="font-size: 0.6rem;">{{ $stats['pending_today'] }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-primary bg-opacity-10 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                <i class="bi bi-calendar-check text-primary"></i>
+            </div>
+        </div>
+    </div>
+
+    @if(trim(auth()->user()->role) === 'admin')
+    <!-- 2. Ingresos (Compact) -->
+    <div class="card border-0 shadow-sm flex-fill" style="min-width: 200px;">
+        <div class="card-body p-2 d-flex align-items-center justify-content-between">
+            <div>
+                <small class="text-uppercase text-secondary fw-bold" style="font-size: 0.65rem;">Ingresos</small>
+                <h3 class="mb-0 fw-bold text-dark text-nowrap">${{ number_format($stats['revenue_today'], 0) }}</h3>
+            </div>
+            <div class="bg-success bg-opacity-10 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                <i class="bi bi-currency-dollar text-success"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Barberos (Compact) -->
+    <div class="card border-0 shadow-sm flex-fill" style="min-width: 200px;">
+        <div class="card-body p-2 d-flex align-items-center justify-content-between">
+            <div>
+                 <small class="text-uppercase text-secondary fw-bold" style="font-size: 0.65rem;">Barberos</small>
+                 <div class="d-flex align-items-center fw-bold text-dark">
+                     {{ $barbers->where('is_active', true)->count() }} <span class="text-muted small fw-normal ms-1">/ {{ $barbers->count() }}</span>
+                 </div>
+            </div>
+            
+            <div class="d-flex ps-2 overflow-hidden">
+                @foreach($barbers->take(3) as $barber)
+                     @php 
+                        $raw = $barber->user->avatar;
+                        $path = $raw && (str_contains($raw, '/') || str_contains($raw, '.')) ? asset('storage/'.$raw) : null;
+                     @endphp
+                     @if($path)
+                        <img src="{{ $path }}" class="rounded-circle border border-white" style="width: 24px; height: 24px; margin-left: -8px; object-fit: cover;">
+                     @else
+                        <div class="rounded-circle bg-secondary text-white border border-white d-flex align-items-center justify-content-center small" style="width: 24px; height: 24px; margin-left: -8px; font-size: 0.6rem;">{{ substr($barber->name, 0, 1) }}</div>
+                     @endif
+                @endforeach
+            </div>
+        </div>
+    </div>
+    @endif
+</div>
+@endsection
+
 @section('content')
 <div class="d-flex flex-column h-100">
-    <!-- Stats Row -->
-    <!-- Stats Row -->
+    <!-- Stats Row (Mobile Only) -->
+    <!-- Stats Row (Mobile Only) -->
     @if(isset($pendingRequests) && $pendingRequests->count() > 0)
     <div class="alert alert-info border-0 shadow-sm mb-4 d-flex align-items-center" role="alert">
         <div class="flex-grow-1">
@@ -55,7 +119,7 @@
     </div>
     @endif
 
-        <div class="row g-3 mb-4 animate-fade-in">
+        <div class="row g-3 mb-4 animate-fade-in d-xl-none">
         @php
             $colClass = trim(auth()->user()->role) === 'admin' ? 'col-12 col-xl-5' : 'col-12 col-md-6';
         @endphp

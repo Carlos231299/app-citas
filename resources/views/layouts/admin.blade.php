@@ -119,6 +119,11 @@
                 </button>
                 <h2 class="h4 mb-0 fw-bold text-dark">@yield('header')</h2>
             </div>
+            
+            <!-- Header Widgets (Dynamic) -->
+            <div class="flex-grow-1 mx-3 d-none d-xl-block">
+                @yield('header_widgets')
+            </div>
             <!-- Notifications & Profile -->
             <div class="d-flex align-items-center gap-3">
                 <!-- Notifications -->
