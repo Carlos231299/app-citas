@@ -819,7 +819,6 @@
                 .catch(err => console.error("Could not load appointment details", err));
         }
     }
-    }
     
     // Global Event Details Viewer
     window.showEventDetails = function(event) {
