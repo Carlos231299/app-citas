@@ -89,7 +89,7 @@
                             <i class="bi bi-three-dots-vertical"></i>
                         </button>
                         <ul class="dropdown-menu border-0 shadow-lg">
-                            <li><button class="dropdown-item py-2" onclick="editProduct({{ $product->id }}, '{{ addslashes($product->name) }}', '{{ $product->price }}', '{{ $product->stock }}', '{{ $product->category_id }}', '{{ addslashes($product->description) }}', {{ $product->min_stock }}, '{{ $product->image }}')"><i class="bi bi-pencil me-2 text-warning"></i> Editar</button></li>
+                            <li><button id="btn-edit-{{ $product->id }}" class="dropdown-item py-2" onclick="editProduct({{ $product->id }}, '{{ addslashes($product->name) }}', '{{ $product->price }}', '{{ $product->stock }}', '{{ $product->category_id }}', '{{ addslashes($product->description) }}', {{ $product->min_stock }}, '{{ $product->image }}')"><i class="bi bi-pencil me-2 text-warning"></i> Editar</button></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form action="{{ route('products.destroy', $product) }}" method="POST" onsubmit="return confirm('¿Eliminar este producto?')">
@@ -312,6 +312,20 @@
             // but let's try to reopen if we can detect which one.
             // Simplified: The alert at the top is sufficient for now to debug WHY it fails.
         @endif
+        // Check for highlight_product param (Deep Link from Notification)
+        const highlightId = urlParams.get('highlight_product');
+        if(highlightId) {
+            const editBtn = document.getElementById(`btn-edit-${highlightId}`);
+            if(editBtn) {
+                // Ensure the tab containing the product is active first?
+                // The grid shows all by default, code handles filtering.
+                // Just wait a bit for modals to init
+                setTimeout(() => { 
+                    editBtn.click(); 
+                    console.log('Auto-opening product ' + highlightId);
+                }, 500);
+            }
+        }
     });
 </script>
 @endpush

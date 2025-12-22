@@ -58,6 +58,11 @@ Route::delete('/appointments/{appointment}', [AppointmentController::class, 'des
     Route::resource('barbers', BarberController::class);
     Route::resource('products', App\Http\Controllers\ProductController::class);
     Route::resource('categories', App\Http\Controllers\CategoryController::class);
+    
+    // POS
+    Route::get('/pos', [App\Http\Controllers\PosController::class, 'index'])->name('pos.index');
+    Route::post('/pos/store', [App\Http\Controllers\PosController::class, 'store'])->name('pos.store');
+    Route::get('/pos/history', [App\Http\Controllers\PosController::class, 'history'])->name('pos.history');
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/pdf', [ReportController::class, 'pdf'])->name('reports.pdf');

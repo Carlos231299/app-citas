@@ -57,10 +57,25 @@
             @endif
 
             {{-- Barbers: Visible ONLY to Admin (Barbers manage status in Profile now) --}}
+            {{-- Barbers: Visible ONLY to Admin (Barbers manage status in Profile now) --}}
             @if(trim(auth()->user()->role) === 'admin')
-            <a class="nav-link sidebar-link {{ request()->routeIs('products.*') ? 'active' : '' }}" href="{{ route('products.index') }}" title="Inventario">
-                <i class="bi bi-box-seam-fill"></i> <span class="sidebar-text">Inventario</span>
+            
+            <!-- POS & Inventory Group -->
+            <a class="nav-link sidebar-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#posSubmenu" role="button" aria-expanded="{{ request()->routeIs('products.*') || request()->routeIs('pos.*') ? 'true' : 'false' }}">
+                <span><i class="bi bi-shop me-2"></i> <span class="sidebar-text">POS / Inventario</span></span>
+                <i class="bi bi-chevron-down small transition-transform" style="font-size: 0.7rem;"></i>
             </a>
+            <div class="collapse {{ request()->routeIs('products.*') || request()->routeIs('pos.*') ? 'show' : '' }}" id="posSubmenu">
+                <nav class="nav flex-column ps-3 border-start border-2 border-light ms-3 mb-2">
+                    <a class="nav-link text-secondary py-1 {{ request()->routeIs('pos.*') ? 'fw-bold text-primary' : '' }}" href="{{ route('pos.index') }}">
+                        Punto de Venta
+                    </a>
+                    <a class="nav-link text-secondary py-1 {{ request()->routeIs('products.*') ? 'fw-bold text-primary' : '' }}" href="{{ route('products.index') }}">
+                        Inventario
+                    </a>
+                </nav>
+            </div>
+
             @endif
 
             @if(trim(auth()->user()->role) === 'admin')
