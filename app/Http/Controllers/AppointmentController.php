@@ -434,7 +434,9 @@ class AppointmentController extends Controller
 
         $stats = [
             'total_today' => $todaysAppointments->count(),
-            'revenue_today' => $todaysAppointments->where('status', 'completed')->sum('price'),
+            'revenue_today' => $todaysAppointments->where('status', 'completed')->sum(function($appt) {
+                return $appt->confirmed_price ?? $appt->price;
+            }),
             'pending_today' => $todaysAppointments->where('status', 'scheduled')->count(),
             'completed_today' => $todaysAppointments->where('status', 'completed')->count(),
             'cancelled_today' => $todaysAppointments->where('status', 'cancelled')->count(),
