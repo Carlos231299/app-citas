@@ -889,6 +889,10 @@
             const appointments = apptsRes.data.filter(ev => ev.extendedProps.type === 'appointment');
             const availableSlots = slotsRes.data || [];
 
+            // Debug: Log slots data
+            console.log('📅 Slots disponibles para', dateStr, ':', availableSlots);
+            console.log('📋 Citas para', dateStr, ':', appointments);
+
             container.innerHTML = '';
             let allItems = [
                 ...appointments.map(a => ({ ...a, type: 'appointment', timeNum: new Date(a.start).getTime() })),
