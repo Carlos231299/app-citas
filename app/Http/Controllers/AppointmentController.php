@@ -1123,4 +1123,47 @@ class AppointmentController extends Controller
 
         return response()->json($allSlots);
     }
+    // --- API NOTIFICATIONS FOR LOCAL BOT --- //
+
+    public function getPendingNotifications()
+    {
+        // Fetch appointments created recently (e.g., last 24h) that haven't been notified to barber
+        $pending = Appointment::with(['barber', 'service'])
+            ->where('barber_notification_sent', false)
+            ->whereIn('status', ['scheduled', 'request']) 
+            ->where('created_at', '>=', now()->subHours(24))
+            ->whereHas('barber', function($q) {
+                $q->whereNotNull('whatsapp_number')->where('whatsapp_number', '!=', '');
+            })
+            ->get();
+
+        // Format for bot
+        $data = $pending->map(function($appt) {
+            $serviceName = $appt->service->name;
+            if($appt->custom_details) $serviceName .= " ({$appt->custom_details})";
+
+            return [
+                'id' => $appt->id,
+                'barber_phone' => $appt->barber->whatsapp_number,
+                'barber_name' => $appt->barber->name,
+                'client_name' => $appt->client_name,
+                'service' => $serviceName,
+                'time' => $appt->scheduled_at->format('h:i A'),
+                'date' => $appt->scheduled_at->format('d/m/Y'),
+                'is_request' => $appt->status === 'request'
+            ];
+        });
+
+        return response()->json($data);
+    }
+
+    public function markNotificationSent(Request $request)
+    {
+        $request->validate(['id' => 'required|exists:appointments,id']);
+        
+        $appt = Appointment::find($request->id);
+        $appt->update(['barber_notification_sent' => true]);
+
+        return response()->json(['success' => true]);
+    }
 }
