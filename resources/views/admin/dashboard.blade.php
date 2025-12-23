@@ -854,7 +854,7 @@
                 meridiem: 'short',
                 hour12: true
             },
-            // Custom Event Rendering: Show Time Only
+            // Custom Event Rendering: Show styled pills (chips)
             eventContent: function(arg) {
                 // Format time as "10am" or "4:30pm"
                 const date = new Date(arg.event.start);
@@ -866,8 +866,36 @@
                 const minutesStr = minutes < 10 ? '0'+minutes : minutes;
                 const timeStr = minutes === 0 ? `${hours}${ampm}` : `${hours}:${minutesStr}${ampm}`;
                 
+                // Status Color Logic
+                const status = arg.event.extendedProps.status || 'pending';
+                let bgClass = 'bg-primary';
+                let textClass = 'text-primary';
+                let borderClass = 'border-primary';
+
+                // Tailwind-like palette using Bootstrap classes + custom styles
+                if(status === 'completed') {
+                    bgClass = 'bg-success'; 
+                    textClass = 'text-success';
+                    borderClass = 'border-success';
+                } else if(status === 'cancelled') {
+                    bgClass = 'bg-danger';
+                    textClass = 'text-danger';
+                    borderClass = 'border-danger';
+                } else if(status === 'confirmed') {
+                    bgClass = 'bg-info'; // azulito
+                    textClass = 'text-info';
+                    borderClass = 'border-info';
+                }
+
+                // Render Chip
+                // Usamos bg-opacity-10 para ese look "moderno" suave
                 return { 
-                    html: `<div class="fc-event-time-only" style="font-size: 0.75rem; font-weight: 600; color: #2563eb; line-height: 1; margin-bottom: 2px;">${timeStr}</div>` 
+                    html: `
+                        <div class="calendar-event-pill badge rounded-pill ${bgClass} bg-opacity-10 ${textClass} border ${borderClass} border-opacity-25" 
+                             style="font-size: 0.7rem; font-weight: 600; padding: 2px 8px; width: 100%; text-align: center; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;">
+                            ${timeStr}
+                        </div>
+                    ` 
                 };
             },
             events: {
