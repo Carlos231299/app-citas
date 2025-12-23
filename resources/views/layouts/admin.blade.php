@@ -103,36 +103,7 @@
             z-index: 1048; /* Below button/sidebar, above content */
             background: transparent; /* Invisible */
         }
-
-        /* --- DARK MODE --- */
-        [data-bs-theme="dark"] body { background-color: #121212 !important; color: #e0e0e0; }
-        [data-bs-theme="dark"] .sidebar { background-color: #1e1e1e; border-right: 1px solid #333; }
-        [data-bs-theme="dark"] .sidebar-text { color: #e0e0e0 !important; }
-        [data-bs-theme="dark"] .sidebar-link { color: #aaa; }
-        [data-bs-theme="dark"] .sidebar-link:hover, [data-bs-theme="dark"] .sidebar-link.active { background-color: rgba(255,255,255,0.05); color: #fff; }
-        [data-bs-theme="dark"] .bg-white { background-color: #1e1e1e !important; color: #e0e0e0; }
-        [data-bs-theme="dark"] .text-dark { color: #fff !important; }
-        [data-bs-theme="dark"] .text-secondary { color: #adb5bd !important; }
-        [data-bs-theme="dark"] .card { background-color: #1e1e1e; border-color: #333; }
-        [data-bs-theme="dark"] .border-light { border-color: #333 !important; }
-        [data-bs-theme="dark"] .dropdown-menu { background-color: #1e1e1e; border-color: #333; }
-        [data-bs-theme="dark"] .dropdown-item { color: #e0e0e0; }
-        [data-bs-theme="dark"] .dropdown-item:hover { background-color: #333; color: #fff; }
-        [data-bs-theme="dark"] .floating-toggle { background-color: #1e1e1e; border-color: #333; color: #e0e0e0; }
-        [data-bs-theme="dark"] .fc-theme-standard td, [data-bs-theme="dark"] .fc-theme-standard th { border-color: #333; }
-        [data-bs-theme="dark"] .form-control, [data-bs-theme="dark"] .form-select { background-color: #2d2d2d; border-color: #444; color: #fff; }
-        [data-bs-theme="dark"] .btn-white { background-color: #2d2d2d; border-color: #444; color: #fff; }
-        [data-bs-theme="dark"] .main-content { background-color: #121212 !important; }
-        [data-bs-theme="dark"] header h2 { color: #fff !important; }
-        [data-bs-theme="dark"] .bi-bell { color: #fff !important; }
     </style>
-    <script>
-        // Init Dark Mode immediately
-        (function() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-bs-theme', savedTheme);
-        })();
-    </script>
 </head>
 <body class="admin-body">
     <div id="loading-bar" style="display:none; position:fixed; top:0; left:0; height:3px; background:#D4AF37; z-index:9999; transition:width 0.2s;"></div>
@@ -278,11 +249,6 @@
                         @endforelse
                     </ul>
                 </div>
-
-                <!-- Dark Mode Toggle -->
-                <button class="btn btn-link text-secondary p-0 me-2" id="darkModeToggle" title="Cambiar Tema">
-                    <i class="bi bi-moon-stars-fill fs-5" id="darkModeIcon"></i>
-                </button>
 
                 <!-- Profile -->
                 <div class="dropdown">
@@ -494,39 +460,6 @@
                     if (url && url !== '#') window.location.href = url; // Redirect anyway
                 });
         }
-
-        // Dark Mode Logic
-        document.addEventListener('DOMContentLoaded', () => {
-            const toggle = document.getElementById('darkModeToggle');
-            const icon = document.getElementById('darkModeIcon');
-            const html = document.documentElement;
-
-            // Sync Icon
-            function updateIcon() {
-                if (html.getAttribute('data-bs-theme') === 'dark') {
-                    icon.classList.remove('bi-moon-stars-fill');
-                    icon.classList.add('bi-sun-fill');
-                    icon.classList.remove('text-secondary');
-                    icon.classList.add('text-warning');
-                } else {
-                    icon.classList.remove('bi-sun-fill');
-                    icon.classList.add('bi-moon-stars-fill');
-                    icon.classList.remove('text-warning');
-                    icon.classList.add('text-secondary');
-                }
-            }
-            
-            updateIcon(); // Initial run
-
-            toggle.addEventListener('click', () => {
-                const current = html.getAttribute('data-bs-theme');
-                const next = current === 'dark' ? 'light' : 'dark';
-                
-                html.setAttribute('data-bs-theme', next);
-                localStorage.setItem('theme', next);
-                updateIcon();
-            });
-        });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.js"></script>
     <script>

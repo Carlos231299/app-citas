@@ -86,23 +86,6 @@
         #calendar { min-height: 400px !important; }
         .card-body { padding: 15px !important; }
     }
-
-    /* DARK MODE CARD OVERRIDES */
-    [data-bs-theme="dark"] .agenda-card { background-color: #1e1e1e !important; border: 1px solid #333; }
-    [data-bs-theme="dark"] .agenda-card.status-completed { background: rgba(16, 185, 129, 0.1) !important; border-left-color: #10b981 !important; }
-    [data-bs-theme="dark"] .agenda-card.status-pending { background: rgba(245, 158, 11, 0.1) !important; border-left-color: #f59e0b !important; }
-    [data-bs-theme="dark"] .agenda-card.status-cancelled { background: rgba(239, 68, 68, 0.1) !important; border-left-color: #ef4444 !important; }
-    
-    [data-bs-theme="dark"] .agenda-card h6 { color: #f8fafc !important; }
-    [data-bs-theme="dark"] .agenda-card p { color: #94a3b8 !important; }
-    [data-bs-theme="dark"] .fc-col-header-cell { color: #94a3b8 !important; }
-    [data-bs-theme="dark"] .fc-daygrid-day-number { color: #e2e8f0; }
-
-    /* Dark Mode Stats Pills */
-    [data-bs-theme="dark"] .bg-success.bg-opacity-10 { background-color: rgba(16, 185, 129, 0.2) !important; }
-    [data-bs-theme="dark"] .bg-warning.bg-opacity-10 { background-color: rgba(245, 158, 11, 0.2) !important; }
-    [data-bs-theme="dark"] .bg-danger.bg-opacity-10 { background-color: rgba(239, 68, 68, 0.2) !important; }
-    [data-bs-theme="dark"] .bg-primary.bg-opacity-10 { background-color: rgba(59, 130, 246, 0.2) !important; }
 </style>
 <div class="d-flex flex-column h-100">
     <!-- Stats Row Toggle -->
