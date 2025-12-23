@@ -773,12 +773,13 @@
     };
     window.calendarInstance = null;
 
+    document.addEventListener('DOMContentLoaded', function() {
         // Initial Load: Today's Agenda
         renderDailyAgenda(new Date());
 
         // Selector Desplegable (AirDatepicker)
         const selectorEl = document.getElementById('customCalendarTitle');
-        if(selectorEl) {
+        if (selectorEl) {
             new AirDatepicker(selectorEl, {
                 locale: typeof localeEs !== 'undefined' ? localeEs : 'es',
                 selectedDates: [new Date()],
@@ -795,12 +796,11 @@
                 }
             });
         }
-    }
 
 
         // Check for Notification Auto-Open
         const openApptId = "{{ request('open_appointment') }}";
-        if(openApptId) {
+        if (openApptId) {
             axios.get(`/appointments/${openApptId}`)
                 .then(res => {
                     const evtData = res.data;
@@ -813,7 +813,7 @@
                 })
                 .catch(err => console.error("Could not load appointment details", err));
         }
-    }
+    });
     
     async function renderDailyAgenda(date) {
         const container = document.getElementById('daily-agenda-container');
