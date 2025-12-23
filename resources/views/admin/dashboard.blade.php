@@ -39,6 +39,7 @@
     .fc-theme-bootstrap5 .fc-scrollgrid { border: none !important; }
     .fc-col-header-cell { background: transparent !important; border: none !important; padding: 10px 0 !important; font-size: 0.75rem; color: #adb5bd; text-transform: uppercase; }
     .fc-daygrid-day { border: 1px solid #f8f9fa !important; }
+    .fc-header-toolbar { display: none !important; } /* Hide default toolbar */
     .fc-daygrid-day-number { font-weight: 500; font-size: 0.9rem; color: #495057; padding: 8px !important; }
     .fc-day-today { background: rgba(37, 99, 235, 0.03) !important; }
     .fc-day-today .fc-daygrid-day-number { color: #2563eb; font-weight: 700; }
@@ -268,8 +269,10 @@
                 <div class="card-body p-3 h-100 position-relative">
                     <!-- Custom View Selector (Simplified) -->
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 px-2 pt-2">
-                        <div class="d-flex align-items-center gap-2">
+                        <!-- Left: Title, Helper, Filter -->
+                        <div class="d-flex align-items-center gap-3">
                             <h5 class="fw-bold text-dark mb-0 d-none d-sm-block">Calendario</h5>
+                            <span class="text-muted small d-none d-md-inline">Selecciona un día...</span>
                             @if(trim(auth()->user()->role) === 'admin')
                                 <select id="barberFilter" class="form-select form-select-sm border-0 bg-light rounded-pill px-3" style="width: 170px; font-weight: 500;" onchange="refreshCalendar()">
                                     <option value="">Todos los Barberos</option>
@@ -283,10 +286,22 @@
                             @endif
                         </div>
 
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm d-flex align-items-center gap-2" onclick="openBookingModal()">
+                        <!-- Right: Search, New Appt, Date Picker -->
+                        <div class="d-flex align-items-center gap-2">
+                            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 38px; height: 38px;" title="Buscar">
+                                <i class="bi bi-search text-secondary"></i>
+                            </button>
+                            
+                            <button class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm d-flex align-items-center gap-2" style="height: 38px;" onclick="openBookingModal()">
                                 <i class="bi bi-plus-lg"></i> <span class="d-none d-md-inline">Nueva Cita</span>
                             </button>
+
+                            <!-- Custom Date Picker Trigger -->
+                            <div class="position-relative ms-2">
+                                <h5 class="fw-bold text-secondary mb-0 cursor-pointer text-capitalize" id="customCalendarTitle" style="min-width: 150px; text-align: right;">
+                                    {{ now()->locale('es')->format('F \d\e Y') }} <i class="bi bi-caret-down-fill small ms-1" style="font-size: 0.7rem;"></i>
+                                </h5>
+                            </div>
                         </div>
                     </div>
 
@@ -752,11 +767,7 @@
         window.calendarInstance = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             themeSystem: 'bootstrap5',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: '' // Leaving empty to inject custom dropdown
-            },
+            headerToolbar: false, // Custom header used instead
             navLinks: true, 
             navLinkDayClick: function(date, jsEvent) {
                 renderDailyAgenda(date, true);
@@ -843,22 +854,33 @@
             datesSet: function(info) {
                 // 1. Title Sync (Not needed anymore if we don't have view selector, but keeping for Flatpickr)
 
-                // 2. Mini Calendar (Flatpickr) on Title
-                const titleEl = document.querySelector('.fc-toolbar-title');
-                if(titleEl && !titleEl._flatpickr) {
-                    flatpickr(titleEl, {
-                        locale: 'es',
-                        defaultDate: calendarInstance.getDate(),
-                        dateFormat: "Y-m-d", // value format
-                        position: 'auto center',
-                        disableMobile: "true", 
-                        onChange: function(selectedDates, dateStr, instance) {
-                            calendarInstance.gotoDate(selectedDates[0]);
-                        },
-                        onOpen: function(selectedDates, dateStr, instance) {
-                            instance.setDate(calendarInstance.getDate());
-                        }
-                    });
+                // 2. Custom Title Sync (Flatpickr)
+                const titleEl = document.getElementById('customCalendarTitle');
+                if(titleEl) {
+                    // Update text
+                    const date = calendarInstance.getDate();
+                    const options = { month: 'long', year: 'numeric' };
+                    // Manual formatting to ensure "de" is used if needed, though 'long' usually does "December 2025"
+                    // Let's use Intl
+                    const text = new Intl.DateTimeFormat('es-ES', options).format(date);
+                    titleEl.innerHTML = `${text} <i class="bi bi-caret-down-fill small ms-1" style="font-size: 0.7rem;"></i>`;
+
+                    // Init Flatpickr if not already
+                    if(!titleEl._flatpickr) {
+                        flatpickr(titleEl, {
+                            locale: 'es',
+                            defaultDate: date,
+                            dateFormat: "Y-m-d", 
+                            position: 'auto right',
+                            disableMobile: "true", 
+                            onChange: function(selectedDates, dateStr, instance) {
+                                calendarInstance.gotoDate(selectedDates[0]);
+                            },
+                             onOpen: function(selectedDates, dateStr, instance) {
+                                instance.setDate(calendarInstance.getDate());
+                            }
+                        });
+                    }
                 }
                 
                 // 3. (Optional) Auto-load today's agenda on first load? 
