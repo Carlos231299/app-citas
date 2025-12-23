@@ -1059,4 +1059,50 @@ class AppointmentController extends Controller
 
         return response()->json($appointments);
     }
+    public function getSlotsForAgenda(Request $request)
+    {
+        $dateStr = $request->get('date');
+        $barberId = $request->get('barber_id');
+        
+        if (!$dateStr) return response()->json([]);
+
+        $date = Carbon::parse($dateStr);
+        $barbers = $barberId ? \App\Models\Barber::where('id', $barberId)->get() : \App\Models\Barber::where('is_active', true)->get();
+        
+        $allSlots = [];
+
+        foreach ($barbers as $barber) {
+             // Logic simplified from existing slots() method
+             $dayOfWeek = strtolower($date->format('l'));
+             $schedule = is_string($barber->schedule) ? json_decode($barber->schedule, true) : $barber->schedule;
+             
+             if (!isset($schedule[$dayOfWeek]) || !$schedule[$dayOfWeek]['active']) continue;
+
+             $start = Carbon::parse($dateStr . ' ' . $schedule[$dayOfWeek]['start']);
+             $end = Carbon::parse($dateStr . ' ' . $schedule[$dayOfWeek]['end']);
+             
+             $bookedSlots = Appointment::where('barber_id', $barber->id)
+                ->whereDate('scheduled_at', $date)
+                ->where('status', '!=', 'cancelled')
+                ->get()
+                ->map(fn($a) => $a->scheduled_at->format('H:i'))
+                ->toArray();
+
+             $curr = $start->copy();
+             while ($curr->lt($end)) {
+                 $time24 = $curr->format('H:i');
+                 if (!in_array($time24, $bookedSlots)) {
+                     // Extra check for lunch break if needed, but keeping it simple for now
+                     $allSlots[] = [
+                         'time' => $time24,
+                         'barber_id' => $barber->id,
+                         'barber_name' => $barber->name
+                     ];
+                 }
+                 $curr->addMinutes(30);
+             }
+        }
+
+        return response()->json($allSlots);
+    }
 }

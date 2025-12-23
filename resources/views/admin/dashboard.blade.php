@@ -262,19 +262,35 @@
 
 
     <!-- Dynamic Agenda Layout -->
-    <div class="row g-4 flex-grow-1 mb-4">
-        <!-- Main Column: Full Width Minimalist Calendar -->
-        <div class="col-12">
+    <div class="row g-4 flex-grow-1 mb-4 h-100">
+        <!-- Main Column: Minimalist Calendar (Left) -->
+        <div class="col-12 col-lg-4">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden bg-white">
                 <div class="card-body p-3 h-100 position-relative">
-                    <!-- Custom View Selector (Simplified) -->
-                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 px-2 pt-2">
-                        <!-- Left: Title, Helper, Filter -->
-                        <div class="d-flex align-items-center gap-3">
-                            <div>
-                                <h5 class="fw-bold text-dark mb-0 d-none d-sm-block lh-1">Calendario</h5>
-                                <small class="text-muted d-none d-md-block" style="font-size: 0.7rem;">Selecciona un día para ver detalles</small>
-                            </div>
+                    <div class="d-flex align-items-center justify-content-between mb-3 px-1">
+                        <h6 class="fw-bold text-dark mb-0">Calendario</h6>
+                        <!-- Custom Date Picker Trigger -->
+                        <div class="position-relative">
+                            <span class="fw-bold text-primary small cursor-pointer text-capitalize" id="customCalendarTitle">
+                                {{ now()->locale('es')->format('F Y') }}
+                            </span>
+                        </div>
+                    </div>
+                    <div id="calendar" style="min-height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agenda Column: Side Panel (Right) -->
+        <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden bg-white">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-1">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0">Agenda del Día</h5>
+                            <p class="text-muted small mb-0" id="agenda-date-label">Hoy</p>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
                             @if(trim(auth()->user()->role) === 'admin')
                                 <select id="barberFilter" class="form-select form-select-sm border-0 bg-light rounded-pill px-3" style="width: 170px; font-weight: 500;" onchange="refreshCalendar()">
                                     <option value="">Todos los Barberos</option>
@@ -284,59 +300,31 @@
                                 </select>
                             @else
                                 <input type="hidden" id="barberFilter" value="{{ auth()->user()->barber?->id }}">
-                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">Mi Agenda</span>
                             @endif
-                        </div>
-
-                        <!-- Right: Search, New Appt, Date Picker -->
-                        <div class="d-flex align-items-center gap-2">
-                            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 38px; height: 38px;" title="Buscar" onclick="openSearchModal()">
-                                <i class="bi bi-search text-secondary"></i>
+                            <button class="btn btn-light btn-sm rounded-circle" style="width: 38px; height: 38px;" onclick="openSearchModal()">
+                                <i class="bi bi-search"></i>
                             </button>
-                            
-                            <button class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm d-flex align-items-center gap-2" style="height: 38px;" onclick="openBookingModal()">
-                                <i class="bi bi-plus-lg"></i> <span class="d-none d-md-inline">Nueva Cita</span>
+                            <button class="btn btn-primary btn-sm rounded-pill px-3 fw-bold" onclick="openBookingModal()">
+                                <i class="bi bi-plus-lg me-1"></i> Nueva Cita
                             </button>
-
-                            <!-- Custom Date Picker Trigger -->
-                            <div class="position-relative ms-2">
-                                <h5 class="fw-bold text-secondary mb-0 cursor-pointer text-capitalize" id="customCalendarTitle" style="min-width: 150px; text-align: right;">
-                                    {{ now()->locale('es')->format('F \d\e Y') }} <i class="bi bi-caret-down-fill small ms-1" style="font-size: 0.7rem;"></i>
-                                </h5>
-                            </div>
                         </div>
                     </div>
-
-                    <div id="calendar" style="min-height: 600px;"></div>
+                </div>
+                <div class="card-body p-4 scroll-area" style="max-height: 70vh; overflow-y: auto;">
+                    <div id="daily-agenda-container" class="pe-1">
+                        <!-- Cards will be injected here -->
+                        <div class="text-center py-5 opacity-50">
+                            <i class="bi bi-calendar2-event fs-1 d-block mb-2"></i>
+                            <p class="small">Selecciona un día para ver la agenda</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Daily Agenda Modal -->
-<div class="modal fade" id="dailyAgendaModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 rounded-4 shadow-lg">
-            <div class="modal-header border-0 pt-4 px-4 pb-1">
-                <div>
-                    <h5 class="modal-title fw-bold text-dark" id="dailyAgendaModalLabel">Agenda del Día</h5>
-                    <p class="text-muted small mb-0" id="agenda-date-label">Hoy</p>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <div id="daily-agenda-container" class="pe-1" style="max-height: 60vh; overflow-y: auto;">
-                    <!-- Cards will be injected here -->
-                    <div class="text-center py-5 opacity-50">
-                        <i class="bi bi-calendar2-event fs-1 d-block mb-2"></i>
-                        <p class="small">Cargando citas...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <!-- Search Modal -->
 <div class="modal fade" id="searchModal" tabindex="-1">
@@ -805,114 +793,35 @@
         window.calendarInstance = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             themeSystem: 'bootstrap5',
-            headerToolbar: false, // Custom header used instead
+            headerToolbar: false, 
             navLinks: true, 
-            navLinkDayClick: function(date, jsEvent) {
-                renderDailyAgenda(date, true);
-            },
-            height: '100%',
+            height: 'auto',
             contentHeight: 'auto',
-            aspectRatio: window.innerWidth < 768 ? 0.65 : 1.35,
+            aspectRatio: 1.1,
             handleWindowResize: true,
             locale: 'es',
-            weekends: true, // Default
-            firstDay: 1, // Lunes
-            
-            // Time Format
-            // Time Format
-            slotMinTime: '00:00:00', // Full 24h
-            slotMaxTime: '24:00:00',
-            scrollTime: '06:00:00', // Start view at 6 AM
-            expandRows: true, 
-            stickyHeaderDates: true,
-            allDaySlot: false,
             weekends: true,
-            editable: false,
-            selectable: true,
-            selectMirror: true,
-            dayMaxEvents: false,
-            nowIndicator: true, // Enabled Google-style check
+            firstDay: 1, 
             
-            // Interaction: Month -> Day
-            // navLinks: true, // Already defined above
-            // navLinkDayClick: 'timeGridDay', // Replaced by custom function
-            
-            views: {
-                dayGridMonth: { dayMaxEvents: 8 }, // Grid Layout allows more events
-                timeGrid: { dayMaxEvents: true },
-                fourDay: {
-                    type: 'timeGrid',
-                    duration: { days: 4 },
-                    buttonText: '4 días'
-                },
-                listYear: { buttonText: 'Año' }
-            },
-            
-            eventTimeFormat: {
-                hour: 'numeric',
-                minute: '2-digit',
-                meridiem: 'short',
-                hour12: true
-            },
-            // Custom Event Rendering: Show styled pills (chips)
-            eventContent: function(arg) {
-                // Format time as "10am" or "4:30pm"
-                const date = new Date(arg.event.start);
-                let hours = date.getHours();
-                let minutes = date.getMinutes();
-                const ampm = hours >= 12 ? 'pm' : 'am';
-                hours = hours % 12;
-                hours = hours ? hours : 12; // the hour '0' should be '12'
-                const minutesStr = minutes < 10 ? '0'+minutes : minutes;
-                const timeStr = minutes === 0 ? `${hours}${ampm}` : `${hours}:${minutesStr}${ampm}`;
+            // Interaction: Month -> Side Panel
+            dateClick: function(info) {
+                // Highlight selected day visually (optional)
+                document.querySelectorAll('.fc-daygrid-day').forEach(el => el.classList.remove('bg-primary', 'bg-opacity-10'));
+                info.dayEl.classList.add('bg-primary', 'bg-opacity-10');
                 
-                // Status Color Logic
-                const status = arg.event.extendedProps.status || 'pending';
-                let bgClass = 'bg-primary';
-                let textClass = 'text-primary';
-                let borderClass = 'border-primary';
-
-                // Tailwind-like palette using Bootstrap classes + custom styles
-                if(status === 'completed') {
-                    bgClass = 'bg-success'; 
-                    textClass = 'text-success';
-                    borderClass = 'border-success';
-                } else if(status === 'cancelled') {
-                    bgClass = 'bg-danger';
-                    textClass = 'text-danger';
-                    borderClass = 'border-danger';
-                } else if(status === 'confirmed') {
-                    bgClass = 'bg-info'; // azulito
-                    textClass = 'text-info';
-                    borderClass = 'border-info';
-                }
-
-                
-                // Get Client Name
-                const clientName = arg.event.extendedProps.client_name || 'Cliente';
-                // Truncate name if too long (first name)
-                const shortName = clientName.split(' ')[0];
-
-                // Render Chip
-                // Usamos bg-opacity-10 para ese look "moderno" suave
-                return { 
-                    html: `
-                        <div class="calendar-event-pill badge rounded-pill ${bgClass} bg-opacity-10 ${textClass} border ${borderClass} border-opacity-25" 
-                             style="font-size: 0.6rem; font-weight: 700; padding: 0px 4px; width: 100%; text-align: left; margin-bottom: 1px; white-space: nowrap; cursor: pointer; display: flex; align-items: center; justify-content: start; line-height: 1.1; height: auto; min-height: 14px; gap: 3px;">
-                            <span style="min-width: 32px; text-align: right; letter-spacing: -0.5px;">${timeStr}</span> 
-                            <span style="font-weight: 400; opacity: 1; overflow: hidden; text-overflow: ellipsis; padding-top: 1px;">${shortName}</span>
-                        </div>
-                    ` 
-                };
+                renderDailyAgenda(info.date);
             },
-            events: {
-                url: "{{ route('calendar.events') }}",
-                extraParams: function() {
-                    return {
-                        barber_id: document.getElementById('barberFilter') ? document.getElementById('barberFilter').value : ''
-                    };
-                }
-            },
+            
+            // No events on calendar as requested "quitar pildoras"
+            // We only keep the background/holiday events if necessary, 
+            // but for now, we'll keep it empty for maximum speed.
+            events: [], 
+            
+            dayCellDidMount: function(arg) {
+                // Remove underscores from day numbers
+                arg.el.style.textDecoration = 'none';
+            }
+        });
             
             // Logic for Hiding Events based on Filters
             eventClassNames: function(arg) {
@@ -1030,7 +939,7 @@
         }
     }
     
-    async function renderDailyAgenda(date, showModal = true) {
+    async function renderDailyAgenda(date) {
         const container = document.getElementById('daily-agenda-container');
         const label = document.getElementById('agenda-date-label');
         if(!container) return;
@@ -1039,11 +948,7 @@
         const options = { weekday: 'long', day: 'numeric', month: 'long' };
         const formattedDate = new Intl.DateTimeFormat('es-ES', options).format(date);
         label.innerText = formattedDate;
-        
-        const modalLabel = document.getElementById('dailyAgendaModalLabel');
-        if(modalLabel) modalLabel.innerText = `Agenda: ${formattedDate}`;
 
-        // Fix: Use local date string instead of UTC ISO string to avoid day shifts
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
@@ -1053,59 +958,88 @@
 
         container.innerHTML = '<div class="text-center py-5"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
 
-        axios.get(`/calendar/events?start=${dateStr}&end=${dateStr}&barber_id=${barberId}`)
-            .then(res => {
-                const events = res.data;
-                if (!events.length) {
-                    container.innerHTML = `
-                        <div class="text-center py-5 opacity-75">
-                            <i class="bi bi-calendar-x fs-1 d-block mb-3 text-muted"></i>
-                            <h6 class="fw-bold text-dark">No hay nada apartado para este día</h6>
-                            <p class="small text-muted">El calendario está libre para recibir nuevas citas.</p>
-                        </div>
-                    `;
-                } else {
-                    container.innerHTML = '';
-                    events.forEach(ev => {
-                        const statusClass = `status-${ev.extendedProps.status || 'pending'}`;
-                        const time = new Date(ev.start).toLocaleTimeString('es-ES', { hour: 'numeric', minute: '2-digit', hour12: true });
+        try {
+            // 1. Fetch Appointments
+            const apptsRes = await axios.get(`/calendar/events?start=${dateStr}&end=${dateStr}&barber_id=${barberId}`);
+            const appointments = apptsRes.data.filter(ev => ev.extendedProps.type === 'appointment');
+
+            // 2. Fetch Available Slots (using existing booking logic if possible, or simple slots)
+            const slotsRes = await axios.get(`/calendar/slots?date=${dateStr}&barber_id=${barberId}`);
+            const availableSlots = slotsRes.data || [];
+
+            container.innerHTML = '';
+
+            // 3. Combine and Sort
+            let allItems = [
+                ...appointments.map(a => ({ ...a, type: 'appointment', timeNum: new Date(a.start).getTime() })),
+                ...availableSlots.map(s => ({ ...s, type: 'slot', timeNum: new Date(`${dateStr}T${s.time}`).getTime() }))
+            ].sort((a, b) => a.timeNum - b.timeNum);
+
+            if (!allItems.length) {
+                container.innerHTML = `
+                    <div class="text-center py-5 opacity-75">
+                        <i class="bi bi-calendar-x fs-1 d-block mb-3 text-muted"></i>
+                        <h6 class="fw-bold text-dark">Día no laborable o sin turnos</h6>
+                        <p class="small text-muted">Asegúrate de que el barbero tenga horario configurado.</p>
+                    </div>
+                `;
+            } else {
+                allItems.forEach(item => {
+                    if (item.type === 'appointment') {
+                        const statusClass = `status-${item.extendedProps.status || 'pending'}`;
+                        const time = new Date(item.start).toLocaleTimeString('es-ES', { hour: 'numeric', minute: '2-digit', hour12: true });
+                        const barberName = item.extendedProps.barber_name || item.extendedProps.barber || 'Barbero';
                         
-                        const card = `
-                            <div class="agenda-card ${statusClass} p-3 bg-white animate-fade-in pointer" onclick="window.showEventDetails(${ev.id})">
+                        container.innerHTML += `
+                            <div class="agenda-card ${statusClass} p-3 mb-2 bg-white animate-fade-in pointer" onclick="window.showEventDetails(${item.id})">
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="flex-shrink-0">
-                                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center fw-bold text-primary border" style="width:40px;height:40px;font-size:0.8rem;">
-                                            ${ev.extendedProps.barber_name ? ev.extendedProps.barber_name.charAt(0) : 'B'}
+                                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center fw-bold text-primary border" style="width:45px;height:45px;font-size:0.9rem;">
+                                            ${barberName.charAt(0)}
                                         </div>
                                     </div>
                                     <div class="flex-grow-1">
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <h6 class="fw-bold mb-0 text-dark">${ev.extendedProps.client_name || 'Sin nombre'}</h6>
+                                            <h6 class="fw-bold mb-0 text-dark">${item.extendedProps.client_name || 'Sin nombre'}</h6>
                                             <span class="badge bg-light text-dark border small">${time}</span>
                                         </div>
                                         <p class="text-muted small mb-0 mt-1">
-                                            <i class="bi bi-scissors me-1"></i> ${ev.title}
+                                            <i class="bi bi-scissors me-1"></i> ${item.extendedProps.service || item.title} • <strong>${barberName}</strong>
                                         </p>
                                     </div>
                                 </div>
                             </div>
                         `;
-                        container.innerHTML += card;
-                    });
-                }
-                
-                if (typeof showModal !== 'undefined' && showModal) {
-                    const modalEl = document.getElementById('dailyAgendaModal');
-                    if (modalEl) {
-                        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                        modal.show();
+                    } else {
+                        // Slot / Disponible
+                        const timeStr = new Date(`${dateStr}T${item.time}`).toLocaleTimeString('es-ES', { hour: 'numeric', minute: '2-digit', hour12: true });
+                        container.innerHTML += `
+                            <div class="agenda-card status-available p-3 mb-2 bg-light border-dashed animate-fade-in pointer" onclick="quickBook('${dateStr}', '${item.time}', '${barberId || item.barber_id}')" style="border-style: dashed !important; border-left: 4px solid #dee2e6;">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle bg-white d-flex align-items-center justify-content-center fw-bold text-muted border" style="width:45px;height:45px;font-size:0.9rem; opacity: 0.5;">
+                                            ${item.barber_name ? item.barber_name.charAt(0) : 'A'}
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h6 class="fw-bold mb-0 text-muted">Disponible</h6>
+                                            <span class="badge bg-white text-dark border small">${timeStr}</span>
+                                        </div>
+                                        <p class="text-muted small mb-0 mt-1">
+                                            <i class="bi bi-plus-circle me-1"></i> Pulsa para agendar con <strong>${item.barber_name || 'cualquiera'}</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
                     }
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                container.innerHTML = '<p class="text-danger small text-center">Error al cargar agenda</p>';
-            });
+                });
+            }
+        } catch (err) {
+            console.error(err);
+            container.innerHTML = '<p class="text-danger small text-center py-5">Error al cargar agenda. Verifica la conexión.</p>';
+        }
     }
     
     // Global Event Details Viewer
@@ -1297,6 +1231,25 @@
         if(calendarInstance) {
             calendarInstance.refetchEvents();
         }
+        // Also refresh agenda with currently selected date
+        renderDailyAgenda(calendarInstance.getDate());
+    };
+
+    window.quickBook = function(date, time24, barberId) {
+        // Prepare the standard booking modal but with pre-filled fields
+        // time24 is "HH:mm" (e.g. "14:30")
+        // We need 12h for the modal display:
+        let [h, m] = time24.split(':');
+        let h_int = parseInt(h);
+        const ampm = h_int >= 12 ? 'PM' : 'AM';
+        h_int = h_int % 12 || 12;
+        const time12 = `${h_int}:${m} ${ampm}`;
+
+        openBookingModal({
+            date: date,
+            time: time12,
+            barber_id: barberId
+        });
     };
 
     // Edit Appointment Logic (Enhanced)
