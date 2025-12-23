@@ -263,32 +263,22 @@
 
     <!-- Dynamic Agenda Layout -->
     <div class="row g-4 flex-grow-1 mb-4 h-100">
-        <!-- Main Column: Minimalist Calendar (Left) -->
-        <div class="col-12 col-xl-2 col-lg-3">
-            <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden bg-white">
-                <div class="card-body p-3 h-100 position-relative">
-                    <div class="d-flex align-items-center justify-content-between mb-3 px-1">
-                        <h6 class="fw-bold text-dark mb-0">Calendario</h6>
-                        <!-- Custom Date Picker Trigger -->
-                        <div class="position-relative">
-                            <span class="fw-bold text-primary small cursor-pointer text-capitalize" id="customCalendarTitle">
-                                {{ now()->locale('es')->format('F Y') }}
-                            </span>
-                        </div>
-                    </div>
-                    <div id="calendar" style="min-height: 300px; font-size: 0.85rem;"></div>
-                </div>
-            </div>
-        </div>
+        <!-- Agenda Column: Full Width (Center) -->
+        <div class="col-12">
 
         <!-- Agenda Column: Side Panel (Right) -->
-        <div class="col-12 col-xl-10 col-lg-9">
+        <div class="col-12">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden bg-white">
                 <div class="card-header bg-white border-0 pt-4 px-4 pb-1">
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                        <div>
-                            <h5 class="fw-bold text-dark mb-0">Agenda del Día</h5>
-                            <p class="text-muted small mb-0" id="agenda-date-label">Hoy</p>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-primary bg-opacity-10 p-2 rounded-circle d-flex align-items-center justify-content-center cursor-pointer" id="customCalendarTitle" style="width: 42px; height: 42px;">
+                                <i class="bi bi-calendar-event fs-5 text-primary"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0" id="agenda-date-label">Hoy</h5>
+                                <p class="text-muted small mb-0">Toca el icono para cambiar de fecha</p>
+                            </div>
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             @if(trim(auth()->user()->role) === 'admin')
@@ -783,98 +773,30 @@
     };
     window.calendarInstance = null;
 
-    function initCalendar() {
-        var calendarEl = document.getElementById('calendar');
-        if(!calendarEl) return;
-        
-        // Initialize State UI
-        updateCheckboxes();
+        // Initial Load: Today's Agenda
+        renderDailyAgenda(new Date());
 
-        window.calendarInstance = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            themeSystem: 'bootstrap5',
-            headerToolbar: false, 
-            navLinks: false, // Disabled to prevent view switching
-            height: 'auto',
-            contentHeight: 'auto',
-            aspectRatio: 0.75, // Narrower aspect for sidebar
-            handleWindowResize: true,
-            locale: 'es',
-            weekends: true,
-            firstDay: 1, 
-            
-            dayCellDidMount: function(arg) {
-                // Shrink day cell padding
-                arg.el.style.padding = '2px';
-                arg.el.style.textDecoration = 'none';
-            },
-            
-            dateClick: function(info) {
-                document.querySelectorAll('.fc-daygrid-day').forEach(el => el.classList.remove('bg-primary', 'bg-opacity-10'));
-                info.dayEl.classList.add('bg-primary', 'bg-opacity-10');
-                renderDailyAgenda(info.date);
-            },
-            
-            events: [], 
-
-            
-            // Logic for Hiding Events based on Filters
-            eventClassNames: function(arg) {
-                const props = arg.event.extendedProps;
-                let classes = [];
-                if (props.status === 'cancelled' && !calendarState.showRejected) classes.push('d-none');
-                if (props.status === 'completed' && !calendarState.showCompleted) classes.push('d-none');
-                return classes;
-            },
-
-            // Lifecycle Hooks
-            datesSet: function(info) {
-                const titleEl = document.getElementById('customCalendarTitle');
-                if(titleEl) {
-                    const date = calendarInstance.getDate();
-                    const options = { month: 'long', year: 'numeric' };
-                    const text = new Intl.DateTimeFormat('es-ES', options).format(date);
-                    titleEl.innerHTML = `${text} <i class="bi bi-caret-down-fill small ms-1" style="font-size: 0.7rem;"></i>`;
-
-                    // Init AirDatepicker
-                    if (!titleEl._airDatepicker) {
-                        titleEl._airDatepicker = new AirDatepicker(titleEl, {
-                            locale: typeof localeEs !== 'undefined' ? localeEs : 'es',
-                            selectedDates: [date],
-                            autoClose: true,
-                            position: 'bottom right',
-                            view: 'years',
-                            minView: 'days',
-                            dateFormat: 'yyyy-MM-dd',
-                            buttons: ['today', 'clear'],
-                            onSelect: function({date, datepicker}) {
-                                if (date) {
-                                    calendarInstance.gotoDate(date);
-                                }
-                            }
-                        });
-                    } else {
-                         titleEl._airDatepicker.selectDate(date, {silent: true});
-                         titleEl._airDatepicker.setViewDate(date);
+        // Selector Desplegable (AirDatepicker)
+        const selectorEl = document.getElementById('customCalendarTitle');
+        if(selectorEl) {
+            new AirDatepicker(selectorEl, {
+                locale: typeof localeEs !== 'undefined' ? localeEs : 'es',
+                selectedDates: [new Date()],
+                autoClose: true,
+                position: 'bottom left',
+                view: 'days',
+                minView: 'days',
+                dateFormat: 'yyyy-MM-dd',
+                buttons: ['today'],
+                onSelect: function({date}) {
+                    if (date) {
+                        renderDailyAgenda(date);
                     }
                 }
-            },
+            });
+        }
+    }
 
-            eventClick: function(info) {
-                info.jsEvent.preventDefault();
-                renderDailyAgenda(info.event.start);
-            },
-            eventDidMount: function(info) {
-                 info.el.style.pointerEvents = 'none';
-                 info.el.style.backgroundColor = 'transparent';
-                 info.el.style.border = 'none';
-            }
-        });
-
-        window.calendarInstance.render();
-    
-        // Initial load: Today's Agenda
-        renderDailyAgenda(new Date());
 
         // Check for Notification Auto-Open
         const openApptId = "{{ request('open_appointment') }}";
