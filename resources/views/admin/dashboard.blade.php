@@ -290,7 +290,7 @@
 
                         <!-- Right: Search, New Appt, Date Picker -->
                         <div class="d-flex align-items-center gap-2">
-                            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 38px; height: 38px;" title="Buscar">
+                            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 38px; height: 38px;" title="Buscar" onclick="openSearchModal()">
                                 <i class="bi bi-search text-secondary"></i>
                             </button>
                             
@@ -331,6 +331,29 @@
                     <div class="text-center py-5 opacity-50">
                         <i class="bi bi-calendar2-event fs-1 d-block mb-2"></i>
                         <p class="small">Cargando citas...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Modal -->
+<div class="modal fade" id="searchModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Buscar Cita</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="position-relative mb-4">
+                    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input type="text" id="searchInput" class="form-control form-control-lg rounded-pill ps-5 bg-light border-0" placeholder="Nombre del cliente..." onkeyup="handleSearch(this.value)">
+                </div>
+                <div id="searchResults" style="max-height: 300px; overflow-y: auto;">
+                    <div class="text-center py-4 text-muted small">
+                        Escribe para buscar...
                     </div>
                 </div>
             </div>
@@ -878,8 +901,28 @@
                             onChange: function(selectedDates, dateStr, instance) {
                                 calendarInstance.gotoDate(selectedDates[0]);
                             },
-                             onOpen: function(selectedDates, dateStr, instance) {
+                            onOpen: function(selectedDates, dateStr, instance) {
                                 instance.setDate(calendarInstance.getDate());
+                            },
+                            onReady: function(dObj, dStr, fp, dayElem) {
+                                const flatpickrCalendar = fp.calendarContainer;
+                                // Create footer container
+                                const footer = document.createElement("div");
+                                footer.className = "d-grid p-2 border-top";
+                                
+                                // Create Today button
+                                const todayBtn = document.createElement("button");
+                                todayBtn.className = "btn btn-sm btn-light fw-bold text-primary";
+                                todayBtn.innerHTML = "Hoy";
+                                todayBtn.onclick = function() {
+                                    const today = new Date();
+                                    fp.setDate(today);
+                                    calendarInstance.gotoDate(today);
+                                    fp.close();
+                                };
+
+                                footer.appendChild(todayBtn);
+                                flatpickrCalendar.appendChild(footer);
                             }
                         });
                     }
@@ -1018,15 +1061,15 @@
                  return;
              }
         } else if (input.id && !input.extendedProps) {
-            // Raw data from API
+            // Raw data from API (e.g., from search results)
             event = {
                 id: input.id,
                 title: input.title,
-                start: new Date(input.start),
-                extendedProps: input.extendedProps || input
+                start: new Date(input.scheduled_at || input.start), // Use scheduled_at from search or start
+                extendedProps: input // The raw object is the extendedProps
             };
         } else {
-            event = input;
+            event = input; // It's already a FullCalendar event object
         }
 
         const props = event.extendedProps;

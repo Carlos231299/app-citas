@@ -1035,4 +1035,28 @@ class AppointmentController extends Controller
             default => '#2563EB', // Primary Blue
         };
     }
+    public function search(Request $request)
+    {
+        $query = $request->get('query');
+        if (!$query) return response()->json([]);
+
+        $appointments = Appointment::with(['barber', 'service'])
+            ->where('client_name', 'like', "%{$query}%")
+            ->orderBy('scheduled_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($app) {
+                return [
+                    'id' => $app->id,
+                    'title' => $app->service->name,
+                    'start' => $app->scheduled_at,
+                    'status' => $app->status,
+                    'client_name' => $app->client_name,
+                    'barber_name' => $app->barber->name,
+                    'scheduled_at_formatted' => Carbon::parse($app->scheduled_at)->format('d/m/Y h:i A')
+                ];
+            });
+
+        return response()->json($appointments);
+    }
 }
