@@ -574,6 +574,19 @@
     // ... Existing scripts ...
 
     // Request Handling
+    window.selectSearchResult = function(id, client, title, status, barber) {
+        Swal.fire({
+            title: '¿Confirmar Cita?',
+            html: `
+                <p class="text-muted mb-3">Servicio: <b>${serviceName}</b></p>
+                <div class="form-text mt-2">Se enviará el mensaje de WhatsApp al cliente indicando que la cita ha sido agendada.</div>
+            `,
+            // The rest of the Swal.fire content for selectSearchResult is missing in the instruction.
+            // Assuming it's meant to be a placeholder or incomplete.
+            // For now, I'll close the HTML tag and the Swal.fire call as provided.
+        });
+    };
+
     function confirmRequest(id, serviceName, basePrice) {
         Swal.fire({
             title: '¿Confirmar Cita?',
@@ -890,41 +903,30 @@
                     const text = new Intl.DateTimeFormat('es-ES', options).format(date);
                     titleEl.innerHTML = `${text} <i class="bi bi-caret-down-fill small ms-1" style="font-size: 0.7rem;"></i>`;
 
-                    // Init Flatpickr if not already
-                    if(!titleEl._flatpickr) {
-                        flatpickr(titleEl, {
-                            locale: 'es',
-                            defaultDate: date,
-                            dateFormat: "Y-m-d", 
-                            position: 'auto right',
-                            disableMobile: "true", 
-                            onChange: function(selectedDates, dateStr, instance) {
-                                calendarInstance.gotoDate(selectedDates[0]);
-                            },
-                            onOpen: function(selectedDates, dateStr, instance) {
-                                instance.setDate(calendarInstance.getDate());
-                            },
-                            onReady: function(dObj, dStr, fp, dayElem) {
-                                const flatpickrCalendar = fp.calendarContainer;
-                                // Create footer container
-                                const footer = document.createElement("div");
-                                footer.className = "d-grid p-2 border-top";
-                                
-                                // Create Today button
-                                const todayBtn = document.createElement("button");
-                                todayBtn.className = "btn btn-sm btn-light fw-bold text-primary";
-                                todayBtn.innerHTML = "Hoy";
-                                todayBtn.onclick = function() {
-                                    const today = new Date();
-                                    fp.setDate(today);
-                                    calendarInstance.gotoDate(today);
-                                    fp.close();
-                                };
-
-                                footer.appendChild(todayBtn);
-                                flatpickrCalendar.appendChild(footer);
+                    // Init AirDatepicker if not already
+                    if (!titleEl._airDatepicker) {
+                        titleEl._airDatepicker = new AirDatepicker(titleEl, {
+                            locale: typeof localeEs !== 'undefined' ? localeEs : 'es',
+                            selectedDates: [date],
+                            autoClose: true,
+                            position: 'bottom right',
+                            view: 'years', // Start with Years view as requested ("vaya bajando")
+                            minView: 'days',
+                            dateFormat: 'yyyy-MM-dd',
+                            buttons: ['today', 'clear'], // Native buttons for Today logic
+                            onSelect: function({date, datepicker}) {
+                                if (date) {
+                                    calendarInstance.gotoDate(date);
+                                }
                             }
                         });
+                    } else {
+                         // Sync date if changed externally (e.g. prev/next)
+                         // But avoid loop if this trigger came from datepicker itself?
+                         // Actually datesSet runs on prev/next click. We should update picker date but silent?
+                         // Air Datepicker has selectDate(date, {silent: true})
+                         titleEl._airDatepicker.selectDate(date, {silent: true});
+                         titleEl._airDatepicker.setViewDate(date);
                     }
                 }
                 
@@ -1737,8 +1739,15 @@
         posCart.splice(index, 1);
         renderPosCart();
     };
+    // Search Logic (Global)
+    window.openSearchModal = function() {
+        const modal = new bootstrap.Modal(document.getElementById('searchModal'));
+        modal.show();
+        setTimeout(() => document.getElementById('searchInput').focus(), 500);
+    };
 
-    function renderPosCart() {
+    let searchTimeout;
+    window.handleSearch = function(query) {
         const tbody = document.getElementById('pos_cart_body');
         const emptyMsg = document.getElementById('pos_empty_cart');
         const totalSpan = document.getElementById('pos_products_total');

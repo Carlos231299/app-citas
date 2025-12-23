@@ -19,9 +19,8 @@
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <!-- Flatpickr for Mini Calendar -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/airbnb.css">
+    <!-- AirDatepicker for Mini Calendar -->
+    <link href="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.css" rel="stylesheet">
     
     <style>
         /* Loading Bar */
@@ -462,5 +461,7 @@
                 });
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/locale/es.js"></script>
 </body>
 </html>
