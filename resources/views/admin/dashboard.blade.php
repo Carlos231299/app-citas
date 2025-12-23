@@ -970,29 +970,37 @@
     window.showEventDetails = function(input) {
         let event = null;
         
-        // If input is an ID, find in calendar or fetch
+        // If input is an ID, fetch from API (since calendarInstance is now null/deprecated)
         if (typeof input === 'number' || typeof input === 'string') {
-             event = calendarInstance.getEventById(input);
-             // If not in memory (e.g. filtered out), we'd need to fetch
-             if(!event) {
-                 Swal.fire({title:'Cargando...', didOpen: () => Swal.showLoading()});
-                 axios.get(`/appointments/${input}`).then(res => {
-                    // Recursive call with data
-                    window.showEventDetails(res.data);
-                 });
-                 return;
-             }
-        } else if (input.id && !input.extendedProps) {
-            // Raw data from API (e.g., from search results)
+             Swal.fire({
+                 title: 'Cargando detalles...',
+                 allowOutsideClick: false,
+                 didOpen: () => Swal.showLoading()
+             });
+             
+             axios.get(`/appointments/${input}`).then(res => {
+                window.showEventDetails(res.data);
+             }).catch(err => {
+                console.error(err);
+                Swal.fire('Error', 'No se pudo cargar la cita', 'error');
+             });
+             return;
+        } 
+        
+        // Handle raw data from API or FullCalendar event structure
+        if (input.id && !input.extendedProps) {
             event = {
                 id: input.id,
                 title: input.title,
-                start: new Date(input.scheduled_at || input.start), // Use scheduled_at from search or start
-                extendedProps: input // The raw object is the extendedProps
+                start: new Date(input.scheduled_at || input.start),
+                allDay: input.allDay || false,
+                extendedProps: input
             };
         } else {
-            event = input; // It's already a FullCalendar event object
+            event = input;
         }
+
+        if (!event || !event.extendedProps) return;
 
         const props = event.extendedProps;
         
