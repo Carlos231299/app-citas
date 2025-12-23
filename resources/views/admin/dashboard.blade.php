@@ -904,8 +904,8 @@
                     </div>
                 `;
             } else {
-                // ULTRA COMPACT GRID: more columns = narrower cards
-                container.className = 'row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 row-cols-xxl-5 g-2 pe-1';
+                // COMPACT GRID: Always 2 columns minimum, even on mobile
+                container.className = 'row row-cols-2 row-cols-lg-3 row-cols-xl-4 row-cols-xxl-5 g-2 pe-1';
                 
                 allItems.forEach(item => {
                     const col = document.createElement('div');
