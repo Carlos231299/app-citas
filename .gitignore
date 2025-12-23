@@ -35,4 +35,5 @@ whatsapp-bot-local/dist/
 
 # Local Documentation and Tools (Keep Local Only)
 GUIA_PROYECTO.md
+deploy.ps1
 whatsapp-bot-local/
