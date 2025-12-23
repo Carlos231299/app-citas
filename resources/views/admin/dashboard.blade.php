@@ -58,11 +58,6 @@
     .agenda-card.status-completed { border-left-color: #10b981 !important; background: #ecfdf5 !important; }
     .agenda-card.status-pending { border-left-color: #f59e0b !important; background: #fff7ed !important; }
     .agenda-card.status-cancelled { border-left-color: #ef4444 !important; background: #fef2f2 !important; }
-    .agenda-card.status-available { 
-        border-style: dashed !important; 
-        border-left-color: #3b82f6 !important; 
-        background: #f0f7ff !important; 
-    }
 
     /* Fix: Remove underlines from calendar numbers */
     .fc-daygrid-day-number { text-decoration: none !important; }
@@ -881,23 +876,13 @@
         container.innerHTML = '<div class="text-center py-5"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
 
         try {
-            const [apptsRes, slotsRes] = await Promise.all([
-                axios.get(`/calendar/events?start=${dateStr}&end=${dateStr}&barber_id=${barberId}`),
-                axios.get(`/calendar/slots?date=${dateStr}&barber_id=${barberId}`)
-            ]);
-
+            const apptsRes = await axios.get(`/calendar/events?start=${dateStr}&end=${dateStr}&barber_id=${barberId}`);
             const appointments = apptsRes.data.filter(ev => ev.extendedProps.type === 'appointment');
-            const availableSlots = slotsRes.data || [];
 
-            // Debug: Log slots data
-            console.log('📅 Slots disponibles para', dateStr, ':', availableSlots);
-            console.log('📋 Citas para', dateStr, ':', appointments);
+            console.log(' Citas para', dateStr, ':', appointments);
 
             container.innerHTML = '';
-            let allItems = [
-                ...appointments.map(a => ({ ...a, type: 'appointment', timeNum: new Date(a.start).getTime() })),
-                ...availableSlots.map(s => ({ ...s, type: 'slot', timeNum: new Date(`${dateStr}T${s.time}`).getTime() }))
-            ].sort((a, b) => a.timeNum - b.timeNum);
+            let allItems = appointments.map(a => ({ ...a, type: 'appointment', timeNum: new Date(a.start).getTime() })).sort((a, b) => a.timeNum - b.timeNum);
 
             if (!allItems.length) {
                 container.innerHTML = `
@@ -933,21 +918,6 @@
                                     <div class="mt-1 pt-1 border-top" style="border-top-color: rgba(0,0,0,0.05) !important;">
                                         <small class="text-primary fw-bold" style="font-size: 0.65rem;">${barberName}</small>
                                     </div>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        const timeStr = new Date(`${dateStr}T${item.time}`).toLocaleTimeString('es-ES', { hour: 'numeric', minute: '2-digit', hour12: true });
-                        col.innerHTML = `
-                            <div class="agenda-card status-available pointer" onclick="quickBook('${dateStr}', '${item.time}', '${barberId || item.barber_id}')">
-                                <div class="d-flex flex-column gap-1 h-100 justify-content-center">
-                                    <div class="d-flex justify-content-between align-items-center mb-0">
-                                        <h6 class="fw-bold mb-0 text-muted extra-small">Disponible</h6>
-                                        <span class="badge bg-white text-secondary border extra-small" style="font-size: 0.65rem;">${timeStr}</span>
-                                    </div>
-                                    <p class="text-primary mb-0" style="font-size: 0.7rem;">
-                                        <i class="bi bi-plus-circle me-1"></i> <strong>Agendar ahora</strong>
-                                    </p>
                                 </div>
                             </div>
                         `;
