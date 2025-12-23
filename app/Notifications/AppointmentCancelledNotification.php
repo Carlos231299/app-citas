@@ -29,7 +29,9 @@ class AppointmentCancelledNotification extends Notification
             'message' => "Motivo: " . ($this->appointment->cancellation_reason ?? 'No especificado'),
             'icon' => 'bi-calendar-x',
             'color' => 'danger',
-            'url' => route('dashboard')
+            'url' => route('dashboard', ['open_appointment' => $this->appointment->id]),
+            'action_type' => 'appointment',
+            'action_id' => $this->appointment->id
         ];
     }
 }

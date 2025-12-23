@@ -12,3 +12,7 @@ Route::get('/slots', [AppointmentController::class, 'getAvailableSlots']);
 Route::post('/bot/cancel', [AppointmentController::class, 'cancelFromBot']);
 Route::get('/notifications/pending', [AppointmentController::class, 'getPendingNotifications']);
 Route::post('/notifications/mark-sent', [AppointmentController::class, 'markNotificationSent']);
+
+Route::get('/reminders/pending', [AppointmentController::class, 'getPendingReminders']);
+Route::post('/reminders/mark-sent', [AppointmentController::class, 'markReminderSent']);
+Route::post('/bot/confirm', [AppointmentController::class, 'confirmFromBot']);

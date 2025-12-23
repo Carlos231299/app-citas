@@ -1166,4 +1166,114 @@ class AppointmentController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    // --- API REMINDERS (15 MIN BEFORE) --- //
+
+    public function getPendingReminders()
+    {
+        // 1. Get appointments scheduled between NOW and NOW + 20 MINS
+        // 2. That haven't had reminder sent
+        // 3. Status is scheduled
+        
+        $startWindow = now();
+        $endWindow = now()->addMinutes(20);
+
+        $reminders = Appointment::with(['barber', 'service'])
+            ->where('reminder_15min_sent', false)
+            ->where('status', 'scheduled') // Only confirmed appointments
+            ->whereBetween('scheduled_at', [$startWindow, $endWindow])
+            ->whereNotNull('client_phone')
+            ->get();
+
+        $data = $reminders->map(function($appt) {
+            $serviceName = $appt->service->name;
+            if($appt->custom_details) $serviceName .= " ({$appt->custom_details})";
+            
+            // Calculate Display Price
+            $formattedPrice = number_format($appt->price, 0, ',', '.');
+             // Check for Extra Time logic if needed, simplify for reminder: use confirmed or base
+            $finalPrice = $appt->confirmed_price ?? $appt->price;
+            $displayPrice = "$" . number_format($finalPrice, 0, ',', '.');
+            if ($appt->is_extra_time) $displayPrice .= " (Horario Extra)";
+
+            return [
+                'id' => $appt->id,
+                'phone' => $appt->client_phone,
+                'client_name' => $appt->client_name,
+                'barber_name' => $appt->barber->name,
+                'service_name' => $serviceName,
+                'time' => $appt->scheduled_at->format('h:i A'),
+                'date' => $appt->scheduled_at->format('Y-m-d'), // Format for message
+                'display_price' => $displayPrice,
+                'is_request' => false // Reminders are for confirmed slots generally
+            ];
+        });
+
+        return response()->json($data);
+    }
+
+    public function markReminderSent(Request $request)
+    {
+        $request->validate(['id' => 'required|exists:appointments,id']);
+        Appointment::where('id', $request->id)->update(['reminder_15min_sent' => true]);
+        return response()->json(['success' => true]);
+    }
+
+    // --- API BOT CONFIRMATION --- //
+    public function confirmFromBot(Request $request)
+    {
+        $request->validate(['phone' => 'required']);
+        
+        // Find active appointment for this phone
+        // Similar logic to cancelFromBot but for Confirmation action
+        $digits = preg_replace('/\D/', '', $request->phone);
+        $last10 = substr($digits, -10);
+
+        $appointment = Appointment::where('client_phone', 'LIKE', "%$last10")
+            ->where('status', 'scheduled')
+            ->where('scheduled_at', '>=', now()->subHours(1)) // Actively valid
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if ($appointment && $appointment->barber && $appointment->barber->whatsapp_number) {
+            try {
+                $msg = "✅ *Confirmación de Cita*\n\n" .
+                       "👤 *Cliente:* {$appointment->client_name}\n" .
+                       "📞 *Tel:* {$appointment->client_phone}\n" .
+                       "📅 *Hora:* {$appointment->scheduled_at->format('h:i A')}\n\n" .
+                       "Ha confirmado su asistencia vía WhatsApp.";
+                
+                // Send to Barber via Local Bot (reuse the generic send endpoint logic if calling from within bot, 
+                // BUT wait, this API is CALLED by the BOT.
+                // If the BOT calls this, we can't tell the BOT to send a message via HTTP response easily 
+                // unless we return it.
+                // Better approach: The BOT sends the message to the barber directly?
+                // NO, keeping logic centrally is good, but here the Server is remote.
+                // The Server cannot talk to the Bot to send a message (no ingress).
+                // SO: The Bot calls this endpoint to LOG the confirmation (maybe?) 
+                // AND the BOT itself should send the message to the barber?
+                // Actually the user wants " notify the barber".
+                // Since the Bot initiates this with "1", the BOT is closest to the Barber's phone number.
+                // However, the Bot doesn't know the Barber's number unless we send it in the reminder payload?
+                // OPTION A: The Bot sends the confirmation to Barber. (Needs Barber Phone in State).
+                // OPTION B: This API queues a notification? (Complex).
+                
+                // LET'S DO THIS: 
+                // The `confirmFromBot` will return the BARBER'S PHONE and MESSAGE to the Bot.
+                // The Bot will then send it.
+                
+                return response()->json([
+                    'success' => true,
+                    'action' => 'notify_barber',
+                    'barber_phone' => $appointment->barber->whatsapp_number,
+                    'message' => $msg
+                ]);
+
+            } catch (\Exception $e) {
+                return response()->json(['success' => false, 'error' => $e->getMessage()]);
+            }
+        }
+
+        return response()->json(['success' => true, 'message' => 'Logged']);
+    }
 }
