@@ -1953,9 +1953,19 @@
 
     // Initialize Calendar
     document.addEventListener('DOMContentLoaded', function() {
-        if(typeof initCalendar === 'function') {
-            initCalendar();
-        }
+        console.log('DOM Loaded, checking for FullCalendar...');
+        
+        const tryInit = () => {
+            if(typeof FullCalendar !== 'undefined' && typeof initCalendar === 'function') {
+                console.log('FullCalendar found, initializing...');
+                initCalendar();
+            } else {
+                console.warn('FullCalendar not yet loaded, retrying in 50ms...');
+                setTimeout(tryInit, 50);
+            }
+        };
+
+        tryInit();
     });
 </script>
 <style>
