@@ -264,7 +264,7 @@
     <!-- Dynamic Agenda Layout -->
     <div class="row g-4 flex-grow-1 mb-4 h-100">
         <!-- Main Column: Minimalist Calendar (Left) -->
-        <div class="col-12 col-lg-4">
+        <div class="col-12 col-lg-3">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden bg-white">
                 <div class="card-body p-3 h-100 position-relative">
                     <div class="d-flex align-items-center justify-content-between mb-3 px-1">
@@ -282,7 +282,7 @@
         </div>
 
         <!-- Agenda Column: Side Panel (Right) -->
-        <div class="col-12 col-lg-8">
+        <div class="col-12 col-lg-9">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden bg-white">
                 <div class="card-header bg-white border-0 pt-4 px-4 pb-1">
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
@@ -794,10 +794,10 @@
             initialView: 'dayGridMonth',
             themeSystem: 'bootstrap5',
             headerToolbar: false, 
-            navLinks: true, 
+            navLinks: false, // Disabled to prevent view switching
             height: 'auto',
             contentHeight: 'auto',
-            aspectRatio: 1.1,
+            aspectRatio: 0.85, // More vertical/compact
             handleWindowResize: true,
             locale: 'es',
             weekends: true,
@@ -805,7 +805,7 @@
             
             // Interaction: Month -> Side Panel
             dateClick: function(info) {
-                // Highlight selected day visually (optional)
+                // Highlight selected day visually 
                 document.querySelectorAll('.fc-daygrid-day').forEach(el => el.classList.remove('bg-primary', 'bg-opacity-10'));
                 info.dayEl.classList.add('bg-primary', 'bg-opacity-10');
                 
@@ -877,7 +877,8 @@
 
         window.calendarInstance.render();
     
-        // View Dropdown removed based on user request "quitemos la vista de día, mes y semana"
+        // Initial load: Today's Agenda
+        renderDailyAgenda(new Date());
 
         // Check for Notification Auto-Open
         const openApptId = "{{ request('open_appointment') }}";
