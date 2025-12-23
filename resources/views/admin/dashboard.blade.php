@@ -281,6 +281,8 @@
                             <div class="bg-primary bg-opacity-10 p-2 rounded-circle d-flex align-items-center justify-content-center cursor-pointer" id="customCalendarTitleTrigger" style="width: 42px; height: 42px;">
                                 <i class="bi bi-calendar-event fs-5 text-primary"></i>
                             </div>
+                            <!-- Hidden input for AirDatepicker -->
+                            <input type="text" id="agendaDatepickerInput" style="position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px;">
                             <div>
                                 <h5 class="fw-bold text-dark mb-0" id="agenda-date-label">Hoy</h5>
                                 <p class="text-muted small mb-0">Toca el icono para cambiar de fecha</p>
@@ -785,14 +787,15 @@
 
         // Selector Desplegable (AirDatepicker)
         const triggerEl = document.getElementById('customCalendarTitleTrigger');
+        const inputEl = document.getElementById('agendaDatepickerInput');
         
-        if (triggerEl) {
-            window._agendaPicker = new AirDatepicker(triggerEl, {
+        if (triggerEl && inputEl) {
+            window._agendaPicker = new AirDatepicker(inputEl, {
                 locale: typeof localeEs !== 'undefined' ? localeEs : 'es',
                 selectedDates: [new Date()],
-                visible: false,
+                inline: false,
                 autoClose: true,
-                position: 'bottom center',
+                position: 'bottom left',
                 dateFormat: 'yyyy-MM-dd',
                 buttons: [{
                     content: 'Hoy',
@@ -813,6 +816,15 @@
                             setTimeout(() => datepicker.hide(), 100);
                         }
                     }
+                }
+            });
+
+            // Manual trigger on button click
+            triggerEl.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (window._agendaPicker) {
+                    window._agendaPicker.show();
                 }
             });
         }
