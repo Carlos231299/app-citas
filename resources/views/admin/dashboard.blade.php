@@ -265,7 +265,7 @@
     <div class="row g-4 flex-grow-1 mb-4 h-100">
         <!-- Agenda Column: Side Panel (Right) -->
         <div class="col-12">
-            <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden bg-white">
+            <div class="card border-0 shadow-sm h-100 rounded-4 bg-white">
                 <div class="card-header bg-white border-0 pt-4 px-4 pb-1">
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                         <div class="d-flex align-items-center gap-3">
@@ -1777,299 +1777,52 @@
         border-color: #2563EB !important; /* Primary blue fallback */
     }
     /* Force table text color generally */
-    .fc-list-table {
-        color: #1E293B !important;
-    }
 
-    /* Today Circle (Month View) */
-    .fc-daygrid-day.fc-day-today .fc-daygrid-day-top {
-        display: flex;
-        justify-content: center;
-        padding-top: 4px;
-    }
-    .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
-        background-color: #1a73e8;
-        color: white !important;
-        border-radius: 50%;
-        width: 28px;
-        height: 28px;
-        min-width: 28px; /* Prevent squash */
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none !important;
-        font-size: 0.9rem;
-    }
-
-    /* GLOBAL FIX: "See More" Popover */
-    .fc-popover {
-        /* ... existing styles ... */
-        z-index: 10000 !important;
-        /* ... */
-    }
-
-    /* Force SweetAlert above everything */
-    .swal2-container {
-        z-index: 20000 !important;
-    }
-    .fc-popover-header {
-        background-color: #f8f9fa !important;
-        padding: 12px 16px !important;
-        border-bottom: 1px solid #eee !important;
-        border-radius: 16px 16px 0 0 !important;
-    }
-    .fc-popover-title {
-        font-size: 1.1rem !important;
-        font-weight: 600 !important;
-    }
-
-    .fc-popover-close {
-        opacity: 1 !important;
-        font-size: 1.2rem !important;
-        color: #666 !important;
-        background: #e9ecef !important;
-        width: 30px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        cursor: pointer !important;
-    }
-    .fc-popover-body {
-        max-height: 60vh !important;
-        overflow-y: auto !important;
-    }
-    /* Backdrop for popover */
-    .fc-popover-header::before { 
-        /* Hacky backdrop attached to header to avoid breaking FC positioning logic with a global fixed div */
-        content: '';
-        position: fixed;
-        top: -500vh;
-        left: -500vw;
-        width: 1000vw;
-        height: 1000vh;
-        background: rgba(0,0,0,0.5);
-        z-index: -1;
-        cursor: pointer;
-    }
-
-    /* Prevent Event Overflow (Horizontal) */
-    .fc-daygrid-event {
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        max-width: 100% !important;
-    }
-
-    /* Mobile Responsive Toolbar */
-    @media (max-width: 768px) {
-        .fc-header-toolbar {
-            flex-direction: column !important; /* Stack items vertically */
-            gap: 12px;
-            align-items: stretch !important; /* Full width items */
-        }
-        
-        .fc-toolbar-chunk {
-            display: flex;
-            justify-content: center; /* Center buttons within chunk */
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        
-        /* Center Title */
-        .fc-toolbar-chunk:nth-child(2) {
-            order: -1; /* Place title at top if desired, or keep as is. Default center is fine here */
-        }
-        
-        .fc-toolbar-title {
-            font-size: 1.25rem !important;
-            justify-content: center;
-            width: 100%;
-        }
-
-        /* Adjust button sizes */
-        .fc-button {
-            padding: 0.25rem 0.75rem !important;
-            font-size: 0.85rem !important;
-        }
-        
-        /* View Selector Dropdown - Mobile Friendly */
-        #custom-view-selector {
-            width: 100%;
-        }
-        #custom-view-selector .btn {
-            width: 100%;
-            justify-content: center;
-        }
-
-        /* Ensure Day Cells are Tall on Mobile */
-        .fc-daygrid-day-frame {
-            min-height: 100px !important;
-        }
-    }
-    
-    /* Buttons (Google Style) */
-    .fc-button {
-        background-color: #fff !important;
-        border: 1px solid #E2E8F0 !important;
-        color: #334155 !important;
-        text-transform: capitalize;
-        font-weight: 500 !important;
-        box-shadow: none !important;
-        padding: 6px 16px !important;
-        border-radius: 6px !important;
-        transition: all 0.2s;
-    }
-    .fc-button-group > .fc-button {
-        border-radius: 0 !important;
-        margin: 0 !important;
-    }
-    .fc-button-group > .fc-button:first-child {
-        border-top-left-radius: 6px !important;
-        border-bottom-left-radius: 6px !important;
-    }
-    .fc-button-group > .fc-button:last-child {
-        border-top-right-radius: 6px !important;
-        border-bottom-right-radius: 6px !important;
-    }
-    .fc-button:hover {
-        background-color: #F8FAFC !important;
-        color: #0F172A !important;
-    }
-    .fc-button-active {
-        background-color: #EFF6FF !important;
-        border-color: #BFDBFE !important;
-        color: #2563EB !important;
-        font-weight: 600 !important;
-    }
-    .fc-today-button {
-        margin-right: 12px !important;
-        border-radius: 6px !important;
-    }
-
-    /* Grid & Cells */
-    .fc-scrollgrid {
+    /* AirDatepicker Custom Overrides */
+    .air-datepicker {
+        --adp-font-family: 'Outfit', sans-serif;
+        --adp-border-radius: 16px;
+        --adp-accent-color: #2563EB;
+        --adp-background-color: #fff;
+        --adp-cell-border-radius: 8px;
+        --adp-width: 320px;
+        z-index: 1050 !important;
         border: none !important;
-    }
-    .fc-daygrid-day-top {
-        flex-direction: row;
-        padding: 8px;
-    }
-    .fc-daygrid-day-number {
-        font-size: 0.9rem;
-        color: #334155;
-        font-weight: 500;
-        width: 28px; 
-        height: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-    }
-    .fc-day-today .fc-daygrid-day-number {
-        background-color: #2563EB;
-        color: #fff;
-    }
-    .fc-day-today {
-        background-color: transparent !important; /* Remove yellow tint */
-    }
-    
-    /* Google Card Modal Styles */
-    .google-modal-popup {
-        border-radius: 28px !important;
-        /* Default Desktop */
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
     }
 
-    .modal-header-graphic {
-        /* Placeholder pattern if no image */
-        background-color: #f1f5f9;
+    .air-datepicker-cell.-selected-, .air-datepicker-cell.-selected-.-current- {
+        background: #2563EB !important;
     }
 
-    /* Mobile Responsive Popup (Bottom Sheet) */
-    @media (max-width: 768px) {
-        .swal2-container {
-            align-items: flex-end !important; /* Align to bottom */
-            padding-bottom: 0 !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-        }
-        .google-modal-popup {
-            width: 100% !important;
-            border-bottom-left-radius: 0 !important;
-            border-bottom-right-radius: 0 !important;
-            border-top-left-radius: 24px !important;
-            border-top-right-radius: 24px !important;
-            margin: 0 !important;
-            animation: slideUp 0.3s ease-out;
-        }
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-    }
-    /* =========================================
-       GOOGLE CALENDAR STYLE "NOW INDICATOR" 
-       ========================================= */
-       
-    /* 1. Línea roja del día actual estilo Google */
-    .fc .fc-timegrid-now-indicator-line {
-        border-top: 3px solid #ea4335 !important; /* Rojo Google (Grosor Lollipop) */
-        opacity: 1;
-        z-index: 100;
+    .air-datepicker-button {
+        color: #2563EB !important;
+        font-weight: 600;
     }
 
-    /* 2. Bolita roja al inicio de la línea (REMOVED by User Request) */
-    .fc .fc-timegrid-now-indicator-arrow {
-        display: none !important;
+    /* Force clean grid for AirDatepicker (Fixing the "shifted days" issue) */
+    .air-datepicker-body--cells {
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+        gap: 2px !important;
     }
 
-    /* 3. Círculo rojo en el día actual en vista MENSUAL */
-    .fc-daygrid-day.fc-day-today {
-        position: relative;
+    /* Agenda Card Styling Refinement */
+    .agenda-card {
+        border-radius: 16px;
+        transition: all 0.2s ease;
+        border: 1px solid rgba(0,0,0,0.05);
     }
-    
-    .fc-daygrid-day.fc-day-today .fc-daygrid-day-top {
-        position: relative;
-        z-index: 2; /* Ensure date number is above circle if needed? No, usually separate */
+    .agenda-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
+    .status-scheduled { border-left: 5px solid #6366F1 !important; }
+    .status-completed { border-left: 5px solid #10B981 !important; }
+    .status-cancelled { border-left: 5px solid #EF4444 !important; opacity: 0.8; }
+    .status-available { border-left: 4px solid #dee2e6 !important; background-color: #f8fafc !important; }
 
-    /* 3. Círculo rojo en el día actual en vista MENSUAL (REMOVED by User Request) */
-    .fc-daygrid-day.fc-day-today::after {
-        display: none !important;
-    }
-
-    /* [NEW] Compact Events & Cells Override */
-    /* Container of events in day cell */
-    .fc-daygrid-day-events {
-        display: flex;
-        flex-wrap: wrap;
-        align-content: flex-start;
-        gap: 1px;
-    }
-    
-    /* Each event wrapper */
-    .fc-daygrid-event-harness {
-        margin-top: 0 !important;
-        margin-bottom: 0px !important;
-        width: 49%; /* 2 Columns */
-        display: inline-block;
-    }
-    
-    .fc-daygrid-day-bottom {
-        padding-top: 1px !important;
-        padding-bottom: 0px !important; /* Remove bottom padding of cell */
-        margin-top: 0 !important;
-    }
-    
-    .fc-daygrid-day-frame {
-        padding-bottom: 1px !important; /* Ensure content goes to bottom */
-    }
-    
-    /* Ensure pills don't have external margins ruining layout */
-    .calendar-event-pill {
-        margin-bottom: 1px !important;
-    }
+    .pointer { cursor: pointer; }
 </style>
 @endpush
 
