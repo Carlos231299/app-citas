@@ -933,37 +933,36 @@
                             <p class="small text-muted">El calendario está libre para recibir nuevas citas.</p>
                         </div>
                     `;
-                    return;
-                }
-
-                container.innerHTML = '';
-                events.forEach(ev => {
-                    const statusClass = `status-${ev.extendedProps.status || 'pending'}`;
-                    const time = new Date(ev.start).toLocaleTimeString('es-ES', { hour: 'numeric', minute: '2-digit', hour12: true });
-                    
-                    const card = `
-                        <div class="agenda-card ${statusClass} p-3 bg-white animate-fade-in pointer" onclick="window.showEventDetails(${ev.id})">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="flex-shrink-0">
-                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center fw-bold text-primary border" style="width:40px;height:40px;font-size:0.8rem;">
-                                        ${ev.extendedProps.barber_name ? ev.extendedProps.barber_name.charAt(0) : 'B'}
+                } else {
+                    container.innerHTML = '';
+                    events.forEach(ev => {
+                        const statusClass = `status-${ev.extendedProps.status || 'pending'}`;
+                        const time = new Date(ev.start).toLocaleTimeString('es-ES', { hour: 'numeric', minute: '2-digit', hour12: true });
+                        
+                        const card = `
+                            <div class="agenda-card ${statusClass} p-3 bg-white animate-fade-in pointer" onclick="window.showEventDetails(${ev.id})">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center fw-bold text-primary border" style="width:40px;height:40px;font-size:0.8rem;">
+                                            ${ev.extendedProps.barber_name ? ev.extendedProps.barber_name.charAt(0) : 'B'}
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="fw-bold mb-0 text-dark">${ev.extendedProps.client_name || 'Sin nombre'}</h6>
-                                        <span class="badge bg-light text-dark border small">${time}</span>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h6 class="fw-bold mb-0 text-dark">${ev.extendedProps.client_name || 'Sin nombre'}</h6>
+                                            <span class="badge bg-light text-dark border small">${time}</span>
+                                        </div>
+                                        <p class="text-muted small mb-0 mt-1">
+                                            <i class="bi bi-scissors me-1"></i> ${ev.title}
+                                        </p>
                                     </div>
-                                    <p class="text-muted small mb-0 mt-1">
-                                        <i class="bi bi-scissors me-1"></i> ${ev.title}
-                                    </p>
                                 </div>
                             </div>
-                        </div>
-                    `;
-                    container.innerHTML += card;
-                });
-
+                        `;
+                        container.innerHTML += card;
+                    });
+                }
+                
                 if (typeof showModal !== 'undefined' && showModal) {
                     const modalEl = document.getElementById('dailyAgendaModal');
                     if (modalEl) {
