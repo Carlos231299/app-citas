@@ -272,7 +272,6 @@
                             <div class="bg-primary bg-opacity-10 p-2 rounded-circle d-flex align-items-center justify-content-center cursor-pointer" id="customCalendarTitleTrigger" style="width: 42px; height: 42px;">
                                 <i class="bi bi-calendar-event fs-5 text-primary"></i>
                             </div>
-                            <input type="text" id="agendaDatepickerInput" style="position: absolute; visibility: hidden; width: 0; height: 0; pointer-events: none;">
                             <div>
                                 <h5 class="fw-bold text-dark mb-0" id="agenda-date-label">Hoy</h5>
                                 <p class="text-muted small mb-0">Toca el icono para cambiar de fecha</p>
@@ -772,43 +771,52 @@
     window.calendarInstance = null;
 
     document.addEventListener('DOMContentLoaded', function() {
-        // Selector Desplegable (AirDatepicker) - Manual Activation via Hidden Input
+        // Initial Load for the UI (Agenda only)
+        renderDailyAgenda(new Date());
+
+        // Selector Desplegable (AirDatepicker) - Lazy Load on Click
         const triggerEl = document.getElementById('customCalendarTitleTrigger');
-        const inputEl = document.getElementById('agendaDatepickerInput');
-        if (triggerEl && inputEl) {
-            // Deduplicate: If instance exists, destroy it
-            if (window._agendaPicker) {
-                window._agendaPicker.destroy();
-            }
-            
-            // 1. Initial Load for the UI
-            renderDailyAgenda(new Date());
-
-            // 2. Initialize the picker on the hidden input
-            window._agendaPicker = new AirDatepicker(inputEl, {
-                locale: typeof localeEs !== 'undefined' ? localeEs : 'es',
-                selectedDates: [new Date()],
-                autoClose: true,
-                visible: false,
-                position: 'bottom left',
-                view: 'days',
-                minView: 'days',
-                dateFormat: 'yyyy-MM-dd',
-                buttons: ['today'],
-                onSelect: function({date, datepicker}) {
-                    if (date) {
-                        renderDailyAgenda(date);
-                        datepicker.hide(); // Force hide on selection
-                    }
-                }
-            });
-
-            // 3. Forzamos que solo abra al hacer click explícito en el icono
+        if (triggerEl) {
             triggerEl.onclick = function(e) {
                 e.stopPropagation();
+                
+                // Si ya existe, solo mostrarlo
                 if (window._agendaPicker) {
                     window._agendaPicker.show();
+                    return;
                 }
+
+                // Si no existe, crearlo por primera vez
+                window._agendaPicker = new AirDatepicker(triggerEl, {
+                    locale: typeof localeEs !== 'undefined' ? localeEs : 'es',
+                    selectedDates: [new Date()],
+                    autoClose: true,
+                    position: 'bottom left',
+                    view: 'days',
+                    minView: 'days',
+                    dateFormat: 'yyyy-MM-dd',
+                    // Botón "Hoy" personalizado para asegurar que cargue la agenda
+                    buttons: [{
+                        content: 'Hoy',
+                        className: 'air-datepicker-button-custom',
+                        onClick: (datepicker) => {
+                            const today = new Date();
+                            datepicker.setViewDate(today);
+                            datepicker.selectDate(today);
+                            renderDailyAgenda(today);
+                            datepicker.hide();
+                        }
+                    }],
+                    onSelect: function({date, datepicker}) {
+                        if (date) {
+                            renderDailyAgenda(date);
+                            datepicker.hide();
+                        }
+                    }
+                });
+
+                // Mostrarlo inmediatamente después de crear
+                window._agendaPicker.show();
             };
         }
 
@@ -1139,9 +1147,8 @@
 
     // Refresh Agenda (Global)
     window.refreshCalendar = function() {
-        // Try to get date from AirDatepicker instance attached to the hidden input
-        const inputEl = document.getElementById('agendaDatepickerInput');
-        const date = (inputEl && inputEl._airDatepicker) ? inputEl._airDatepicker.selectedDates[0] : new Date();
+        // Try to get date from AirDatepicker instance attached to the trigger
+        const date = (window._agendaPicker) ? window._agendaPicker.selectedDates[0] : new Date();
         renderDailyAgenda(date);
     };
 
