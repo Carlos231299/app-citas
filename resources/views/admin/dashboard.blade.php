@@ -785,14 +785,14 @@
 
         // Selector Desplegable (AirDatepicker)
         const triggerEl = document.getElementById('customCalendarTitleTrigger');
-        const inputEl = document.getElementById('agendaDatepickerInput');
         
-        if (triggerEl && inputEl) {
-            window._agendaPicker = new AirDatepicker(inputEl, {
+        if (triggerEl) {
+            // Anchor directly to triggerEl so manual click works natively or via .show()
+            window._agendaPicker = new AirDatepicker(triggerEl, {
                 locale: typeof localeEs !== 'undefined' ? localeEs : 'es',
                 selectedDates: [new Date()],
                 autoClose: true,
-                position: 'bottom left',
+                position: 'bottom center',
                 dateFormat: 'yyyy-MM-dd',
                 buttons: [{
                     content: 'Hoy',
@@ -806,19 +806,25 @@
                     }
                 }],
                 onSelect({date, datepicker}) {
+                    // Check if we have a date (onSelect can be called with empty date when clearing)
                     const selected = Array.isArray(date) ? date[0] : date;
-                    if (selected && datepicker.visible) {
+                    if (selected) {
                         renderDailyAgenda(selected);
-                        setTimeout(() => datepicker.hide(), 150);
+                        // AirDatepicker uses visible property
+                        if (datepicker && datepicker.visible) {
+                            setTimeout(() => datepicker.hide(), 100);
+                        }
                     }
                 }
             });
 
-            triggerEl.onclick = (e) => {
+            // Fallback click listener
+            triggerEl.addEventListener('click', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
-                if (window._agendaPicker) window._agendaPicker.show();
-            };
+                if (window._agendaPicker) {
+                    window._agendaPicker.show();
+                }
+            });
         }
 
         // --- Persistence: Stats Collapse State ---
