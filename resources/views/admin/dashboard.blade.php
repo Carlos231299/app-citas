@@ -790,6 +790,7 @@
             window._agendaPicker = new AirDatepicker(triggerEl, {
                 locale: typeof localeEs !== 'undefined' ? localeEs : 'es',
                 selectedDates: [new Date()],
+                visible: false,
                 autoClose: true,
                 position: 'bottom center',
                 dateFormat: 'yyyy-MM-dd',
