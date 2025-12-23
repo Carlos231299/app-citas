@@ -912,6 +912,11 @@
                     const col = document.createElement('div');
                     col.className = 'col animate-fade-in';
                     
+                    if (item.type === 'appointment') {
+                        const statusClass = `status-${item.extendedProps.status || 'pending'}`;
+                        const time = new Date(item.start).toLocaleTimeString('es-ES', { hour: 'numeric', minute: '2-digit', hour12: true });
+                        const barberName = item.extendedProps.barber_name || item.extendedProps.barber || 'Barbero';
+                        
                         col.innerHTML = `
                             <div class="agenda-card ${statusClass} pointer" onclick="window.showEventDetails(${item.id})">
                                 <div class="d-flex align-items-center gap-3">
@@ -1888,5 +1893,3 @@
     .pointer { cursor: pointer; }
 </style>
 @endpush
-
-
