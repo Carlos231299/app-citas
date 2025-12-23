@@ -1092,9 +1092,10 @@ class AppointmentController extends Controller
              while ($curr->lt($end)) {
                  $time24 = $curr->format('H:i');
                  if (!in_array($time24, $bookedSlots)) {
-                     // Extra check for lunch break if needed, but keeping it simple for now
+                     // Return in 12-hour format for frontend
+                     $time12 = $curr->format('g:i A');
                      $allSlots[] = [
-                         'time' => $time24,
+                         'time' => $time12,
                          'barber_id' => $barber->id,
                          'barber_name' => $barber->name
                      ];
