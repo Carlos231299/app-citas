@@ -307,24 +307,14 @@
             <div class="modal-body p-4">
                 <div id="daily-agenda-container" class="pe-1" style="max-height: 60vh; overflow-y: auto;">
                     <!-- Cards will be injected here -->
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-                <div class="card-body p-4 pt-2">
-                    <div id="daily-agenda-container" class="d-flex flex-column gap-3" style="max-height: 600px; overflow-y: auto;">
-                        <!-- JS Loaded Content -->
-                        <div class="text-center py-5 opacity-50">
-                            <i class="bi bi-calendar2-event fs-1 d-block mb-2"></i>
-                            <p class="small">Selecciona un día en el calendario para ver detalles</p>
-                        </div>
+                    <div class="text-center py-5 opacity-50">
+                        <i class="bi bi-calendar2-event fs-1 d-block mb-2"></i>
+                        <p class="small">Cargando citas...</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Rendered: {{ now() }} -->
 </div>
 
 <!-- Complete Appointment Modal (POS) -->
