@@ -50,11 +50,13 @@
         border-radius: 16px;
         transition: all 0.2s ease;
         border-left: 4px solid #dee2e6;
+        height: 100%; /* For grid equality */
     }
-    .agenda-card:hover { transform: translateY(-2px); shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color: #2563eb; }
+    .agenda-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color: #2563eb; }
     .agenda-card.status-completed { border-left-color: #10b981; }
     .agenda-card.status-pending { border-left-color: #f59e0b; }
     .agenda-card.status-cancelled { border-left-color: #ef4444; }
+    .agenda-card.status-available { border-style: dashed !important; border-left-color: #dee2e6; background: #fdfdfd !important; }
 
     /* Fix: Remove underlines from calendar numbers */
     .fc-daygrid-day-number { text-decoration: none !important; }
@@ -896,35 +898,48 @@
 
             if (!allItems.length) {
                 container.innerHTML = `
-                    <div class="text-center py-5 opacity-75">
-                        <i class="bi bi-calendar-x fs-1 d-block mb-3 text-muted"></i>
-                        <h6 class="fw-bold text-dark">Día no laborable o sin turnos</h6>
-                        <p class="small text-muted">Asegúrate de que el barbero tenga horario configurado.</p>
+                    <div class="col-12">
+                        <div class="text-center py-5 opacity-75">
+                            <i class="bi bi-calendar-x fs-1 d-block mb-3 text-muted"></i>
+                            <h6 class="fw-bold text-dark">Día no laborable o sin turnos</h6>
+                            <p class="small text-muted">Asegúrate de que el barbero tenga horario configurado.</p>
+                        </div>
                     </div>
                 `;
             } else {
+                // Main Row for the Grid
+                const row = document.createElement('div');
+                row.className = 'row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3';
+                container.appendChild(row);
+
                 allItems.forEach(item => {
+                    const col = document.createElement('div');
+                    col.className = 'col animate-fade-in';
+                    
                     if (item.type === 'appointment') {
                         const statusClass = `status-${item.extendedProps.status || 'pending'}`;
                         const time = new Date(item.start).toLocaleTimeString('es-ES', { hour: 'numeric', minute: '2-digit', hour12: true });
                         const barberName = item.extendedProps.barber_name || item.extendedProps.barber || 'Barbero';
                         
-                        container.innerHTML += `
-                            <div class="agenda-card ${statusClass} p-3 mb-2 bg-white animate-fade-in pointer" onclick="window.showEventDetails(${item.id})">
+                        col.innerHTML = `
+                            <div class="agenda-card ${statusClass} p-3 bg-white pointer" onclick="window.showEventDetails(${item.id})">
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="flex-shrink-0">
-                                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center fw-bold text-primary border" style="width:45px;height:45px;font-size:0.9rem;">
+                                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center fw-bold text-primary border" style="width:42px;height:42px;font-size:0.85rem;">
                                             ${barberName.charAt(0)}
                                         </div>
                                     </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <h6 class="fw-bold mb-0 text-dark">${item.extendedProps.client_name || 'Sin nombre'}</h6>
-                                            <span class="badge bg-light text-dark border small">${time}</span>
+                                    <div class="flex-grow-1 overflow-hidden">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <h6 class="fw-bold mb-0 text-dark text-truncate" style="max-width: 70%;">${item.extendedProps.client_name || 'Sin nombre'}</h6>
+                                            <span class="badge bg-light text-dark border extra-small">${time}</span>
                                         </div>
-                                        <p class="text-muted small mb-0 mt-1">
-                                            <i class="bi bi-scissors me-1"></i> ${item.extendedProps.service || item.title} • <strong>${barberName}</strong>
+                                        <p class="text-muted small mb-0 d-flex align-items-center gap-1">
+                                            <i class="bi bi-scissors"></i> <span class="text-truncate">${item.extendedProps.service || item.title}</span>
                                         </p>
+                                        <div class="mt-2 pt-2 border-top">
+                                            <small class="text-primary fw-600">${barberName}</small>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -932,27 +947,28 @@
                     } else {
                         // Slot / Disponible
                         const timeStr = new Date(`${dateStr}T${item.time}`).toLocaleTimeString('es-ES', { hour: 'numeric', minute: '2-digit', hour12: true });
-                        container.innerHTML += `
-                            <div class="agenda-card status-available p-3 mb-2 bg-light border-dashed animate-fade-in pointer" onclick="quickBook('${dateStr}', '${item.time}', '${barberId || item.barber_id}')" style="border-style: dashed !important; border-left: 4px solid #dee2e6;">
-                                <div class="d-flex align-items-center gap-3">
+                        col.innerHTML = `
+                            <div class="agenda-card status-available p-3 bg-white pointer" onclick="quickBook('${dateStr}', '${item.time}', '${barberId || item.barber_id}')">
+                                <div class="d-flex align-items-center gap-3 h-100">
                                     <div class="flex-shrink-0">
-                                        <div class="rounded-circle bg-white d-flex align-items-center justify-content-center fw-bold text-muted border" style="width:45px;height:45px;font-size:0.9rem; opacity: 0.5;">
+                                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center fw-bold text-muted border border-dashed" style="width:42px;height:42px;font-size:0.85rem; opacity: 0.6;">
                                             ${item.barber_name ? item.barber_name.charAt(0) : 'A'}
                                         </div>
                                     </div>
                                     <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
                                             <h6 class="fw-bold mb-0 text-muted">Disponible</h6>
-                                            <span class="badge bg-white text-dark border small">${timeStr}</span>
+                                            <span class="badge bg-white text-secondary border small">${timeStr}</span>
                                         </div>
-                                        <p class="text-muted small mb-0 mt-1">
-                                            <i class="bi bi-plus-circle me-1"></i> Pulsa para agendar con <strong>${item.barber_name || 'cualquiera'}</strong>
+                                        <p class="text-muted small mb-0">
+                                            <i class="bi bi-plus-circle me-1 text-primary"></i> Agendar con <strong>${item.barber_name || 'Alguien'}</strong>
                                         </p>
                                     </div>
                                 </div>
                             </div>
                         `;
                     }
+                    row.appendChild(col);
                 });
             }
         } catch (err) {
