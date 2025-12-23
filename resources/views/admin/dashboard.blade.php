@@ -44,14 +44,14 @@
     .fc-day-today { background: rgba(37, 99, 235, 0.03) !important; }
     .fc-day-today .fc-daygrid-day-number { color: #2563eb; font-weight: 700; }
     
-    /* Agenda Cards - Compact & Vibrant */
+    /* Agenda Cards - ULTRA Compact & Vibrant */
     .agenda-card {
         border: 1px solid rgba(0,0,0,0.05);
-        border-radius: 12px;
+        border-radius: 10px;
         transition: all 0.2s ease;
         border-left: 6px solid #dee2e6;
         height: 100%;
-        padding: 10px 12px !important; /* More compact */
+        padding: 8px 10px !important; /* Extremely narrow vertically and horizontally */
     }
     .agenda-card:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0,0,0,0.05); }
     
@@ -806,9 +806,10 @@
                     }
                 }],
                 onSelect({date, datepicker}) {
-                    if (date && datepicker.visible) {
-                        renderDailyAgenda(date);
-                        setTimeout(() => datepicker.hide(), 100);
+                    const selected = Array.isArray(date) ? date[0] : date;
+                    if (selected && datepicker.visible) {
+                        renderDailyAgenda(selected);
+                        setTimeout(() => datepicker.hide(), 150);
                     }
                 }
             });
@@ -849,6 +850,9 @@
     });
     
     async function renderDailyAgenda(date) {
+        if (!date) date = new Date();
+        if (!(date instanceof Date)) date = new Date(date);
+
         const container = document.getElementById('daily-agenda-container');
         const label = document.getElementById('agenda-date-label');
         if(!container) return;
@@ -858,7 +862,12 @@
         const formattedDate = new Intl.DateTimeFormat('es-ES', options).format(date);
         label.innerText = formattedDate;
 
-        const dateStr = date.toISOString().split('T')[0];
+        // SAFE LOCAL DATE STRING
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        const dateStr = `${y}-${m}-${d}`;
+        
         const barberId = document.getElementById('barberFilter') ? document.getElementById('barberFilter').value : '';
 
         container.innerHTML = '<div class="text-center py-5"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
@@ -887,7 +896,8 @@
                     </div>
                 `;
             } else {
-                container.className = 'row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3 pe-1';
+                // ULTRA COMPACT GRID: more columns = narrower cards
+                container.className = 'row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 row-cols-xxl-5 g-2 pe-1';
                 
                 allItems.forEach(item => {
                     const col = document.createElement('div');
