@@ -1508,7 +1508,7 @@
     };
 
     var searchTimeout;
-    window.handleSearch = function(query) {
+    function renderPosCart() {
         const tbody = document.getElementById('pos_cart_body');
         const emptyMsg = document.getElementById('pos_empty_cart');
         const totalSpan = document.getElementById('pos_products_total');
