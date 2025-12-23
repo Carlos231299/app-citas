@@ -1949,7 +1949,14 @@
                 });
             }
         });
-    };    
+    };
+
+    // Initialize Calendar
+    document.addEventListener('DOMContentLoaded', function() {
+        if(typeof initCalendar === 'function') {
+            initCalendar();
+        }
+    });
 </script>
 <style>
     /* Custom Calendar Styling for Google Calendar Look */
