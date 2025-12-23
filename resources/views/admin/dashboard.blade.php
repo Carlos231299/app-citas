@@ -294,9 +294,6 @@
                             @else
                                 <input type="hidden" id="barberFilter" value="{{ auth()->user()->barber?->id }}">
                             @endif
-                            <button class="btn btn-light btn-sm rounded-circle" style="width: 38px; height: 38px;" onclick="openSearchModal()">
-                                <i class="bi bi-search"></i>
-                            </button>
                             <button class="btn btn-primary btn-sm rounded-pill px-3 fw-bold" onclick="openBookingModal()">
                                 <i class="bi bi-plus-lg me-1"></i> Nueva Cita
                             </button>
@@ -320,27 +317,7 @@
 
 
 <!-- Search Modal -->
-<div class="modal fade" id="searchModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 rounded-4 shadow-lg">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold">Buscar Cita</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="position-relative mb-4">
-                    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                    <input type="text" id="searchInput" class="form-control form-control-lg rounded-pill ps-5 bg-light border-0" placeholder="Nombre del cliente..." onkeyup="handleSearch(this.value)">
-                </div>
-                <div id="searchResults" style="max-height: 300px; overflow-y: auto;">
-                    <div class="text-center py-4 text-muted small">
-                        Escribe para buscar...
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <!-- Complete Appointment Modal (POS) -->
 <div class="modal fade" id="completeAppointmentModal" tabindex="-1">
