@@ -271,8 +271,10 @@
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 px-2 pt-2">
                         <!-- Left: Title, Helper, Filter -->
                         <div class="d-flex align-items-center gap-3">
-                            <h5 class="fw-bold text-dark mb-0 d-none d-sm-block">Calendario</h5>
-                            <span class="text-muted small d-none d-md-inline">Selecciona un día para ver detalles</span>
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0 d-none d-sm-block lh-1">Calendario</h5>
+                                <small class="text-muted d-none d-md-block" style="font-size: 0.7rem;">Selecciona un día para ver detalles</small>
+                            </div>
                             @if(trim(auth()->user()->role) === 'admin')
                                 <select id="barberFilter" class="form-select form-select-sm border-0 bg-light rounded-pill px-3" style="width: 170px; font-weight: 500;" onchange="refreshCalendar()">
                                     <option value="">Todos los Barberos</option>
