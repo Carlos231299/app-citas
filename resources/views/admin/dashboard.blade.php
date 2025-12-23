@@ -782,18 +782,21 @@
                 window._agendaPicker.destroy();
             }
             
+            // Re-bind click to ensure it only opens on click
             window._agendaPicker = new AirDatepicker(selectorEl, {
                 locale: typeof localeEs !== 'undefined' ? localeEs : 'es',
                 selectedDates: [new Date()],
                 autoClose: true,
+                visible: false, // Ensure it starts hidden
                 position: 'bottom left',
                 view: 'days',
                 minView: 'days',
                 dateFormat: 'yyyy-MM-dd',
                 buttons: ['today'],
-                onSelect: function({date}) {
+                onSelect: function({date, datepicker}) {
                     if (date) {
                         renderDailyAgenda(date);
+                        datepicker.hide(); // Cerrar al seleccionar
                     }
                 }
             });
