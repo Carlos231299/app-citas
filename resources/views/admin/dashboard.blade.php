@@ -272,7 +272,7 @@
                         <!-- Left: Title, Helper, Filter -->
                         <div class="d-flex align-items-center gap-3">
                             <h5 class="fw-bold text-dark mb-0 d-none d-sm-block">Calendario</h5>
-                            <span class="text-muted small d-none d-md-inline">Selecciona un día...</span>
+                            <span class="text-muted small d-none d-md-inline">Selecciona un día para ver detalles</span>
                             @if(trim(auth()->user()->role) === 'admin')
                                 <select id="barberFilter" class="form-select form-select-sm border-0 bg-light rounded-pill px-3" style="width: 170px; font-weight: 500;" onchange="refreshCalendar()">
                                     <option value="">Todos los Barberos</option>
