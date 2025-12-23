@@ -1265,6 +1265,15 @@
                         .then(() => {
                             Swal.fire('¡Actualizado!', '', 'success');
                             refreshCalendar();
+                            // Reload the appointment details to show updated price
+                            setTimeout(() => {
+                                axios.get(`/appointments/${id}`)
+                                    .then(response => {
+                                        const updatedEvent = response.data;
+                                        showEventDetails(updatedEvent);
+                                    })
+                                    .catch(err => console.error('Error reloading appointment:', err));
+                            }, 500);
                         }).catch(err => Swal.fire('Error', 'No se pudo guardar', 'error'));
                 }
             });
