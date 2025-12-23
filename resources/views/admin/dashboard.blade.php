@@ -848,13 +848,10 @@
                 listYear: { buttonText: 'Año' }
             },
             
-            slotLabelFormat: {
+            eventTimeFormat: {
                 hour: 'numeric',
                 minute: '2-digit',
-                omitZeroMinute: false,
                 meridiem: 'short',
-                hour12: true
-            },
                 hour12: true
             },
             // Custom Event Rendering: Show Time Only
