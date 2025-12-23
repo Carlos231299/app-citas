@@ -961,8 +961,9 @@ class AppointmentController extends Controller
                 'client_phone' => $appointment->client_phone,
                 'custom_details' => $appointment->custom_details ?? 'Sin detalles adicionales',
                 'cancellation_reason' => $appointment->cancellation_reason,
-                'price' => $appointment->service->price,
-                'base_price' => $appointment->service->price,
+                'price' => $appointment->price, // Stored Price (Base or Extra)
+                'base_price' => $appointment->service->price, // Service Base Price
+                'extra_price' => $appointment->service->extra_price, // Service Extra Price
                 'final_price' => $appointment->confirmed_price,
                 'completed_by' => $appointment->completedBy->name ?? null,
                 'products' => $formattedProducts
@@ -1022,7 +1023,8 @@ class AppointmentController extends Controller
                         'client_phone' => $appointment->client_phone,
                         'custom_details' => $appointment->custom_details ?? 'Sin detalles adicionales',
                         'price' => $appointment->confirmed_price ?? $appointment->price,
-                        'base_price' => $appointment->price, 
+                        'base_price' => $appointment->service->price, 
+                        'extra_price' => $appointment->service->extra_price,
                         'final_price' => $appointment->confirmed_price,
                         'cancellation_reason' => $appointment->cancellation_reason,
                         'products' => $appointment->products->map(function($prod) {
