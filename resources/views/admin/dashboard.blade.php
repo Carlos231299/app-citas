@@ -838,7 +838,7 @@
             // navLinkDayClick: 'timeGridDay', // Replaced by custom function
             
             views: {
-                dayGridMonth: { dayMaxEvents: 4 }, // Limit to 4 events per day (avoids huge cells)
+                dayGridMonth: { dayMaxEvents: 8 }, // Grid Layout allows more events
                 timeGrid: { dayMaxEvents: true },
                 fourDay: {
                     type: 'timeGrid',
@@ -2364,9 +2364,20 @@
     }
 
     /* [NEW] Compact Events & Cells Override */
+    /* Container of events in day cell */
+    .fc-daygrid-day-events {
+        display: flex;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        gap: 1px;
+    }
+    
+    /* Each event wrapper */
     .fc-daygrid-event-harness {
         margin-top: 0 !important;
-        margin-bottom: 0px !important; /* Reduce gap between events */
+        margin-bottom: 0px !important;
+        width: 49%; /* 2 Columns */
+        display: inline-block;
     }
     
     .fc-daygrid-day-bottom {
