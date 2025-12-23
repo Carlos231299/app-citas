@@ -823,6 +823,11 @@
         // Check for Notification Auto-Open
         const openApptId = "{{ request('open_appointment') }}";
         if (openApptId) {
+            // Clean the URL immediately to prevent reopening on refresh
+            const cleanUrl = new URL(window.location.href);
+            cleanUrl.searchParams.delete('open_appointment');
+            window.history.replaceState({}, document.title, cleanUrl.toString());
+
             axios.get(`/appointments/${openApptId}`).then(res => {
                 showEventDetails(res.data);
             }).catch(err => console.error(err));
