@@ -639,7 +639,7 @@
     }
 
     // Admin Booking Logic
-    const bookingModal = new bootstrap.Modal(document.getElementById('adminBookingModal'));
+    var bookingModal = new bootstrap.Modal(document.getElementById('adminBookingModal'));
 
     function openBookingModal() {
         document.getElementById('adminBookingForm').reset();
@@ -1676,8 +1676,8 @@
     }
 
     // 4. POS Modal Logic
-    let posCart = [];
-    const posModal = new bootstrap.Modal(document.getElementById('completeAppointmentModal'));
+    var posCart = [];
+    var posModal = new bootstrap.Modal(document.getElementById('completeAppointmentModal'));
 
     function openPosModal(id, basePrice) {
         // Reset State
