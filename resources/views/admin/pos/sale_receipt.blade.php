@@ -75,6 +75,14 @@
                 $logoData = file_get_contents($logoPath);
                 $logoBase64 = 'data:image/png;base64,' . base64_encode($logoData);
             }
+            
+            // Calculate Totals
+            $servicePrice = 0;
+            if($sale->appointment) {
+                $servicePrice = $sale->appointment->price; // Use stored price (includes extra time)
+            }
+            
+            $grandTotal = $sale->total + $servicePrice;
         @endphp
         
         @if($logoBase64)
@@ -110,7 +118,7 @@
             <tr>
                 <td style="font-size: 10px;" class="fw-bold">{{ $sale->appointment->service->name }}</td>
                 <td class="text-right">1</td>
-                <td class="text-right fw-bold">${{ number_format($sale->appointment->service->price, 0) }}</td>
+                <td class="text-right fw-bold">${{ number_format($servicePrice, 0) }}</td>
             </tr>
             @endif
             
@@ -127,7 +135,7 @@
 
     <div class="total-container">
         <div class="total-label">VALOR TOTAL PAGADO</div>
-        <div class="total-amount">${{ number_format($sale->total, 0) }}</div>
+        <div class="total-amount">${{ number_format($grandTotal, 0) }}</div>
     </div>
 
     <div class="footer">
