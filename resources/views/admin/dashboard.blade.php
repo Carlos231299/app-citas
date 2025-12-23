@@ -771,10 +771,7 @@
     window.calendarInstance = null;
 
     document.addEventListener('DOMContentLoaded', function() {
-        // Initial Load: Today's Agenda
-        renderDailyAgenda(new Date());
-
-        // Selector Desplegable (AirDatepicker)
+        // Selector Desplegable (AirDatepicker) - Manual Activation
         const selectorEl = document.getElementById('customCalendarTitle');
         if (selectorEl) {
             // Deduplicate: If instance exists, destroy it
@@ -782,12 +779,15 @@
                 window._agendaPicker.destroy();
             }
             
-            // Re-bind click to ensure it only opens on click
+            // 1. Initial Load for the UI
+            renderDailyAgenda(new Date());
+
+            // 2. Initialize the picker but keep it hidden and detached from auto-focus
             window._agendaPicker = new AirDatepicker(selectorEl, {
                 locale: typeof localeEs !== 'undefined' ? localeEs : 'es',
                 selectedDates: [new Date()],
                 autoClose: true,
-                visible: false, // Ensure it starts hidden
+                visible: false,
                 position: 'bottom left',
                 view: 'days',
                 minView: 'days',
@@ -796,10 +796,18 @@
                 onSelect: function({date, datepicker}) {
                     if (date) {
                         renderDailyAgenda(date);
-                        datepicker.hide(); // Cerrar al seleccionar
+                        datepicker.hide(); // Force hide on selection
                     }
                 }
             });
+
+            // 3. Forzamos que solo abra al hacer click explícito (evita aperturas automáticas)
+            selectorEl.onclick = function(e) {
+                e.stopPropagation();
+                if (window._agendaPicker) {
+                    window._agendaPicker.show();
+                }
+            };
         }
 
         // --- Persistence: Stats Collapse State ---
