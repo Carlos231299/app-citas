@@ -788,7 +788,7 @@
 @push('scripts')
 <script>
     // Global State for Filters
-    let calendarState = {
+    var calendarState = {
         weekends: true,
         showRejected: true, // Cancelled
         showCompleted: true
@@ -1775,7 +1775,7 @@
         setTimeout(() => document.getElementById('searchInput').focus(), 500);
     };
 
-    let searchTimeout;
+    var searchTimeout;
     window.handleSearch = function(query) {
         const tbody = document.getElementById('pos_cart_body');
         const emptyMsg = document.getElementById('pos_empty_cart');
