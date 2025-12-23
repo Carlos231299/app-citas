@@ -918,23 +918,16 @@
                         
                         col.innerHTML = `
                             <div class="agenda-card ${statusClass} pointer" onclick="window.showEventDetails(${item.id})">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="flex-shrink-0">
-                                        <div class="rounded-circle bg-white bg-opacity-75 d-flex align-items-center justify-content-center fw-bold text-primary border" style="width:38px;height:38px;font-size:0.8rem;">
-                                            ${barberName.charAt(0)}
-                                        </div>
+                                <div class="d-flex flex-column gap-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-0">
+                                        <h6 class="fw-bold mb-0 text-dark text-truncate small" style="max-width: 65%;">${item.extendedProps.client_name || 'Sin nombre'}</h6>
+                                        <span class="badge bg-white bg-opacity-50 text-dark border extra-small" style="font-size: 0.65rem;">${time}</span>
                                     </div>
-                                    <div class="flex-grow-1 overflow-hidden">
-                                        <div class="d-flex justify-content-between align-items-center mb-0">
-                                            <h6 class="fw-bold mb-0 text-dark text-truncate small" style="max-width: 65%;">${item.extendedProps.client_name || 'Sin nombre'}</h6>
-                                            <span class="badge bg-white bg-opacity-50 text-dark border extra-small" style="font-size: 0.65rem;">${time}</span>
-                                        </div>
-                                        <p class="text-muted mb-0 d-flex align-items-center gap-1 text-truncate" style="font-size: 0.75rem;">
-                                            <i class="bi bi-scissors"></i> <span>${item.extendedProps.service || item.title}</span>
-                                        </p>
-                                        <div class="mt-1 pt-1 border-top" style="border-top-color: rgba(0,0,0,0.05) !important;">
-                                            <small class="text-primary fw-bold" style="font-size: 0.65rem;">${barberName}</small>
-                                        </div>
+                                    <p class="text-muted mb-0 d-flex align-items-center gap-1 text-truncate" style="font-size: 0.75rem;">
+                                        <i class="bi bi-scissors"></i> <span>${item.extendedProps.service || item.title}</span>
+                                    </p>
+                                    <div class="mt-1 pt-1 border-top" style="border-top-color: rgba(0,0,0,0.05) !important;">
+                                        <small class="text-primary fw-bold" style="font-size: 0.65rem;">${barberName}</small>
                                     </div>
                                 </div>
                             </div>
@@ -943,21 +936,14 @@
                         const timeStr = new Date(`${dateStr}T${item.time}`).toLocaleTimeString('es-ES', { hour: 'numeric', minute: '2-digit', hour12: true });
                         col.innerHTML = `
                             <div class="agenda-card status-available pointer" onclick="quickBook('${dateStr}', '${item.time}', '${barberId || item.barber_id}')">
-                                <div class="d-flex align-items-center gap-3 h-100">
-                                    <div class="flex-shrink-0">
-                                        <div class="rounded-circle bg-white bg-opacity-75 d-flex align-items-center justify-content-center fw-bold text-muted border border-dashed" style="width:38px;height:38px;font-size:0.8rem; opacity: 0.6;">
-                                            ${item.barber_name ? item.barber_name.charAt(0) : 'A'}
-                                        </div>
+                                <div class="d-flex flex-column gap-1 h-100 justify-content-center">
+                                    <div class="d-flex justify-content-between align-items-center mb-0">
+                                        <h6 class="fw-bold mb-0 text-muted extra-small">Disponible</h6>
+                                        <span class="badge bg-white text-secondary border extra-small" style="font-size: 0.65rem;">${timeStr}</span>
                                     </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-center mb-0">
-                                            <h6 class="fw-bold mb-0 text-muted extra-small">Disponible</h6>
-                                            <span class="badge bg-white text-secondary border extra-small" style="font-size: 0.65rem;">${timeStr}</span>
-                                        </div>
-                                        <p class="text-primary mb-0" style="font-size: 0.7rem;">
-                                            <i class="bi bi-plus-circle me-1"></i> <strong>Agendar ahora</strong>
-                                        </p>
-                                    </div>
+                                    <p class="text-primary mb-0" style="font-size: 0.7rem;">
+                                        <i class="bi bi-plus-circle me-1"></i> <strong>Agendar ahora</strong>
+                                    </p>
                                 </div>
                             </div>
                         `;
