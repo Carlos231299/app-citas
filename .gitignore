@@ -32,3 +32,7 @@ whatsapp-bot-bundle/
 whatsapp-bot-local/node_modules/
 whatsapp-bot-local/.wwebjs_auth/
 whatsapp-bot-local/dist/
+
+# Local Documentation and Tools (Keep Local Only)
+GUIA_PROYECTO.md
+whatsapp-bot-local/
