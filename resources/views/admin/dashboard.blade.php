@@ -973,7 +973,22 @@
             bgStyle = `background: ${statusColors[props.status] || statusColors['scheduled']}`;
         }
 
-        // STANDARD SWEETALERT 2 DESIGN
+        
+        // CALCULATE CORRECT PRICE TO DISPLAY (Dynamic based on time)
+        let displayPrice = props.price; // Default to stored price
+        
+        if (props.base_price && props.extra_price && event.start) {
+            const hour = event.start.getHours();
+            const isExtraTime = (hour < 8 || hour >= 22);
+            
+            if (isExtraTime && props.extra_price > 0) {
+                displayPrice = props.extra_price;
+            } else {
+                displayPrice = props.base_price;
+            }
+        }
+        
+        // Status Badge
         let statusBadge = '';
         if (props.status && props.type !== 'holiday') {
             const colors = { 'scheduled': 'primary', 'completed': 'success', 'cancelled': 'danger' };
@@ -990,7 +1005,7 @@
                     <p class="mb-2"><strong><i class="bi bi-calendar-event me-2"></i>Fecha:</strong> ${dateStr}</p>
                     <p class="mb-2"><strong><i class="bi bi-clock me-2"></i>Hora:</strong> ${timeStr}</p>
                     ${props.barber ? `<p class="mb-2"><strong><i class="bi bi-person me-2"></i>Barbero:</strong> ${props.barber}</p>` : ''}
-                    ${props.service ? `<p class="mb-2"><strong><i class="bi bi-scissors me-2"></i>Servicio:</strong> ${props.service} (${formatMoney(props.price)})</p>` : ''}
+                    ${props.service ? `<p class="mb-2"><strong><i class="bi bi-scissors me-2"></i>Servicio:</strong> ${props.service} (${formatMoney(displayPrice)})</p>` : ''}
                     
                     ${props.products && props.products.length > 0 ? `
                         <div class="mb-2 ps-4 border-start border-3 border-secondary">
