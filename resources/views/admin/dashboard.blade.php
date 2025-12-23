@@ -55,6 +55,10 @@
     .agenda-card.status-pending { border-left-color: #f59e0b; }
     .agenda-card.status-cancelled { border-left-color: #ef4444; }
 
+    /* Fix: Remove underlines from calendar numbers */
+    .fc-daygrid-day-number { text-decoration: none !important; }
+    .fc-daygrid-day-number:hover { color: #2563eb !important; }
+
     .barber-avatar-sm {
         width: 40px; height: 40px; border-radius: 12px; object-fit: cover;
         background: #f8f9fa; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
@@ -100,8 +104,8 @@
 
         <!-- 1. Citas Hoy (Full) -->
         <div class="{{ $colClass }}">
-            <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-primary">
-                <div class="card-body p-3">
+            <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-primary pointer" onclick="renderDailyAgenda(new Date(), true)">
+                <div class="card-body p-3 text-center">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
                             <h6 class="text-secondary text-uppercase fw-bold mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">Citas Hoy</h6>
@@ -754,6 +758,9 @@
                 right: '' // Leaving empty to inject custom dropdown
             },
             navLinks: true, 
+            navLinkDayClick: function(date, jsEvent) {
+                renderDailyAgenda(date, true);
+            },
             height: '100%',
             contentHeight: 'auto',
             aspectRatio: window.innerWidth < 768 ? 0.65 : 1.35,
@@ -778,8 +785,8 @@
             nowIndicator: true, // Enabled Google-style check
             
             // Interaction: Month -> Day
-            navLinks: true, 
-            navLinkDayClick: 'timeGridDay',
+            // navLinks: true, // Already defined above
+            // navLinkDayClick: 'timeGridDay', // Replaced by custom function
             
             views: {
                 dayGridMonth: { dayMaxEvents: false }, // Expand all events (No "+1 more")
@@ -920,10 +927,12 @@
                 const events = res.data;
                 if (!events.length) {
                     container.innerHTML = `
-                        <div class="text-center py-5 opacity-50 animate-fade-in">
-                            <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
-                            <p class="small">No hay citas para este día</p>
-                        </div>`;
+                        <div class="text-center py-5 opacity-75">
+                            <i class="bi bi-calendar-x fs-1 d-block mb-3 text-muted"></i>
+                            <h6 class="fw-bold text-dark">No hay nada apartado para este día</h6>
+                            <p class="small text-muted">El calendario está libre para recibir nuevas citas.</p>
+                        </div>
+                    `;
                     return;
                 }
 
@@ -954,6 +963,7 @@
                     `;
                     container.innerHTML += card;
                 });
+
                 if (typeof showModal !== 'undefined' && showModal) {
                     const modalEl = document.getElementById('dailyAgendaModal');
                     if (modalEl) {
