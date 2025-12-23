@@ -44,24 +44,24 @@
     .fc-day-today { background: rgba(37, 99, 235, 0.03) !important; }
     .fc-day-today .fc-daygrid-day-number { color: #2563eb; font-weight: 700; }
     
-    /* Agenda Cards - More intense "Traffic Light" colors */
+    /* Agenda Cards - Compact & Vibrant */
     .agenda-card {
-        border: 1px solid #f1f3f5;
-        border-radius: 16px;
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 12px;
         transition: all 0.2s ease;
-        border-left: 6px solid #dee2e6; /* Thicker left border */
+        border-left: 6px solid #dee2e6;
         height: 100%;
-        padding: 12px 16px !important; /* More narrow/compact vertically */
+        padding: 10px 12px !important; /* More compact */
     }
-    .agenda-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); border-color: #2563eb; }
+    .agenda-card:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0,0,0,0.05); }
     
-    .agenda-card.status-completed { border-left-color: #10b981; background: #ecfdf5 !important; }
-    .agenda-card.status-pending { border-left-color: #f59e0b; background: #fff7ed !important; }
-    .agenda-card.status-cancelled { border-left-color: #ef4444; background: #fef2f2 !important; }
+    .agenda-card.status-completed { border-left-color: #10b981 !important; background: #ecfdf5 !important; }
+    .agenda-card.status-pending { border-left-color: #f59e0b !important; background: #fff7ed !important; }
+    .agenda-card.status-cancelled { border-left-color: #ef4444 !important; background: #fef2f2 !important; }
     .agenda-card.status-available { 
         border-style: dashed !important; 
         border-left-color: #3b82f6 !important; 
-        background: #eff6ff !important; 
+        background: #f0f7ff !important; 
     }
 
     /* Fix: Remove underlines from calendar numbers */
@@ -788,7 +788,6 @@
         const inputEl = document.getElementById('agendaDatepickerInput');
         
         if (triggerEl && inputEl) {
-            // Simplified initialization to avoid TypeError
             window._agendaPicker = new AirDatepicker(inputEl, {
                 locale: typeof localeEs !== 'undefined' ? localeEs : 'es',
                 selectedDates: [new Date()],
@@ -809,7 +808,6 @@
                 onSelect({date, datepicker}) {
                     if (date && datepicker.visible) {
                         renderDailyAgenda(date);
-                        // Delay hide to avoid race conditions
                         setTimeout(() => datepicker.hide(), 100);
                     }
                 }
@@ -826,37 +824,27 @@
         const statsCollapse = document.getElementById('statsCollapse');
         const statsIcon = document.getElementById('statsCollapseIcon');
         if (statsCollapse && statsIcon) {
-            const savedState = localStorage.getItem('stats_collapse_state'); // 'hidden' or 'visible'
+            const savedState = localStorage.getItem('stats_collapse_state');
             if (savedState === 'hidden') {
                 statsCollapse.classList.remove('show');
                 statsIcon.classList.replace('bi-chevron-up', 'bi-chevron-down');
             }
-
-            statsCollapse.addEventListener('hidden.bs.collapse', function () {
+            statsCollapse.addEventListener('hidden.bs.collapse', () => {
                 localStorage.setItem('stats_collapse_state', 'hidden');
                 statsIcon.classList.replace('bi-chevron-up', 'bi-chevron-down');
             });
-            statsCollapse.addEventListener('shown.bs.collapse', function () {
+            statsCollapse.addEventListener('shown.bs.collapse', () => {
                 localStorage.setItem('stats_collapse_state', 'visible');
                 statsIcon.classList.replace('bi-chevron-down', 'bi-chevron-up');
             });
         }
 
-
         // Check for Notification Auto-Open
         const openApptId = "{{ request('open_appointment') }}";
         if (openApptId) {
-            axios.get(`/appointments/${openApptId}`)
-                .then(res => {
-                    const evtData = res.data;
-                    // Convert ISO strings to Date objects for helper methods
-                    evtData.start = new Date(evtData.start);
-                    evtData.end = new Date(evtData.end);
-                    
-                    if(calendarInstance) calendarInstance.gotoDate(evtData.start);
-                    showEventDetails(evtData);
-                })
-                .catch(err => console.error("Could not load appointment details", err));
+            axios.get(`/appointments/${openApptId}`).then(res => {
+                showEventDetails(res.data);
+            }).catch(err => console.error(err));
         }
     });
     
@@ -870,27 +858,21 @@
         const formattedDate = new Intl.DateTimeFormat('es-ES', options).format(date);
         label.innerText = formattedDate;
 
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const dateStr = `${year}-${month}-${day}`;
-        
+        const dateStr = date.toISOString().split('T')[0];
         const barberId = document.getElementById('barberFilter') ? document.getElementById('barberFilter').value : '';
 
         container.innerHTML = '<div class="text-center py-5"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
 
         try {
-            // 1. Fetch Appointments
-            const apptsRes = await axios.get(`/calendar/events?start=${dateStr}&end=${dateStr}&barber_id=${barberId}`);
-            const appointments = apptsRes.data.filter(ev => ev.extendedProps.type === 'appointment');
+            const [apptsRes, slotsRes] = await Promise.all([
+                axios.get(`/calendar/events?start=${dateStr}&end=${dateStr}&barber_id=${barberId}`),
+                axios.get(`/calendar/slots?date=${dateStr}&barber_id=${barberId}`)
+            ]);
 
-            // 2. Fetch Available Slots (using existing booking logic if possible, or simple slots)
-            const slotsRes = await axios.get(`/calendar/slots?date=${dateStr}&barber_id=${barberId}`);
+            const appointments = apptsRes.data.filter(ev => ev.extendedProps.type === 'appointment');
             const availableSlots = slotsRes.data || [];
 
             container.innerHTML = '';
-
-            // 3. Combine and Sort
             let allItems = [
                 ...appointments.map(a => ({ ...a, type: 'appointment', timeNum: new Date(a.start).getTime() })),
                 ...availableSlots.map(s => ({ ...s, type: 'slot', timeNum: new Date(`${dateStr}T${s.time}`).getTime() }))
@@ -905,8 +887,7 @@
                     </div>
                 `;
             } else {
-                // Ensure container is a row with 4 cols on large screens
-                container.className = 'row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xxl-4 g-3 pe-1';
+                container.className = 'row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3 pe-1';
                 
                 allItems.forEach(item => {
                     const col = document.createElement('div');
@@ -921,20 +902,20 @@
                             <div class="agenda-card ${statusClass} pointer" onclick="window.showEventDetails(${item.id})">
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="flex-shrink-0">
-                                        <div class="rounded-circle bg-white bg-opacity-75 d-flex align-items-center justify-content-center fw-bold text-primary border" style="width:40px;height:40px;font-size:0.85rem;">
+                                        <div class="rounded-circle bg-white bg-opacity-75 d-flex align-items-center justify-content-center fw-bold text-primary border" style="width:38px;height:38px;font-size:0.8rem;">
                                             ${barberName.charAt(0)}
                                         </div>
                                     </div>
                                     <div class="flex-grow-1 overflow-hidden">
                                         <div class="d-flex justify-content-between align-items-center mb-0">
-                                            <h6 class="fw-bold mb-0 text-dark text-truncate" style="max-width: 70%;">${item.extendedProps.client_name || 'Sin nombre'}</h6>
-                                            <span class="badge bg-white bg-opacity-50 text-dark border extra-small" style="font-size: 0.7rem;">${time}</span>
+                                            <h6 class="fw-bold mb-0 text-dark text-truncate small" style="max-width: 65%;">${item.extendedProps.client_name || 'Sin nombre'}</h6>
+                                            <span class="badge bg-white bg-opacity-50 text-dark border extra-small" style="font-size: 0.65rem;">${time}</span>
                                         </div>
-                                        <p class="text-muted small mb-0 d-flex align-items-center gap-1" style="font-size: 0.75rem;">
-                                            <i class="bi bi-scissors"></i> <span class="text-truncate">${item.extendedProps.service || item.title}</span>
+                                        <p class="text-muted mb-0 d-flex align-items-center gap-1 text-truncate" style="font-size: 0.75rem;">
+                                            <i class="bi bi-scissors"></i> <span>${item.extendedProps.service || item.title}</span>
                                         </p>
                                         <div class="mt-1 pt-1 border-top" style="border-top-color: rgba(0,0,0,0.05) !important;">
-                                            <small class="text-primary fw-600" style="font-size: 0.7rem;">${barberName}</small>
+                                            <small class="text-primary fw-bold" style="font-size: 0.65rem;">${barberName}</small>
                                         </div>
                                     </div>
                                 </div>
@@ -946,17 +927,17 @@
                             <div class="agenda-card status-available pointer" onclick="quickBook('${dateStr}', '${item.time}', '${barberId || item.barber_id}')">
                                 <div class="d-flex align-items-center gap-3 h-100">
                                     <div class="flex-shrink-0">
-                                        <div class="rounded-circle bg-white bg-opacity-75 d-flex align-items-center justify-content-center fw-bold text-muted border border-dashed" style="width:40px;height:40px;font-size:0.85rem; opacity: 0.6;">
+                                        <div class="rounded-circle bg-white bg-opacity-75 d-flex align-items-center justify-content-center fw-bold text-muted border border-dashed" style="width:38px;height:38px;font-size:0.8rem; opacity: 0.6;">
                                             ${item.barber_name ? item.barber_name.charAt(0) : 'A'}
                                         </div>
                                     </div>
                                     <div class="flex-grow-1">
                                         <div class="d-flex justify-content-between align-items-center mb-0">
-                                            <h6 class="fw-bold mb-0 text-muted" style="font-size: 0.9rem;">Disponible</h6>
-                                            <span class="badge bg-white text-secondary border small" style="font-size: 0.7rem;">${timeStr}</span>
+                                            <h6 class="fw-bold mb-0 text-muted extra-small">Disponible</h6>
+                                            <span class="badge bg-white text-secondary border extra-small" style="font-size: 0.65rem;">${timeStr}</span>
                                         </div>
-                                        <p class="text-muted small mb-0" style="font-size: 0.75rem;">
-                                            <i class="bi bi-plus-circle me-1 text-primary"></i> <strong>Agendar ahora</strong>
+                                        <p class="text-primary mb-0" style="font-size: 0.7rem;">
+                                            <i class="bi bi-plus-circle me-1"></i> <strong>Agendar ahora</strong>
                                         </p>
                                     </div>
                                 </div>
@@ -968,7 +949,7 @@
             }
         } catch (err) {
             console.error(err);
-            container.innerHTML = '<p class="text-danger small text-center py-5">Error al cargar agenda. Verifica la conexión.</p>';
+            container.innerHTML = '<p class="text-danger small text-center py-5">Error al cargar agenda.</p>';
         }
     }
     
@@ -1146,25 +1127,25 @@
              calendarState.showCompleted = !calendarState.showCompleted;
              document.getElementById('toggleCompleted').classList.toggle('active', calendarState.showCompleted);
         }
-        calendarInstance.refetchEvents(); // Re-apply eventClassNames logic
+        // calendarInstance is now null, we refresh the custom agenda instead
+        refreshCalendar();
     };
 
     // Toggle Logic
     function toggleOption(e, type) {
         e.preventDefault();
-        e.stopPropagation(); // Keep dropdown open
+        e.stopPropagation();
 
-        if(type === 'weekends') {
+        if (type === 'weekends') {
             calendarState.weekends = !calendarState.weekends;
-            calendarInstance.setOption('weekends', calendarState.weekends);
+            // No full calendar to update
         } else if (type === 'rejected') {
             calendarState.showRejected = !calendarState.showRejected;
-            calendarInstance.render(); // Re-trigger eventClassNames
         } else if (type === 'completed') {
             calendarState.showCompleted = !calendarState.showCompleted;
-            calendarInstance.render(); // Re-trigger eventClassNames
         }
-
+        
+        refreshCalendar();
         updateCheckboxes();
     }
 
