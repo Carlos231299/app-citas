@@ -1221,8 +1221,8 @@
 
     // Inject Server Data for JS
     const serverData = {
-        services: @json($services),
-        barbers: @json($barbers),
+        services: @json($services ?? []),
+        barbers: @json($barbers ?? []),
         products: @json($products ?? [])
     };
 
@@ -1951,21 +1951,21 @@
         });
     };
 
-    // Initialize Calendar
+    // Initialize Calendar (Debug Mode)
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM Loaded, checking for FullCalendar...');
+        console.log('DOM Ready. Starting Init...');
         
-        const tryInit = () => {
-            if(typeof FullCalendar !== 'undefined' && typeof initCalendar === 'function') {
-                console.log('FullCalendar found, initializing...');
+        try {
+            if (typeof initCalendar === 'function') {
                 initCalendar();
             } else {
-                console.warn('FullCalendar not yet loaded, retrying in 50ms...');
-                setTimeout(tryInit, 50);
+                console.error('initCalendar function missing!');
+                Swal.fire('Error Crítico', 'La función del calendario no se encontró. Recarga la página.', 'error');
             }
-        };
-
-        tryInit();
+        } catch (e) {
+            console.error('Init Error:', e);
+            Swal.fire('Error de Script', 'Detalle: ' + e.message, 'error');
+        }
     });
 </script>
 <style>
