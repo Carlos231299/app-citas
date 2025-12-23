@@ -1000,10 +1000,14 @@
             event = input;
         }
 
-        if (!event || !event.extendedProps) return;
+        // Ensure event.start is a Date object
+        if (event.start && !(event.start instanceof Date)) {
+            event.start = new Date(event.start);
+        }
 
+        if (!event || !event.extendedProps) return;
         const props = event.extendedProps;
-        
+
         // Format Date
         const dateOptions = { weekday: 'long', day: 'numeric', month: 'long' };
         const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
