@@ -855,11 +855,23 @@
                 meridiem: 'short',
                 hour12: true
             },
-            eventTimeFormat: {
-                hour: 'numeric',
-                minute: '2-digit',
-                meridiem: 'short',
                 hour12: true
+            },
+            // Custom Event Rendering: Show Time Only
+            eventContent: function(arg) {
+                // Format time as "10am" or "4:30pm"
+                const date = new Date(arg.event.start);
+                let hours = date.getHours();
+                let minutes = date.getMinutes();
+                const ampm = hours >= 12 ? 'pm' : 'am';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // the hour '0' should be '12'
+                const minutesStr = minutes < 10 ? '0'+minutes : minutes;
+                const timeStr = minutes === 0 ? `${hours}${ampm}` : `${hours}:${minutesStr}${ampm}`;
+                
+                return { 
+                    html: `<div class="fc-event-time-only" style="font-size: 0.75rem; font-weight: 600; color: #2563eb; line-height: 1; margin-bottom: 2px;">${timeStr}</div>` 
+                };
             },
             events: {
                 url: "{{ route('calendar.events') }}",
@@ -943,7 +955,25 @@
             },
 
             eventClick: function(info) {
-                window.showEventDetails(info.event);
+                // Per user request: Events themselves should not trigger the modal details directly,
+                // ONLY the day click (which triggers renderDailyAgenda).
+                // But since the event is ON the day, we need to let the click bubble up OR allow it
+                // to trigger the same "Open Agenda" action.
+                // The user said: "no responderán a los clicks sino solo el día que desplegara la agenda"
+                // So, clicking the time should basically act like clicking the white space of the day.
+                // We'll manually trigger renderDailyAgenda just in case bubbling is stopped.
+                info.jsEvent.preventDefault(); // Stop default navigation if any
+                renderDailyAgenda(info.event.start, true);
+            },
+            eventDidMount: function(info) {
+                 // Add pointer-events-none style if we want to ensure it passes through, 
+                 // but we also added a handler above to be safe.
+                 // Actually, if we use pointer-events:none, the eventClick above won't fire, 
+                 // and the click will hit the underlying 'fc-daygrid-day' which triggers dateClick.
+                 // This is the cleanest implementation of "only the day responds".
+                 info.el.style.pointerEvents = 'none';
+                 info.el.style.backgroundColor = 'transparent';
+                 info.el.style.border = 'none';
             }
         });
 
@@ -1396,6 +1426,54 @@
                          slotsContainer.innerHTML = '<small>Selecciona una fecha.</small>';
                          return;
                     }
+
+    };
+    
+    // Ensure handleSearch is global
+    window.handleSearch = function(query) {
+        clearTimeout(searchTimeout);
+        const resultsContainer = document.getElementById('searchResults');
+        
+        if(query.length < 2) {
+            resultsContainer.innerHTML = '<div class="text-center py-4 text-muted small">Escribe para buscar...</div>';
+            return;
+        }
+
+        resultsContainer.innerHTML = '<div class="text-center py-4"><div class="spinner-border spinner-border-sm text-secondary"></div></div>';
+
+        searchTimeout = setTimeout(() => {
+            axios.get(`/appointments/search?query=${query}`)
+                 .then(res => {
+                     const data = res.data;
+                     if(!data.length) {
+                         resultsContainer.innerHTML = '<div class="text-center py-4 text-muted small">No se encontraron citas.</div>';
+                         return;
+                     }
+                     
+                     let html = '<div class="list-group list-group-flush">';
+                     data.forEach(item => {
+                         const statusColor = item.status === 'completed' ? 'success' : (item.status === 'cancelled' ? 'danger' : 'primary');
+                         html += `
+                            <button class="list-group-item list-group-item-action border-0 px-0 py-3" onclick="selectSearchResult(${item.id}, '${item.client_name}', '${item.title}', '${item.status}', '${item.barber_name}')">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-0">${item.client_name}</h6>
+                                        <small class="text-muted"><i class="bi bi-calendar me-1"></i> ${item.scheduled_at_formatted} • ${item.title}</small>
+                                    </div>
+                                    <span class="badge bg-${statusColor} bg-opacity-10 text-${statusColor} rounded-pill">${item.status}</span>
+                                </div>
+                            </button>
+                         `;
+                     });
+                     html += '</div>';
+                     resultsContainer.innerHTML = html;
+                 })
+                 .catch(err => {
+                     console.error(err);
+                     resultsContainer.innerHTML = '<div class="text-center text-danger small">Error al buscar</div>';
+                 });
+        }, 300);
+    };
 
                     slotsContainer.innerHTML = '<div class="spinner-border spinner-border-sm text-primary"></div>';
 
