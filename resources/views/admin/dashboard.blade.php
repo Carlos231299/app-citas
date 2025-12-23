@@ -277,10 +277,10 @@
                 <div class="card-header bg-white border-0 pt-4 px-4 pb-1">
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                         <div class="d-flex align-items-center gap-3">
+                            <!-- Icon Trigger for Calendar -->
                             <div class="bg-primary bg-opacity-10 p-2 rounded-circle d-flex align-items-center justify-content-center cursor-pointer" id="customCalendarTitleTrigger" style="width: 42px; height: 42px;">
                                 <i class="bi bi-calendar-event fs-5 text-primary"></i>
                             </div>
-                            <input type="text" id="agendaDatepickerInput" style="position: absolute; left: -9999px;">
                             <div>
                                 <h5 class="fw-bold text-dark mb-0" id="agenda-date-label">Hoy</h5>
                                 <p class="text-muted small mb-0">Toca el icono para cambiar de fecha</p>
@@ -787,7 +787,6 @@
         const triggerEl = document.getElementById('customCalendarTitleTrigger');
         
         if (triggerEl) {
-            // Anchor directly to triggerEl so manual click works natively or via .show()
             window._agendaPicker = new AirDatepicker(triggerEl, {
                 locale: typeof localeEs !== 'undefined' ? localeEs : 'es',
                 selectedDates: [new Date()],
@@ -806,23 +805,13 @@
                     }
                 }],
                 onSelect({date, datepicker}) {
-                    // Check if we have a date (onSelect can be called with empty date when clearing)
                     const selected = Array.isArray(date) ? date[0] : date;
                     if (selected) {
                         renderDailyAgenda(selected);
-                        // AirDatepicker uses visible property
                         if (datepicker && datepicker.visible) {
                             setTimeout(() => datepicker.hide(), 100);
                         }
                     }
-                }
-            });
-
-            // Fallback click listener
-            triggerEl.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (window._agendaPicker) {
-                    window._agendaPicker.show();
                 }
             });
         }

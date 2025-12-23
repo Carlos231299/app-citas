@@ -327,7 +327,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
     
-    @stack('scripts')
+    <!-- Removed duplicate script stack -->
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -476,6 +476,7 @@
             firstDay: 1
         };
     </script>
+    <!-- Final Scripts Stack -->
     @stack('scripts')
 </body>
 </html>
