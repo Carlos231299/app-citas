@@ -63,6 +63,19 @@
     /* Scrollbar */
     #daily-agenda-container::-webkit-scrollbar { width: 4px; }
     #daily-agenda-container::-webkit-scrollbar-thumb { background: #e9ecef; border-radius: 10px; }
+
+    /* Mobile Enhancements */
+    @media (max-width: 768px) {
+        .fc-toolbar { flex-direction: column !important; gap: 10px !important; }
+        .fc-toolbar-title { font-size: 1.1rem !important; }
+        .fc-daygrid-day-number { font-size: 0.8rem; padding: 4px !important; }
+        .agenda-card { padding: 12px !important; }
+        .agenda-card h6 { font-size: 0.9rem; }
+        .agenda-card p { font-size: 0.75rem; }
+        .barber-avatar-sm { width: 32px; height: 32px; }
+        #calendar { min-height: 400px !important; }
+        .card-body { padding: 15px !important; }
+    }
 </style>
 <div class="d-flex flex-column h-100">
     <!-- Stats Row Toggle -->

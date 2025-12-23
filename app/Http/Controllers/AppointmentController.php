@@ -964,10 +964,10 @@ class AppointmentController extends Controller
         $end = Carbon::parse($request->end)->endOfDay();
 
         // 1. Fetch Regular Appointments
-        // 1. Fetch Regular Appointments
         $query = Appointment::with(['service', 'barber', 'products', 'completedBy'])
             ->whereBetween('scheduled_at', [$start, $end])
-            ->where('status', '!=', 'request');
+            ->where('status', '!=', 'request')
+            ->orderBy('scheduled_at', 'asc');
 
         if ($request->filled('barber_id')) {
             $query->where('barber_id', $request->barber_id);
