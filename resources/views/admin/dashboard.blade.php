@@ -1220,7 +1220,7 @@
     };
 
     // Inject Server Data for JS
-    const serverData = {
+    var serverData = {
         services: @json($services ?? []),
         barbers: @json($barbers ?? []),
         products: @json($products ?? [])
