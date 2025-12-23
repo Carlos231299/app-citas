@@ -463,5 +463,6 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/locale/es.js"></script>
+    @stack('scripts')
 </body>
 </html>
