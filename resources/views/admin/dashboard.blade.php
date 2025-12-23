@@ -44,19 +44,25 @@
     .fc-day-today { background: rgba(37, 99, 235, 0.03) !important; }
     .fc-day-today .fc-daygrid-day-number { color: #2563eb; font-weight: 700; }
     
-    /* Agenda Cards */
+    /* Agenda Cards - More intense "Traffic Light" colors */
     .agenda-card {
         border: 1px solid #f1f3f5;
         border-radius: 16px;
         transition: all 0.2s ease;
-        border-left: 4px solid #dee2e6;
-        height: 100%; /* For grid equality */
+        border-left: 6px solid #dee2e6; /* Thicker left border */
+        height: 100%;
+        padding: 12px 16px !important; /* More narrow/compact vertically */
     }
-    .agenda-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color: #2563eb; }
-    .agenda-card.status-completed { border-left-color: #10b981; }
-    .agenda-card.status-pending { border-left-color: #f59e0b; }
-    .agenda-card.status-cancelled { border-left-color: #ef4444; }
-    .agenda-card.status-available { border-style: dashed !important; border-left-color: #dee2e6; background: #fdfdfd !important; }
+    .agenda-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); border-color: #2563eb; }
+    
+    .agenda-card.status-completed { border-left-color: #10b981; background: #ecfdf5 !important; }
+    .agenda-card.status-pending { border-left-color: #f59e0b; background: #fff7ed !important; }
+    .agenda-card.status-cancelled { border-left-color: #ef4444; background: #fef2f2 !important; }
+    .agenda-card.status-available { 
+        border-style: dashed !important; 
+        border-left-color: #3b82f6 !important; 
+        background: #eff6ff !important; 
+    }
 
     /* Fix: Remove underlines from calendar numbers */
     .fc-daygrid-day-number { text-decoration: none !important; }
@@ -899,36 +905,31 @@
                     </div>
                 `;
             } else {
-                // Ensure container is a row
-                container.className = 'row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 pe-1';
+                // Ensure container is a row with 4 cols on large screens
+                container.className = 'row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xxl-4 g-3 pe-1';
                 
                 allItems.forEach(item => {
                     const col = document.createElement('div');
                     col.className = 'col animate-fade-in';
                     
-                    if (item.type === 'appointment') {
-                        const statusClass = `status-${item.extendedProps.status || 'pending'}`;
-                        const time = new Date(item.start).toLocaleTimeString('es-ES', { hour: 'numeric', minute: '2-digit', hour12: true });
-                        const barberName = item.extendedProps.barber_name || item.extendedProps.barber || 'Barbero';
-                        
                         col.innerHTML = `
-                            <div class="agenda-card ${statusClass} p-3 bg-white pointer" onclick="window.showEventDetails(${item.id})">
+                            <div class="agenda-card ${statusClass} pointer" onclick="window.showEventDetails(${item.id})">
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="flex-shrink-0">
-                                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center fw-bold text-primary border" style="width:42px;height:42px;font-size:0.85rem;">
+                                        <div class="rounded-circle bg-white bg-opacity-75 d-flex align-items-center justify-content-center fw-bold text-primary border" style="width:40px;height:40px;font-size:0.85rem;">
                                             ${barberName.charAt(0)}
                                         </div>
                                     </div>
                                     <div class="flex-grow-1 overflow-hidden">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div class="d-flex justify-content-between align-items-center mb-0">
                                             <h6 class="fw-bold mb-0 text-dark text-truncate" style="max-width: 70%;">${item.extendedProps.client_name || 'Sin nombre'}</h6>
-                                            <span class="badge bg-light text-dark border extra-small">${time}</span>
+                                            <span class="badge bg-white bg-opacity-50 text-dark border extra-small" style="font-size: 0.7rem;">${time}</span>
                                         </div>
-                                        <p class="text-muted small mb-0 d-flex align-items-center gap-1">
+                                        <p class="text-muted small mb-0 d-flex align-items-center gap-1" style="font-size: 0.75rem;">
                                             <i class="bi bi-scissors"></i> <span class="text-truncate">${item.extendedProps.service || item.title}</span>
                                         </p>
-                                        <div class="mt-2 pt-2 border-top">
-                                            <small class="text-primary fw-600">${barberName}</small>
+                                        <div class="mt-1 pt-1 border-top" style="border-top-color: rgba(0,0,0,0.05) !important;">
+                                            <small class="text-primary fw-600" style="font-size: 0.7rem;">${barberName}</small>
                                         </div>
                                     </div>
                                 </div>
@@ -937,20 +938,20 @@
                     } else {
                         const timeStr = new Date(`${dateStr}T${item.time}`).toLocaleTimeString('es-ES', { hour: 'numeric', minute: '2-digit', hour12: true });
                         col.innerHTML = `
-                            <div class="agenda-card status-available p-3 bg-white pointer" onclick="quickBook('${dateStr}', '${item.time}', '${barberId || item.barber_id}')">
+                            <div class="agenda-card status-available pointer" onclick="quickBook('${dateStr}', '${item.time}', '${barberId || item.barber_id}')">
                                 <div class="d-flex align-items-center gap-3 h-100">
                                     <div class="flex-shrink-0">
-                                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center fw-bold text-muted border border-dashed" style="width:42px;height:42px;font-size:0.85rem; opacity: 0.6;">
+                                        <div class="rounded-circle bg-white bg-opacity-75 d-flex align-items-center justify-content-center fw-bold text-muted border border-dashed" style="width:40px;height:40px;font-size:0.85rem; opacity: 0.6;">
                                             ${item.barber_name ? item.barber_name.charAt(0) : 'A'}
                                         </div>
                                     </div>
                                     <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <h6 class="fw-bold mb-0 text-muted">Disponible</h6>
-                                            <span class="badge bg-white text-secondary border small">${timeStr}</span>
+                                        <div class="d-flex justify-content-between align-items-center mb-0">
+                                            <h6 class="fw-bold mb-0 text-muted" style="font-size: 0.9rem;">Disponible</h6>
+                                            <span class="badge bg-white text-secondary border small" style="font-size: 0.7rem;">${timeStr}</span>
                                         </div>
-                                        <p class="text-muted small mb-0">
-                                            <i class="bi bi-plus-circle me-1 text-primary"></i> Agendar con <strong>${item.barber_name || 'Alguien'}</strong>
+                                        <p class="text-muted small mb-0" style="font-size: 0.75rem;">
+                                            <i class="bi bi-plus-circle me-1 text-primary"></i> <strong>Agendar ahora</strong>
                                         </p>
                                     </div>
                                 </div>
