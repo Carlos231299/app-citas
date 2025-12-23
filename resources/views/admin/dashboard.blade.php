@@ -990,7 +990,7 @@
                     <p class="mb-2"><strong><i class="bi bi-calendar-event me-2"></i>Fecha:</strong> ${dateStr}</p>
                     <p class="mb-2"><strong><i class="bi bi-clock me-2"></i>Hora:</strong> ${timeStr}</p>
                     ${props.barber ? `<p class="mb-2"><strong><i class="bi bi-person me-2"></i>Barbero:</strong> ${props.barber}</p>` : ''}
-                    ${props.service ? `<p class="mb-2"><strong><i class="bi bi-scissors me-2"></i>Servicio:</strong> ${props.service} (Base: ${formatMoney(props.base_price)})</p>` : ''}
+                    ${props.service ? `<p class="mb-2"><strong><i class="bi bi-scissors me-2"></i>Servicio:</strong> ${props.service} (${formatMoney(props.price)})</p>` : ''}
                     
                     ${props.products && props.products.length > 0 ? `
                         <div class="mb-2 ps-4 border-start border-3 border-secondary">
