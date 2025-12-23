@@ -1369,47 +1369,49 @@
         document.getElementById('pos_appointment_id').value = id;
         document.getElementById('pos_base_price').value = basePrice;
         
-        let serviceName = "Servicio Cita #" + id;
-        if(window.calendarInstance) {
-            const event = window.calendarInstance.getEventById(id);
-            if(event) {
-                if(event.extendedProps.service) {
-                    serviceName = event.extendedProps.service;
-                }
-                // [NEW] Load Existing Products if any
-                if(event.extendedProps.products && Array.isArray(event.extendedProps.products)) {
-                    event.extendedProps.products.forEach(p => {
+        // Fetch appointment data from API
+        axios.get(`/appointments/${id}`)
+            .then(response => {
+                const appointment = response.data;
+                let serviceName = appointment.service?.name || "Servicio Cita #" + id;
+                
+                // Load existing products if any
+                if(appointment.products && Array.isArray(appointment.products)) {
+                    appointment.products.forEach(p => {
                         posCart.push({
-                            id: p.id.toString(), // Ensure string for matching
+                            id: p.id.toString(),
                             name: p.name,
                             price: parseFloat(p.price),
                             qty: parseInt(p.qty)
                         });
                     });
                 }
-            }
-        }
-        document.getElementById('pos_service_name').value = serviceName;
+                
+                document.getElementById('pos_service_name').value = serviceName;
 
-        const select = document.getElementById('pos_product_select');
-        select.innerHTML = '<option value="" selected disabled>Buscar producto...</option>';
-        
-        if (typeof serverData !== 'undefined' && serverData.products && serverData.products.length > 0) {
-            serverData.products.forEach(p => {
-                const opt = document.createElement('option');
-                opt.value = p.id;
-                // Format: Name ($ 10,000) - Stock: 5
-                opt.text = `${p.name} (${formatMoney(p.price)}) - Stock: ${p.stock}`;
-                opt.dataset.price = p.price;
-                opt.dataset.name = p.name;
-                opt.dataset.stock = p.stock;
-                if(p.stock <= 0) opt.disabled = true;
-                select.appendChild(opt);
+                const select = document.getElementById('pos_product_select');
+                select.innerHTML = '<option value="" selected disabled>Buscar producto...</option>';
+                
+                if (typeof serverData !== 'undefined' && serverData.products && serverData.products.length > 0) {
+                    serverData.products.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.id;
+                        opt.text = `${p.name} (${formatMoney(p.price)}) - Stock: ${p.stock}`;
+                        opt.dataset.price = p.price;
+                        opt.dataset.name = p.name;
+                        opt.dataset.stock = p.stock;
+                        if(p.stock <= 0) opt.disabled = true;
+                        select.appendChild(opt);
+                    });
+                }
+
+                renderPosCart();
+                posModal.show();
+            })
+            .catch(error => {
+                console.error('Error loading appointment:', error);
+                Swal.fire('Error', 'No se pudo cargar los datos de la cita', 'error');
             });
-        }
-
-        renderPosCart();
-        posModal.show();
     }
 
     window.addPosProduct = function() {
