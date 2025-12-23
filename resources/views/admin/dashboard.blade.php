@@ -1570,7 +1570,7 @@
     // --- POS & COMPLETION SYSTEM ---
 
     // 1. Currency Formatter ($ 10,000)
-    const currencyFmt = new Intl.NumberFormat('en-US', {
+    var currencyFmt = new Intl.NumberFormat('en-US', {
         style: 'decimal',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
