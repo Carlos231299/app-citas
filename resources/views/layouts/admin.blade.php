@@ -122,6 +122,9 @@
         [data-bs-theme="dark"] .fc-theme-standard td, [data-bs-theme="dark"] .fc-theme-standard th { border-color: #333; }
         [data-bs-theme="dark"] .form-control, [data-bs-theme="dark"] .form-select { background-color: #2d2d2d; border-color: #444; color: #fff; }
         [data-bs-theme="dark"] .btn-white { background-color: #2d2d2d; border-color: #444; color: #fff; }
+        [data-bs-theme="dark"] .main-content { background-color: #121212 !important; }
+        [data-bs-theme="dark"] header h2 { color: #fff !important; }
+        [data-bs-theme="dark"] .bi-bell { color: #fff !important; }
     </style>
     <script>
         // Init Dark Mode immediately
