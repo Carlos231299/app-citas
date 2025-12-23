@@ -105,6 +105,16 @@
             </tr>
         </thead>
         <tbody>
+            {{-- Service from Appointment --}}
+            @if($sale->appointment && $sale->appointment->service)
+            <tr>
+                <td style="font-size: 10px;" class="fw-bold">{{ $sale->appointment->service->name }}</td>
+                <td class="text-right">1</td>
+                <td class="text-right fw-bold">${{ number_format($sale->appointment->service->price, 0) }}</td>
+            </tr>
+            @endif
+            
+            {{-- Products --}}
             @foreach($sale->items as $item)
             <tr>
                 <td style="font-size: 10px;">{{ $item['product_name'] }}</td>
