@@ -777,7 +777,12 @@
         // Selector Desplegable (AirDatepicker)
         const selectorEl = document.getElementById('customCalendarTitle');
         if (selectorEl) {
-            new AirDatepicker(selectorEl, {
+            // Deduplicate: If instance exists, destroy it
+            if (window._agendaPicker) {
+                window._agendaPicker.destroy();
+            }
+            
+            window._agendaPicker = new AirDatepicker(selectorEl, {
                 locale: typeof localeEs !== 'undefined' ? localeEs : 'es',
                 selectedDates: [new Date()],
                 autoClose: true,
@@ -791,6 +796,26 @@
                         renderDailyAgenda(date);
                     }
                 }
+            });
+        }
+
+        // --- Persistence: Stats Collapse State ---
+        const statsCollapse = document.getElementById('statsCollapse');
+        const statsIcon = document.getElementById('statsCollapseIcon');
+        if (statsCollapse && statsIcon) {
+            const savedState = localStorage.getItem('stats_collapse_state'); // 'hidden' or 'visible'
+            if (savedState === 'hidden') {
+                statsCollapse.classList.remove('show');
+                statsIcon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+            }
+
+            statsCollapse.addEventListener('hidden.bs.collapse', function () {
+                localStorage.setItem('stats_collapse_state', 'hidden');
+                statsIcon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+            });
+            statsCollapse.addEventListener('shown.bs.collapse', function () {
+                localStorage.setItem('stats_collapse_state', 'visible');
+                statsIcon.classList.replace('bi-chevron-down', 'bi-chevron-up');
             });
         }
 
