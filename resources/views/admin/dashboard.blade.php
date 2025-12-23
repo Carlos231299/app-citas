@@ -892,7 +892,7 @@
                 return { 
                     html: `
                         <div class="calendar-event-pill badge rounded-pill ${bgClass} bg-opacity-10 ${textClass} border ${borderClass} border-opacity-25" 
-                             style="font-size: 0.7rem; font-weight: 600; padding: 2px 8px; width: 100%; text-align: center; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;">
+                             style="font-size: 0.7rem; font-weight: 600; padding: 1px 4px; width: 100%; text-align: center; margin-bottom: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; line-height: 1.2; display: block;">
                             ${timeStr}
                         </div>
                     ` 
