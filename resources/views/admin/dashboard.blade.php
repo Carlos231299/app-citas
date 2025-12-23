@@ -1424,53 +1424,7 @@
                          return;
                     }
 
-    };
-    
-    // Ensure handleSearch is global
-    window.handleSearch = function(query) {
-        clearTimeout(searchTimeout);
-        const resultsContainer = document.getElementById('searchResults');
-        
-        if(query.length < 2) {
-            resultsContainer.innerHTML = '<div class="text-center py-4 text-muted small">Escribe para buscar...</div>';
-            return;
-        }
 
-        resultsContainer.innerHTML = '<div class="text-center py-4"><div class="spinner-border spinner-border-sm text-secondary"></div></div>';
-
-        searchTimeout = setTimeout(() => {
-            axios.get(`/appointments/search?query=${query}`)
-                 .then(res => {
-                     const data = res.data;
-                     if(!data.length) {
-                         resultsContainer.innerHTML = '<div class="text-center py-4 text-muted small">No se encontraron citas.</div>';
-                         return;
-                     }
-                     
-                     let html = '<div class="list-group list-group-flush">';
-                     data.forEach(item => {
-                         const statusColor = item.status === 'completed' ? 'success' : (item.status === 'cancelled' ? 'danger' : 'primary');
-                         html += `
-                            <button class="list-group-item list-group-item-action border-0 px-0 py-3" onclick="selectSearchResult(${item.id}, '${item.client_name}', '${item.title}', '${item.status}', '${item.barber_name}')">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div>
-                                        <h6 class="fw-bold text-dark mb-0">${item.client_name}</h6>
-                                        <small class="text-muted"><i class="bi bi-calendar me-1"></i> ${item.scheduled_at_formatted} • ${item.title}</small>
-                                    </div>
-                                    <span class="badge bg-${statusColor} bg-opacity-10 text-${statusColor} rounded-pill">${item.status}</span>
-                                </div>
-                            </button>
-                         `;
-                     });
-                     html += '</div>';
-                     resultsContainer.innerHTML = html;
-                 })
-                 .catch(err => {
-                     console.error(err);
-                     resultsContainer.innerHTML = '<div class="text-center text-danger small">Error al buscar</div>';
-                 });
-        }, 300);
-    };
 
                     slotsContainer.innerHTML = '<div class="spinner-border spinner-border-sm text-primary"></div>';
 
@@ -2376,4 +2330,4 @@
 </style>
 @endpush
 
-@endpush
+
