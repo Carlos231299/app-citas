@@ -473,13 +473,28 @@ class AppointmentController extends Controller
 
         $scheduledAt = Carbon::parse($validated['date'] . ' ' . $validated['time']);
 
+        // RECALCULATE PRICE IF TIME OR SERVICE CHANGED
+        $service = Service::find($validated['service_id']);
+        $hour = $scheduledAt->hour;
+        
+        // Extra Time: Before 8:00 AM OR After 22:00 (10 PM)
+        $isExtraTime = ($hour < 8 || $hour >= 22);
+        
+        $finalPrice = $service->price; // Default
+        if ($isExtraTime && $service->extra_price > 0) {
+            $finalPrice = $service->extra_price;
+        }
+
+        \Illuminate\Support\Facades\Log::info("💰 UPDATE PRICE: Time {$scheduledAt->format('H:i')} | Hour: $hour | Extra: " . ($isExtraTime?'YES':'NO') . " | Service Price: {$service->price} | Extra Price: {$service->extra_price} | FINAL: $finalPrice");
+
         $appointment->update([
             'scheduled_at' => $scheduledAt,
             'barber_id' => $validated['barber_id'],
             'service_id' => $validated['service_id'],
             'client_name' => $validated['client_name'],
             'client_phone' => $validated['client_phone'],
-            'custom_details' => $request->custom_details
+            'custom_details' => $request->custom_details,
+            'price' => $finalPrice // RECALCULATED PRICE
         ]);
 
         return response()->json(['message' => 'Cita actualizada correctamente']);
