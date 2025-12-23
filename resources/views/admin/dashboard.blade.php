@@ -820,53 +820,37 @@
             dayCellDidMount: function(arg) {
                 // Remove underscores from day numbers
                 arg.el.style.textDecoration = 'none';
-            }
-        });
+            },
             
             // Logic for Hiding Events based on Filters
             eventClassNames: function(arg) {
                 const props = arg.event.extendedProps;
                 let classes = [];
-                
-                // Filter: Rejected (Cancelled)
-                if (props.status === 'cancelled' && !calendarState.showRejected) {
-                    classes.push('d-none');
-                }
-                
-                // Filter: Completed
-                if (props.status === 'completed' && !calendarState.showCompleted) {
-                    classes.push('d-none');
-                }
-                
+                if (props.status === 'cancelled' && !calendarState.showRejected) classes.push('d-none');
+                if (props.status === 'completed' && !calendarState.showCompleted) classes.push('d-none');
                 return classes;
             },
 
             // Lifecycle Hooks
             datesSet: function(info) {
-                // 1. Title Sync (Not needed anymore if we don't have view selector, but keeping for Flatpickr)
-
-                // 2. Custom Title Sync (Flatpickr)
                 const titleEl = document.getElementById('customCalendarTitle');
                 if(titleEl) {
-                    // Update text
                     const date = calendarInstance.getDate();
                     const options = { month: 'long', year: 'numeric' };
-                    // Manual formatting to ensure "de" is used if needed, though 'long' usually does "December 2025"
-                    // Let's use Intl
                     const text = new Intl.DateTimeFormat('es-ES', options).format(date);
                     titleEl.innerHTML = `${text} <i class="bi bi-caret-down-fill small ms-1" style="font-size: 0.7rem;"></i>`;
 
-                    // Init AirDatepicker if not already
+                    // Init AirDatepicker
                     if (!titleEl._airDatepicker) {
                         titleEl._airDatepicker = new AirDatepicker(titleEl, {
                             locale: typeof localeEs !== 'undefined' ? localeEs : 'es',
                             selectedDates: [date],
                             autoClose: true,
                             position: 'bottom right',
-                            view: 'years', // Start with Years view as requested ("vaya bajando")
+                            view: 'years',
                             minView: 'days',
                             dateFormat: 'yyyy-MM-dd',
-                            buttons: ['today', 'clear'], // Native buttons for Today logic
+                            buttons: ['today', 'clear'],
                             onSelect: function({date, datepicker}) {
                                 if (date) {
                                     calendarInstance.gotoDate(date);
@@ -874,44 +858,17 @@
                             }
                         });
                     } else {
-                         // Sync date if changed externally (e.g. prev/next)
-                         // But avoid loop if this trigger came from datepicker itself?
-                         // Actually datesSet runs on prev/next click. We should update picker date but silent?
-                         // Air Datepicker has selectDate(date, {silent: true})
                          titleEl._airDatepicker.selectDate(date, {silent: true});
                          titleEl._airDatepicker.setViewDate(date);
                     }
                 }
-                
-                // 3. (Optional) Auto-load today's agenda on first load? 
-                // User might want it fixed or just on click. 
-                // If we want it on load, we call it but it might be annoying on first load.
-                // renderDailyAgenda(calendarInstance.getDate(), false); // false to not show modal
-            },
-
-            dateClick: function(info) {
-                renderDailyAgenda(info.date, true); // true to show modal
-                document.querySelectorAll('.fc-daygrid-day').forEach(el => el.style.background = '');
-                info.dayEl.style.background = 'rgba(37, 99, 235, 0.05)';
             },
 
             eventClick: function(info) {
-                // Per user request: Events themselves should not trigger the modal details directly,
-                // ONLY the day click (which triggers renderDailyAgenda).
-                // But since the event is ON the day, we need to let the click bubble up OR allow it
-                // to trigger the same "Open Agenda" action.
-                // The user said: "no responderán a los clicks sino solo el día que desplegara la agenda"
-                // So, clicking the time should basically act like clicking the white space of the day.
-                // We'll manually trigger renderDailyAgenda just in case bubbling is stopped.
-                info.jsEvent.preventDefault(); // Stop default navigation if any
-                renderDailyAgenda(info.event.start, true);
+                info.jsEvent.preventDefault();
+                renderDailyAgenda(info.event.start);
             },
             eventDidMount: function(info) {
-                 // Add pointer-events-none style if we want to ensure it passes through, 
-                 // but we also added a handler above to be safe.
-                 // Actually, if we use pointer-events:none, the eventClick above won't fire, 
-                 // and the click will hit the underlying 'fc-daygrid-day' which triggers dateClick.
-                 // This is the cleanest implementation of "only the day responds".
                  info.el.style.pointerEvents = 'none';
                  info.el.style.backgroundColor = 'transparent';
                  info.el.style.border = 'none';
