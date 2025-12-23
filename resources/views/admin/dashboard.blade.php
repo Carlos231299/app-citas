@@ -806,13 +806,16 @@
                             datepicker.setViewDate(today);
                             datepicker.selectDate(today);
                             renderDailyAgenda(today);
-                            datepicker.hide();
+                            setTimeout(() => datepicker.hide(), 100);
                         }
                     }],
-                    onSelect: function({date, datepicker}) {
+                    onSelect: function({date}) {
                         if (date) {
                             renderDailyAgenda(date);
-                            datepicker.hide();
+                            // Usar un pequeño timeout para asegurar que el evento de la librería termine
+                            setTimeout(() => {
+                                if (window._agendaPicker) window._agendaPicker.hide();
+                            }, 100);
                         }
                     }
                 });
