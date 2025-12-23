@@ -838,7 +838,7 @@
             // navLinkDayClick: 'timeGridDay', // Replaced by custom function
             
             views: {
-                dayGridMonth: { dayMaxEvents: false }, // Expand all events (No "+1 more")
+                dayGridMonth: { dayMaxEvents: 4 }, // Limit to 4 events per day (avoids huge cells)
                 timeGrid: { dayMaxEvents: true },
                 fourDay: {
                     type: 'timeGrid',
@@ -887,13 +887,20 @@
                     borderClass = 'border-info';
                 }
 
+                
+                // Get Client Name
+                const clientName = arg.event.extendedProps.client_name || 'Cliente';
+                // Truncate name if too long (first name)
+                const shortName = clientName.split(' ')[0];
+
                 // Render Chip
                 // Usamos bg-opacity-10 para ese look "moderno" suave
                 return { 
                     html: `
                         <div class="calendar-event-pill badge rounded-pill ${bgClass} bg-opacity-10 ${textClass} border ${borderClass} border-opacity-25" 
-                             style="font-size: 0.65rem; font-weight: 700; padding: 2px 6px; width: 100%; text-align: center; margin-bottom: 2px; white-space: nowrap; cursor: pointer; display: block; line-height: normal; height: auto;">
-                            ${timeStr}
+                             style="font-size: 0.65rem; font-weight: 700; padding: 2px 6px; width: 100%; text-align: left; margin-bottom: 2px; white-space: nowrap; cursor: pointer; display: flex; align-items: center; justify-content: start; line-height: normal; height: auto; gap: 4px;">
+                            <span style="min-width: 40px; text-align: right;">${timeStr}</span> 
+                            <span style="font-weight: 400; opacity: 0.9; overflow: hidden; text-overflow: ellipsis;">${shortName}</span>
                         </div>
                     ` 
                 };
