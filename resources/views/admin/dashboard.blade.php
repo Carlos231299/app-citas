@@ -898,9 +898,9 @@
                 return { 
                     html: `
                         <div class="calendar-event-pill badge rounded-pill ${bgClass} bg-opacity-10 ${textClass} border ${borderClass} border-opacity-25" 
-                             style="font-size: 0.65rem; font-weight: 700; padding: 2px 6px; width: 100%; text-align: left; margin-bottom: 2px; white-space: nowrap; cursor: pointer; display: flex; align-items: center; justify-content: start; line-height: normal; height: auto; gap: 4px;">
-                            <span style="min-width: 40px; text-align: right;">${timeStr}</span> 
-                            <span style="font-weight: 400; opacity: 0.9; overflow: hidden; text-overflow: ellipsis;">${shortName}</span>
+                             style="font-size: 0.6rem; font-weight: 700; padding: 0px 4px; width: 100%; text-align: left; margin-bottom: 1px; white-space: nowrap; cursor: pointer; display: flex; align-items: center; justify-content: start; line-height: 1.1; height: auto; min-height: 14px; gap: 3px;">
+                            <span style="min-width: 32px; text-align: right; letter-spacing: -0.5px;">${timeStr}</span> 
+                            <span style="font-weight: 400; opacity: 1; overflow: hidden; text-overflow: ellipsis; padding-top: 1px;">${shortName}</span>
                         </div>
                     ` 
                 };
@@ -2361,7 +2361,28 @@
     /* 3. Círculo rojo en el día actual en vista MENSUAL (REMOVED by User Request) */
     .fc-daygrid-day.fc-day-today::after {
         display: none !important;
-    }    
+    }
+
+    /* [NEW] Compact Events & Cells Override */
+    .fc-daygrid-event-harness {
+        margin-top: 0 !important;
+        margin-bottom: 0px !important; /* Reduce gap between events */
+    }
+    
+    .fc-daygrid-day-bottom {
+        padding-top: 1px !important;
+        padding-bottom: 0px !important; /* Remove bottom padding of cell */
+        margin-top: 0 !important;
+    }
+    
+    .fc-daygrid-day-frame {
+        padding-bottom: 1px !important; /* Ensure content goes to bottom */
+    }
+    
+    /* Ensure pills don't have external margins ruining layout */
+    .calendar-event-pill {
+        margin-bottom: 1px !important;
+    }
 </style>
 @endpush
 
