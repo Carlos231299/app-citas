@@ -258,11 +258,11 @@
 
     <!-- Dynamic Agenda Layout -->
     <div class="row g-4 flex-grow-1 mb-4">
-        <!-- Left Column: Minimalist Calendar -->
-        <div class="col-12 col-xl-8">
+        <!-- Main Column: Full Width Minimalist Calendar -->
+        <div class="col-12">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden bg-white">
                 <div class="card-body p-3 h-100 position-relative">
-                    <!-- Custom View Selector (Integrated) -->
+                    <!-- Custom View Selector (Simplified) -->
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 px-2 pt-2">
                         <div class="d-flex align-items-center gap-2">
                             <h5 class="fw-bold text-dark mb-0 d-none d-sm-block">Calendario</h5>
@@ -283,41 +283,35 @@
                             <button class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm d-flex align-items-center gap-2" onclick="openBookingModal()">
                                 <i class="bi bi-plus-lg"></i> <span class="d-none d-md-inline">Nueva Cita</span>
                             </button>
-                            <div class="dropdown">
-                                <button class="btn btn-light btn-sm rounded-pill px-3 fw-bold border-0 dropdown-toggle" type="button" id="calendarViewBtn" data-bs-toggle="dropdown">
-                                    <span>Mes</span>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-2">
-                                    <li><a class="dropdown-item rounded-3 py-2" href="#" data-view="dayGridMonth">Vista Mes</a></li>
-                                    <li><a class="dropdown-item rounded-3 py-2" href="#" data-view="timeGridWeek">Vista Semana</a></li>
-                                    <li><a class="dropdown-item rounded-3 py-2" href="#" data-view="timeGridDay">Vista Día</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><div class="dropdown-item rounded-3 py-2 pointer" onclick="toggleOption(event, 'completed')">Mostrar Completadas</div></li>
-                                    <li><div class="dropdown-item rounded-3 py-2 pointer" onclick="toggleOption(event, 'rejected')">Mostrar Canceladas</div></li>
-                                </ul>
-                            </div>
                         </div>
                     </div>
 
-                    <div id="calendar" style="min-height: 500px;"></div>
+                    <div id="calendar" style="min-height: 600px;"></div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Right Column: Daily Agenda (Upcoming) -->
-        <div class="col-12 col-xl-4">
-            <div class="card border-0 shadow-sm h-100 rounded-4 bg-white overflow-hidden">
-                <div class="card-header bg-white border-0 pt-4 px-4 pb-1">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="fw-bold text-dark mb-0">Agenda del Día</h5>
-                            <p class="text-muted small mb-0" id="agenda-date-label">Hoy</p>
-                        </div>
-                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle text-primary">
-                            <i class="bi bi-clock-history"></i>
-                        </div>
-                    </div>
+<!-- Daily Agenda Modal -->
+<div class="modal fade" id="dailyAgendaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 pt-4 px-4 pb-1">
+                <div>
+                    <h5 class="modal-title fw-bold text-dark" id="dailyAgendaModalLabel">Agenda del Día</h5>
+                    <p class="text-muted small mb-0" id="agenda-date-label">Hoy</p>
                 </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="daily-agenda-container" class="pe-1" style="max-height: 60vh; overflow-y: auto;">
+                    <!-- Cards will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
                 <div class="card-body p-4 pt-2">
                     <div id="daily-agenda-container" class="d-flex flex-column gap-3" style="max-height: 600px; overflow-y: auto;">
                         <!-- JS Loaded Content -->
@@ -850,19 +844,7 @@
 
             // Lifecycle Hooks
             datesSet: function(info) {
-                // 1. Update View Dropdown text
-                const viewNameMap = {
-                    'timeGridDay': 'Día',
-                    'timeGridWeek': 'Semana',
-                    'dayGridMonth': 'Mes',
-                    'listYear': 'Año',
-                    'listWeek': 'Agenda',
-                    'fourDay': '4 días'
-                };
-                const btn = document.getElementById('calendarViewBtn');
-                if(btn) {
-                    btn.innerHTML = `<span>${viewNameMap[info.view.type] || 'Vista'}</span>`;
-                }
+                // 1. Title Sync (Not needed anymore if we don't have view selector, but keeping for Flatpickr)
 
                 // 2. Mini Calendar (Flatpickr) on Title
                 const titleEl = document.querySelector('.fc-toolbar-title');
@@ -882,15 +864,14 @@
                     });
                 }
                 
-                // 3. Auto-load today's agenda on first load
-                if (info.view.type === 'dayGridMonth') {
-                    renderDailyAgenda(calendarInstance.getDate());
-                }
+                // 3. (Optional) Auto-load today's agenda on first load? 
+                // User might want it fixed or just on click. 
+                // If we want it on load, we call it but it might be annoying on first load.
+                // renderDailyAgenda(calendarInstance.getDate(), false); // false to not show modal
             },
 
             dateClick: function(info) {
-                renderDailyAgenda(info.date);
-                // Mark active day visually?
+                renderDailyAgenda(info.date, true); // true to show modal
                 document.querySelectorAll('.fc-daygrid-day').forEach(el => el.style.background = '');
                 info.dayEl.style.background = 'rgba(37, 99, 235, 0.05)';
             },
@@ -902,25 +883,7 @@
 
         window.calendarInstance.render();
     
-        // Inject Custom Dropdown into FullCalendar Toolbar
-        const toolbarRight = document.querySelector('.fc-toolbar-chunk:last-child');
-        const selector = document.getElementById('custom-view-selector');
-        
-        if (toolbarRight && selector) {
-            selector.classList.remove('d-none');
-            toolbarRight.appendChild(selector);
-            
-            // Re-bind dropdown clicks to calendar
-            selector.querySelectorAll('[data-view]').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    // Find closest link if click was on span
-                    const link = e.target.closest('a');
-                    const view = link.getAttribute('data-view');
-                    if(view) calendarInstance.changeView(view);
-                });
-            });
-        }
+        // View Dropdown removed based on user request "quitemos la vista de día, mes y semana"
 
         // Check for Notification Auto-Open
         const openApptId = "{{ request('open_appointment') }}";
@@ -939,14 +902,18 @@
         }
     }
     
-    async function renderDailyAgenda(date) {
+    async function renderDailyAgenda(date, showModal = true) {
         const container = document.getElementById('daily-agenda-container');
         const label = document.getElementById('agenda-date-label');
         if(!container) return;
         
         // Format Date for label
         const options = { weekday: 'long', day: 'numeric', month: 'long' };
-        label.innerText = new Intl.DateTimeFormat('es-ES', options).format(date);
+        const formattedDate = new Intl.DateTimeFormat('es-ES', options).format(date);
+        label.innerText = formattedDate;
+        
+        const modalLabel = document.getElementById('dailyAgendaModalLabel');
+        if(modalLabel) modalLabel.innerText = `Agenda: ${formattedDate}`;
 
         // Fix: Use local date string instead of UTC ISO string to avoid day shifts
         const year = date.getFullYear();
@@ -997,6 +964,13 @@
                     `;
                     container.innerHTML += card;
                 });
+                if (typeof showModal !== 'undefined' && showModal) {
+                    const modalEl = document.getElementById('dailyAgendaModal');
+                    if (modalEl) {
+                        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                        modal.show();
+                    }
+                }
             })
             .catch(err => {
                 console.error(err);
