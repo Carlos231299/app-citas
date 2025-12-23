@@ -274,7 +274,7 @@
                             <div class="bg-primary bg-opacity-10 p-2 rounded-circle d-flex align-items-center justify-content-center cursor-pointer" id="customCalendarTitleTrigger" style="width: 42px; height: 42px;">
                                 <i class="bi bi-calendar-event fs-5 text-primary"></i>
                             </div>
-                            <input type="text" id="agendaDatepickerInput" style="position: absolute; opacity: 0; width: 0; height: 0; padding: 0; margin: 0; border: none; pointer-events: none;">
+                            <input type="text" id="agendaDatepickerInput" style="position: absolute; left: -9999px;">
                             <div>
                                 <h5 class="fw-bold text-dark mb-0" id="agenda-date-label">Hoy</h5>
                                 <p class="text-muted small mb-0">Toca el icono para cambiar de fecha</p>
@@ -777,53 +777,42 @@
         // Initialize Agenda
         renderDailyAgenda(new Date());
 
-        // Selector Desplegable (AirDatepicker) - Stable Initialization
+        // Selector Desplegable (AirDatepicker)
         const triggerEl = document.getElementById('customCalendarTitleTrigger');
         const inputEl = document.getElementById('agendaDatepickerInput');
         
         if (triggerEl && inputEl) {
-            // Destroy any existing to avoid duplicates on hot-reload (if applicable)
-            if (window._agendaPicker) {
-                window._agendaPicker.destroy();
-            }
-
+            // Simplified initialization to avoid TypeError
             window._agendaPicker = new AirDatepicker(inputEl, {
                 locale: typeof localeEs !== 'undefined' ? localeEs : 'es',
                 selectedDates: [new Date()],
                 autoClose: true,
                 position: 'bottom left',
-                view: 'days',
-                minView: 'days',
                 dateFormat: 'yyyy-MM-dd',
                 buttons: [{
                     content: 'Hoy',
                     className: 'air-datepicker-button-custom',
-                    onClick: (datepicker) => {
+                    onClick: (dp) => {
                         const today = new Date();
-                        datepicker.setViewDate(today);
-                        datepicker.selectDate(today);
+                        dp.selectDate(today);
+                        dp.setViewDate(today);
                         renderDailyAgenda(today);
-                        setTimeout(() => datepicker.hide(), 150);
+                        dp.hide();
                     }
                 }],
-                onSelect: function({date, datepicker}) {
-                    if (date) {
+                onSelect({date, datepicker}) {
+                    if (date && datepicker.visible) {
                         renderDailyAgenda(date);
-                        // Using explicit hide with a small delay to prevent TypeError
-                        setTimeout(() => {
-                            if (datepicker) datepicker.hide();
-                        }, 150);
+                        // Delay hide to avoid race conditions
+                        setTimeout(() => datepicker.hide(), 100);
                     }
                 }
             });
 
-            // Trigger click
-            triggerEl.onclick = function(e) {
+            triggerEl.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (window._agendaPicker) {
-                    window._agendaPicker.show();
-                }
+                if (window._agendaPicker) window._agendaPicker.show();
             };
         }
 
@@ -903,20 +892,16 @@
 
             if (!allItems.length) {
                 container.innerHTML = `
-                    <div class="col-12">
-                        <div class="text-center py-5 opacity-75">
-                            <i class="bi bi-calendar-x fs-1 d-block mb-3 text-muted"></i>
-                            <h6 class="fw-bold text-dark">Día no laborable o sin turnos</h6>
-                            <p class="small text-muted">Asegúrate de que el barbero tenga horario configurado.</p>
-                        </div>
+                    <div class="col-12 text-center py-5 opacity-75">
+                        <i class="bi bi-calendar-x fs-1 d-block mb-3 text-muted"></i>
+                        <h6 class="fw-bold text-dark">Día no laborable o sin turnos</h6>
+                        <p class="small text-muted">Asegúrate de que el barbero tenga horario configurado.</p>
                     </div>
                 `;
             } else {
-                // Main Row for the Grid
-                const row = document.createElement('div');
-                row.className = 'row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3';
-                container.appendChild(row);
-
+                // Ensure container is a row
+                container.className = 'row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 pe-1';
+                
                 allItems.forEach(item => {
                     const col = document.createElement('div');
                     col.className = 'col animate-fade-in';
@@ -950,7 +935,6 @@
                             </div>
                         `;
                     } else {
-                        // Slot / Disponible
                         const timeStr = new Date(`${dateStr}T${item.time}`).toLocaleTimeString('es-ES', { hour: 'numeric', minute: '2-digit', hour12: true });
                         col.innerHTML = `
                             <div class="agenda-card status-available p-3 bg-white pointer" onclick="quickBook('${dateStr}', '${item.time}', '${barberId || item.barber_id}')">
@@ -973,7 +957,7 @@
                             </div>
                         `;
                     }
-                    row.appendChild(col);
+                    container.appendChild(col);
                 });
             }
         } catch (err) {
