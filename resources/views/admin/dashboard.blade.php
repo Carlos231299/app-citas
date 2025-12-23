@@ -264,7 +264,7 @@
     <!-- Dynamic Agenda Layout -->
     <div class="row g-4 flex-grow-1 mb-4 h-100">
         <!-- Main Column: Minimalist Calendar (Left) -->
-        <div class="col-12 col-lg-3">
+        <div class="col-12 col-xl-2 col-lg-3">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden bg-white">
                 <div class="card-body p-3 h-100 position-relative">
                     <div class="d-flex align-items-center justify-content-between mb-3 px-1">
@@ -276,13 +276,13 @@
                             </span>
                         </div>
                     </div>
-                    <div id="calendar" style="min-height: 400px;"></div>
+                    <div id="calendar" style="min-height: 300px; font-size: 0.85rem;"></div>
                 </div>
             </div>
         </div>
 
         <!-- Agenda Column: Side Panel (Right) -->
-        <div class="col-12 col-lg-9">
+        <div class="col-12 col-xl-10 col-lg-9">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden bg-white">
                 <div class="card-header bg-white border-0 pt-4 px-4 pb-1">
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
@@ -310,7 +310,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-body p-4 scroll-area" style="max-height: 70vh; overflow-y: auto;">
+                <div class="card-body p-4">
                     <div id="daily-agenda-container" class="pe-1">
                         <!-- Cards will be injected here -->
                         <div class="text-center py-5 opacity-50">
@@ -797,30 +797,26 @@
             navLinks: false, // Disabled to prevent view switching
             height: 'auto',
             contentHeight: 'auto',
-            aspectRatio: 0.85, // More vertical/compact
+            aspectRatio: 0.75, // Narrower aspect for sidebar
             handleWindowResize: true,
             locale: 'es',
             weekends: true,
             firstDay: 1, 
             
-            // Interaction: Month -> Side Panel
+            dayCellDidMount: function(arg) {
+                // Shrink day cell padding
+                arg.el.style.padding = '2px';
+                arg.el.style.textDecoration = 'none';
+            },
+            
             dateClick: function(info) {
-                // Highlight selected day visually 
                 document.querySelectorAll('.fc-daygrid-day').forEach(el => el.classList.remove('bg-primary', 'bg-opacity-10'));
                 info.dayEl.classList.add('bg-primary', 'bg-opacity-10');
-                
                 renderDailyAgenda(info.date);
             },
             
-            // No events on calendar as requested "quitar pildoras"
-            // We only keep the background/holiday events if necessary, 
-            // but for now, we'll keep it empty for maximum speed.
             events: [], 
-            
-            dayCellDidMount: function(arg) {
-                // Remove underscores from day numbers
-                arg.el.style.textDecoration = 'none';
-            },
+
             
             // Logic for Hiding Events based on Filters
             eventClassNames: function(arg) {
