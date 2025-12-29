@@ -32,30 +32,37 @@ class BotController extends Controller
             // Extract last 10 digits to be more flexible with prefixes (like 57)
             $searchNumber = strlen($cleanPhone) >= 10 ? substr($cleanPhone, -10) : $cleanPhone;
 
-            Log::info("Bot Rating Attempt - Phone: $phone, Search: $searchNumber");
+            Log::info("⭐ Bot Rating Attempt - Phone: $phone, Search: $searchNumber");
+
+            // DEBUG: Check if ANY completed appointment exists for this phone part
+            $allAppointments = Appointment::where('status', 'completed')->get();
+            Log::info("DEBUG: Found " . $allAppointments->count() . " completed appointments total.");
+            
+            foreach($allAppointments as $a) {
+                $cleanDBPhone = preg_replace('/\D/', '', $a->client_phone);
+                Log::info("DEBUG: Checking Appointment ID {$a->id} - DB Phone: {$a->client_phone} (Clean: $cleanDBPhone)");
+            }
 
             $appointment = Appointment::where('status', 'completed')
                 ->where(function($q) use ($searchNumber) {
-                    // Remove characters from DB column and match end of string
                     $q->whereRaw("REPLACE(REPLACE(REPLACE(client_phone, '+', ''), ' ', ''), '-', '') LIKE ?", ["%{$searchNumber}"]);
                 })
-                ->whereDoesntHave('review') // Ensure not already rated
+                ->whereDoesntHave('review')
                 ->orderBy('scheduled_at', 'desc')
                 ->first();
 
             if (!$appointment) {
+                Log::warning("❌ No matching appointment found for $searchNumber");
                 return response()->json(['success' => false, 'message' => 'No active appointment to rate']);
             }
 
-            // Create Review
             Review::create([
                 'appointment_id' => $appointment->id,
                 'barber_id' => $appointment->barber_id,
                 'score' => $score
             ]);
 
-            Log::info("⭐ Rating Saved: $score stars for Barber ID {$appointment->barber_id} from {$cleanPhone}");
-
+            Log::info("✅ Rating Saved: $score stars for Barber ID {$appointment->barber_id}");
             return response()->json(['success' => true]);
 
         } catch (\Exception $e) {
