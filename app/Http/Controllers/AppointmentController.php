@@ -651,8 +651,7 @@ class AppointmentController extends Controller
             try {
                  if ($appointment->client_phone) {
                     \Illuminate\Support\Facades\Http::timeout(2)->post('http://localhost:3000/ask-rating', [
-                        'phone' => $appointment->client_phone,
-                        'barber_name' => $appointment->barber?->name ?? 'tu barbero'
+                        'phone' => $appointment->client_phone
                     ]);
                  }
             } catch (\Exception $ratingError) {
