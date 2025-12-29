@@ -44,4 +44,9 @@ class Appointment extends Model
     {
         return $this->belongsTo(User::class, 'completed_by');
     }
+
+    public function review()
+    {
+        return $this->hasOne(Review::class);
+    }
 }

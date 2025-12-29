@@ -639,10 +639,23 @@ class AppointmentController extends Controller
                             'pdf_url' => $pdfUrl,
                             'filename' => $filename
                         ]);
+
                     } catch (\Exception $botError) {
                         \Illuminate\Support\Facades\Log::error("Bot PDF Receipt Failed: " . $botError->getMessage());
                     }
                 }
+
+            }
+
+            // [NEW] ASK FOR RATING (Runs for everyone, even if no products/PDF)
+            try {
+                 if ($appointment->client_phone) {
+                    \Illuminate\Support\Facades\Http::timeout(2)->post('http://localhost:3000/ask-rating', [
+                        'phone' => $appointment->client_phone
+                    ]);
+                 }
+            } catch (\Exception $ratingError) {
+                \Illuminate\Support\Facades\Log::error("Bot Rating Trigger Failed: " . $ratingError->getMessage());
             }
 
             return request()->wantsJson() 

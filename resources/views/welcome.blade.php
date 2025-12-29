@@ -144,7 +144,12 @@
                                                 data-extra-start="{{ $barber->extra_time_start ? \Carbon\Carbon::parse($barber->extra_time_start)->format('d/m') : '' }}"
                                                 data-extra-end="{{ $barber->extra_time_end ? \Carbon\Carbon::parse($barber->extra_time_end)->format('d/m') : '' }}"
                                                 data-reason="{{ $barber->deactivation_reason }}">
-                                            {{ $barber->name }}
+                                            {{ $barber->name }} 
+                                            @if($barber->average_rating > 0)
+                                                <span class='text-warning fw-bold small'>
+                                                    ★ {{ $barber->average_rating }}
+                                                </span>
+                                            @endif
                                         </option>
                                     @endforeach
                                     @if($barbers->isEmpty())
