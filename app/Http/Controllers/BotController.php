@@ -26,20 +26,29 @@ class BotController extends Controller
             // Find the LAST COMPLETED appointment for this phone that DOES NOT have a review yet.
             // We search by formatted phone (remove +57, etc) or just use SQL LIKE
             
-            // Clean phone for matching
+            // Clean phone (remove non-digits)
             $cleanPhone = preg_replace('/\D/', '', $phone); 
-            // Often stored with prefix or without. Let's try matching end.
             
+            // To be safe, match the last 10 digits (common for Colombian mobile numbers)
+            $shortPhone = substr($cleanPhone, -10);
+
+            Log::info("🔍 Testing Rating Lookup: Full=$cleanPhone, Short=$shortPhone");
+
             $appointment = Appointment::where('status', 'completed')
-                ->where(function($q) use ($cleanPhone) {
-                    $q->whereRaw("REPLACE(client_phone, '+', '') LIKE ?", ["%{$cleanPhone}"]);
+                ->where(function($q) use ($cleanPhone, $shortPhone) {
+                    $q->whereRaw("REPLACE(client_phone, '+', '') LIKE ?", ["%{$cleanPhone}%"])
+                      ->orWhereRaw("REPLACE(client_phone, '+', '') LIKE ?", ["%{$shortPhone}%"]);
                 })
-                ->whereDoesntHave('review') // Ensure not already rated
+                ->whereDoesntHave('review')
                 ->orderBy('scheduled_at', 'desc')
                 ->first();
 
             if (!$appointment) {
-                return response()->json(['success' => false, 'message' => 'No active appointment to rate']);
+                Log::warning("⚠️ Appointment not found for rating: Phone=$cleanPhone");
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'No se encontró una cita recientemente completada para este número.'
+                ]);
             }
 
             // Create Review
