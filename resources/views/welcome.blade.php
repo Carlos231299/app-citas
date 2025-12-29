@@ -147,7 +147,7 @@
                                             {{ $barber->name }} 
                                             @if($barber->average_rating > 0)
                                                 <span class='text-warning fw-bold small'>
-                                                    ★ {{ $barber->average_rating }}. "/ 5"
+                                                    ⭐ {{ $barber->average_rating }} / 5
                                                 </span>
                                             @endif
                                         </option>
