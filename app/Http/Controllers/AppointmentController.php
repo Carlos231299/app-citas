@@ -1175,6 +1175,7 @@ class AppointmentController extends Controller
         $request->validate(['id' => 'required|exists:appointments,id']);
         
         $appt = Appointment::find($request->id);
+        // Fix: Use barber_notification_sent instead of whatsapp_sent
         $appt->update(['barber_notification_sent' => true]);
 
         return response()->json(['success' => true]);
