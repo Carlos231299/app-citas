@@ -1181,6 +1181,44 @@ class AppointmentController extends Controller
         return response()->json(['success' => true]);
     }
 
+    // --- CLIENT NOTIFICATIONS --- //
+
+    public function getPendingClientNotifications()
+    {
+        $pending = Appointment::with(['barber', 'service'])
+            ->where('client_notification_sent', false)
+            ->whereIn('status', ['scheduled', 'request']) 
+            ->where('created_at', '>=', now()->subHours(24))
+            ->whereNotNull('client_phone')
+            ->get();
+
+        $data = $pending->map(function($appt) {
+            $serviceName = $appt->service->name;
+            if($appt->custom_details) $serviceName .= " ({$appt->custom_details})";
+
+            return [
+                'id' => $appt->id,
+                'client_phone' => $appt->client_phone,
+                'client_name' => $appt->client_name,
+                'barber_name' => $appt->barber->name,
+                'service' => $serviceName,
+                'time' => $appt->scheduled_at->format('h:i A'),
+                'date' => $appt->scheduled_at->format('d/m/Y'),
+                'status' => $appt->status
+            ];
+        });
+
+        return response()->json($data);
+    }
+
+    public function markClientNotificationSent(Request $request)
+    {
+        $request->validate(['id' => 'required|exists:appointments,id']);
+        $appt = Appointment::find($request->id);
+        $appt->update(['client_notification_sent' => true]);
+        return response()->json(['success' => true]);
+    }
+
     // --- API REMINDERS (15 MIN BEFORE) --- //
 
     public function getPendingReminders()
