@@ -860,39 +860,30 @@ class AppointmentController extends Controller
     }
 
         $request->validate([
-            'phone' => 'required',
-            'reason' => 'required'
+            'id' => 'sometimes|exists:appointments,id',
+            'phone' => 'required_without:id',
+            'reason' => 'sometimes'
         ]);
 
-        $phone = $request->phone;
-        
-        // Robust Phone Matching: Use last 10 digits to match DB
-        // Remove non-digits
-        $digits = preg_replace('/\D/', '', $phone);
-        $last10 = substr($digits, -10);
-
-        // Find the MOST RECENTLY CREATED appointment for this phone
-        // matching the user's "undo last action" intent.
-        $appointment = Appointment::where('client_phone', 'LIKE', "%$last10")
-            ->whereIn('status', ['scheduled', 'request'])
-            ->orderBy('created_at', 'desc') // Target the one just created
-            ->first();
-
-        if (!$appointment) {
-             // Fallback: Try with + prefix just in case
-             $appointment = Appointment::where('client_phone', '+' . $digits)
-                ->where('status', 'scheduled')
-                ->where('scheduled_at', '>=', Carbon::now())
+        if ($request->id) {
+            $appointment = Appointment::find($request->id);
+        } else {
+            $phone = $request->phone;
+            $digits = preg_replace('/\D/', '', $phone);
+            $last10 = substr($digits, -10);
+            $appointment = Appointment::where('client_phone', 'LIKE', "%$last10")
+                ->whereIn('status', ['scheduled', 'request'])
+                ->orderBy('created_at', 'desc')
                 ->first();
         }
 
         if (!$appointment) {
-             return response()->json(['success' => false, 'message' => 'No active appointment found for phone: ' . $phone], 404);
+             return response()->json(['success' => false, 'message' => 'No active appointment found'], 404);
         }
 
         $appointment->update([
             'status' => 'cancelled',
-            'cancellation_reason' => $request->reason
+            'cancellation_reason' => $request->reason ?? 'Cancelado vía WhatsApp'
         ]);
 
         // NOTIFY BARBER OF CANCELLATION
@@ -1274,18 +1265,23 @@ class AppointmentController extends Controller
     // --- API BOT CONFIRMATION --- //
     public function confirmFromBot(Request $request)
     {
-        $request->validate(['phone' => 'required']);
+        $request->validate([
+            'id' => 'sometimes|exists:appointments,id',
+            'phone' => 'required_without:id'
+        ]);
         
-        // Find active appointment for this phone
-        // Similar logic to cancelFromBot but for Confirmation action
-        $digits = preg_replace('/\D/', '', $request->phone);
-        $last10 = substr($digits, -10);
+        if ($request->id) {
+            $appointment = Appointment::find($request->id);
+        } else {
+            $digits = preg_replace('/\D/', '', $request->phone);
+            $last10 = substr($digits, -10);
 
-        $appointment = Appointment::where('client_phone', 'LIKE', "%$last10")
-            ->where('status', 'scheduled')
-            ->where('scheduled_at', '>=', now()->subHours(1)) // Actively valid
-            ->orderBy('created_at', 'desc')
-            ->first();
+            $appointment = Appointment::where('client_phone', 'LIKE', "%$last10")
+                ->where('status', 'scheduled')
+                ->where('scheduled_at', '>=', now()->subHours(1)) 
+                ->orderBy('created_at', 'desc')
+                ->first();
+        }
 
         if ($appointment && $appointment->barber && $appointment->barber->whatsapp_number) {
             try {
